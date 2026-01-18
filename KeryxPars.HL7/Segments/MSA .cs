@@ -1,10 +1,13 @@
 ﻿using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
+using KeryxPars.HL7.DataTypes.Primitive;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.HL7.Segments
 {
     /// <summary>
     /// HL7 Segment: Message Acknowledgement
+    /// Refactored to use strongly-typed HL7 datatypes.
     /// </summary>
     public class MSA : ISegment
     {
@@ -12,111 +15,97 @@ namespace KeryxPars.HL7.Segments
         
         public SegmentType SegmentType { get; private set; }
 
-        // Auto-Implemented Properties
+        /// <summary>
+        /// MSA.1 - Acknowledgement Code
+        /// </summary>
+        public ID AcknowledgementCode { get; set; }
 
         /// <summary>
-        /// MSA.1
+        /// MSA.2 - Message Control ID
         /// </summary>
-        public string AcknowledgementCode { get; set; }
+        public ST MessageControlID { get; set; }
 
         /// <summary>
-        /// MSA.2
+        /// MSA.3 - Text Message
         /// </summary>
-        public string MessageControlID { get; set; }
+        public ST TextMessage { get; set; }
 
         /// <summary>
-        /// MSA.3
+        /// MSA.4 - Expected Sequence Number
         /// </summary>
-        public string TextMessage { get; set; }
+        public NM ExpectedSequenceNumber { get; set; }
 
         /// <summary>
-        /// MSA.4
+        /// MSA.5 - Delayed Acknowledgment Type
         /// </summary>
-        public string ExpectedSequenceNumber { get; set; }
+        public ID DelayedAcknowledgementType { get; set; }
 
         /// <summary>
-        /// MSA.5
+        /// MSA.6 - Error Condition
         /// </summary>
-        public string DelayedAcknowledgementType { get; set; }
+        public CE ErrorCondition { get; set; }
 
         /// <summary>
-        /// MSA.6
+        /// MSA.7 - Message Waiting Number
         /// </summary>
-        public string ErrorCondition { get; set; }
+        public NM MessageWaitingNumber { get; set; }
 
         /// <summary>
-        /// MSA.7
+        /// MSA.8 - Message Waiting Priority
         /// </summary>
-        public string MessageWaitingNumber { get; set; }
+        public ID MessageWaitingPriority { get; set; }
 
-        /// <summary>
-        /// MSA.8
-        /// </summary>
-        public string MessageWaitingPriority { get; set; }
-
-        // Constructors
         public MSA()
         {
             SegmentType = SegmentType.Universal;
-
-            AcknowledgementCode = string.Empty;
-            MessageControlID = string.Empty;
-            TextMessage = string.Empty;
-            ExpectedSequenceNumber = string.Empty;
-            DelayedAcknowledgementType = string.Empty;
-            ErrorCondition = string.Empty;
-            MessageWaitingNumber = string.Empty;
-            MessageWaitingPriority = string.Empty;
+            AcknowledgementCode = default;
+            MessageControlID = default;
+            TextMessage = default;
+            ExpectedSequenceNumber = default;
+            DelayedAcknowledgementType = default;
+            ErrorCondition = default;
+            MessageWaitingNumber = default;
+            MessageWaitingPriority = default;
         }
 
-        // Methods
         public void SetValue(string value, int element)
         {
             switch (element)
             {
-                case 1: AcknowledgementCode = value; break;
-                case 2: MessageControlID = value; break;
-                case 3: TextMessage = value; break;
-                case 4: ExpectedSequenceNumber = value; break;
-                case 5: DelayedAcknowledgementType = value; break;
+                case 1: AcknowledgementCode = new ID(value); break;
+                case 2: MessageControlID = new ST(value); break;
+                case 3: TextMessage = new ST(value); break;
+                case 4: ExpectedSequenceNumber = new NM(value); break;
+                case 5: DelayedAcknowledgementType = new ID(value); break;
                 case 6: ErrorCondition = value; break;
-                case 7: MessageWaitingNumber = value; break;
-                case 8: MessageWaitingPriority = value; break;
+                case 7: MessageWaitingNumber = new NM(value); break;
+                case 8: MessageWaitingPriority = new ID(value); break;
                 default: break;
             }
         }
 
         public string[] GetValues()
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return
             [
                 SegmentId,
-                AcknowledgementCode,
-                MessageControlID,
-                TextMessage,
-                ExpectedSequenceNumber,
-                DelayedAcknowledgementType,
-                ErrorCondition,
-                MessageWaitingNumber,
-                MessageWaitingPriority
+                AcknowledgementCode.ToHL7String(delimiters),
+                MessageControlID.ToHL7String(delimiters),
+                TextMessage.ToHL7String(delimiters),
+                ExpectedSequenceNumber.ToHL7String(delimiters),
+                DelayedAcknowledgementType.ToHL7String(delimiters),
+                ErrorCondition.ToHL7String(delimiters),
+                MessageWaitingNumber.ToHL7String(delimiters),
+                MessageWaitingPriority.ToHL7String(delimiters)
             ];
         }
 
         public string? GetField(int index)
         {
-            return index switch
-            {
-                0 => SegmentId,
-                1 => AcknowledgementCode,
-                2 => MessageControlID,
-                3 => TextMessage,
-                4 => ExpectedSequenceNumber,
-                5 => DelayedAcknowledgementType,
-                6 => ErrorCondition,
-                7 => MessageWaitingNumber,
-                8 => MessageWaitingPriority,
-                _ => null
-            };
+            var values = GetValues();
+            return index >= 0 && index < values.Length ? values[index] : null;
         }
     }
 }

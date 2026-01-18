@@ -1,10 +1,13 @@
 ﻿using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
+using KeryxPars.HL7.DataTypes.Primitive;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.HL7.Segments
 {
     /// <summary>
-    /// HL7 Segment: Patient Idenfitication
+    /// HL7 Segment: Patient Identification
+    /// Refactored to use strongly-typed HL7 datatypes for improved validation and type safety.
     /// </summary>
     public class PID : ISegment
     {
@@ -12,398 +15,361 @@ namespace KeryxPars.HL7.Segments
         
         public SegmentType SegmentType { get; private set; }
 
-        // Auto-Implemented Properties
+        /// <summary>
+        /// PID.1 - Set ID - PID
+        /// </summary>
+        public SI SetID { get; set; }
 
         /// <summary>
-        /// PID.1
+        /// PID.2 - Patient ID (External ID) - deprecated
         /// </summary>
-        public string SetID { get; set; }
+        public CX PatientID { get; set; }
 
         /// <summary>
-        /// PID.2
+        /// PID.3 - Patient Identifier List (repeating)
         /// </summary>
-        public string PatientID { get; set; }
+        public CX[] PatientIdentifierList { get; set; }
 
         /// <summary>
-        /// PID.3
+        /// PID.4 - Alternate Patient ID - PID (repeating) - deprecated
         /// </summary>
-        public string PatientIdentifierList { get; set; }
+        public CX[] AlternatePatientID { get; set; }
 
         /// <summary>
-        /// PID.4
+        /// PID.5 - Patient Name (repeating)
         /// </summary>
-        public string AlternatePatientID { get; set; }
+        public XPN[] PatientName { get; set; }
 
         /// <summary>
-        /// PID.5
+        /// PID.6 - Mother's Maiden Name (repeating)
         /// </summary>
-        public string PatientName { get; set; }
+        public XPN[] MothersMaidenName { get; set; }
 
         /// <summary>
-        /// PID.6
+        /// PID.7 - Date/Time of Birth
         /// </summary>
-        public string MothersMaidenName { get; set; }
+        public DTM DateTimeofBirth { get; set; }
 
         /// <summary>
-        /// PID.7
+        /// PID.8 - Administrative Sex
         /// </summary>
-        public string DateTimeofBirth { get; set; }
+        public IS AdministrativeSex { get; set; }
 
         /// <summary>
-        /// PID.8
+        /// PID.9 - Patient Alias (repeating) - deprecated
         /// </summary>
-        public string AdministrativeSex { get; set; }
+        public XPN[] PatientAlias { get; set; }
 
         /// <summary>
-        /// PID.9
+        /// PID.10 - Race (repeating)
         /// </summary>
-        public string PatientAlias { get; set; }
+        public CE[] Race { get; set; }
 
         /// <summary>
-        /// PID.10
+        /// PID.11 - Patient Address (repeating)
         /// </summary>
-        public string Race { get; set; }
+        public XAD[] PatientAddress { get; set; }
 
         /// <summary>
-        /// PID.11
+        /// PID.12 - County Code - deprecated
         /// </summary>
-        public string PatientAddress { get; set; }
+        public IS CountyCode { get; set; }
 
         /// <summary>
-        /// PID.12
+        /// PID.13 - Phone Number - Home (repeating)
         /// </summary>
-        public string CountyCode { get; set; }
+        public XTN[] PhoneNumberHome { get; set; }
 
         /// <summary>
-        /// PID.13
+        /// PID.14 - Phone Number - Business (repeating)
         /// </summary>
-        public string PhoneNumberHome { get; set; }
+        public XTN[] PhoneNumberBusiness { get; set; }
 
         /// <summary>
-        /// PID.14
+        /// PID.15 - Primary Language
         /// </summary>
-        public string PhoneNumberBusiness { get; set; }
+        public CE PrimaryLanguage { get; set; }
 
         /// <summary>
-        /// PID.15
+        /// PID.16 - Marital Status
         /// </summary>
-        public string PrimaryLanguage { get; set; }
+        public CE MaritalStatus { get; set; }
 
         /// <summary>
-        /// PID.16
+        /// PID.17 - Religion
         /// </summary>
-        public string MaritalStatus { get; set; }
+        public CE Religion { get; set; }
 
         /// <summary>
-        /// PID.17
+        /// PID.18 - Patient Account Number
         /// </summary>
-        public string Religion { get; set; }
+        public CX PatientAccountNumber { get; set; }
 
         /// <summary>
-        /// PID.18
+        /// PID.19 - SSN Number - Patient - deprecated
         /// </summary>
-        public string PatientAccountNumber { get; set; }
+        public ST SocialSecurityNumberPatient { get; set; }
 
         /// <summary>
-        /// PID.19
+        /// PID.20 - Driver's License Number - Patient - deprecated
         /// </summary>
-        public string SocialSecurityNumberPatient { get; set; }
+        public ST DriversLicenseNumberPatient { get; set; }
 
         /// <summary>
-        /// PID.20
+        /// PID.21 - Mother's Identifier (repeating)
         /// </summary>
-        public string DriversLicenseNumberPatient { get; set; }
+        public CX[] MothersIdentifier { get; set; }
 
         /// <summary>
-        /// PID.21
+        /// PID.22 - Ethnic Group (repeating)
         /// </summary>
-        public string MothersIdentifier { get; set; }
+        public CE[] EthnicGroup { get; set; }
 
         /// <summary>
-        /// PID.22
+        /// PID.23 - Birth Place
         /// </summary>
-        public string EthnicGroup { get; set; }
+        public ST BirthPlace { get; set; }
 
         /// <summary>
-        /// PID.23
+        /// PID.24 - Multiple Birth Indicator
         /// </summary>
-        public string BirthPlace { get; set; }
+        public ID MultipleBirthIndicator { get; set; }
 
         /// <summary>
-        /// PID.24
+        /// PID.25 - Birth Order
         /// </summary>
-        public string MultipleBirthIndicator { get; set; }
+        public NM BirthOrder { get; set; }
 
         /// <summary>
-        /// PID.25
+        /// PID.26 - Citizenship (repeating)
         /// </summary>
-        public string BirthOrder { get; set; }
+        public CE[] Citizenship { get; set; }
 
         /// <summary>
-        /// PID.26
+        /// PID.27 - Veterans Military Status
         /// </summary>
-        public string Citizenship { get; set; }
+        public CE VeteransMilitaryStatus { get; set; }
 
         /// <summary>
-        /// PID.27
+        /// PID.28 - Nationality
         /// </summary>
-        public string VeteransMilitaryStatus { get; set; }
+        public CE Nationality { get; set; }
 
         /// <summary>
-        /// PID.28
+        /// PID.29 - Patient Death Date and Time
         /// </summary>
-        public string Nationality { get; set; }
+        public DTM PatientDeathDateandTime { get; set; }
 
         /// <summary>
-        /// PID.29
+        /// PID.30 - Patient Death Indicator
         /// </summary>
-        public string PatientDeathDateandTime { get; set; }
+        public ID PatientDeathIndicator { get; set; }
 
         /// <summary>
-        /// PID.30
+        /// PID.31 - Identity Unknown Indicator
         /// </summary>
-        public string PatientDeathIndicator { get; set; }
+        public ID IdentityUnknownIndicator { get; set; }
 
         /// <summary>
-        /// PID.31
+        /// PID.32 - Identity Reliability Code (repeating)
         /// </summary>
-        public string IdentityUnknownIndicator { get; set; }
+        public IS[] IdentityReliabilityCode { get; set; }
 
         /// <summary>
-        /// PID.32
+        /// PID.33 - Last Update Date/Time
         /// </summary>
-        public string IdentityReliabilityCode { get; set; }
+        public DTM LastUpdateDateTime { get; set; }
 
         /// <summary>
-        /// PID.33
+        /// PID.34 - Last Update Facility
         /// </summary>
-        public string LastUpdateDateTime { get; set; }
+        public HD LastUpdateFacility { get; set; }
 
         /// <summary>
-        /// PID.34
+        /// PID.35 - Species Code
         /// </summary>
-        public string LastUpdateFacility { get; set; }
+        public CE SpeciesCode { get; set; }
 
         /// <summary>
-        /// PID.35
+        /// PID.36 - Breed Code
         /// </summary>
-        public string SpeciesCode { get; set; }
+        public CE BreedCode { get; set; }
 
         /// <summary>
-        /// PID.36
+        /// PID.37 - Strain
         /// </summary>
-        public string BreedCode { get; set; }
+        public ST Strain { get; set; }
 
         /// <summary>
-        /// PID.37
+        /// PID.38 - Production Class Code
         /// </summary>
-        public string Strain { get; set; }
+        public CE ProductionClassCode { get; set; }
 
         /// <summary>
-        /// PID.38
+        /// PID.39 - Tribal Citizenship (repeating)
         /// </summary>
-        public string ProductionClassCode { get; set; }
+        public CWE[] TribalCitizenship { get; set; }
 
         /// <summary>
-        /// PID.39
+        /// PID.40 - Patient Telecommunication Information (repeating)
         /// </summary>
-        public string TribalCitizenship { get; set; }
+        public XTN[] PatientTelecommunicationInformation { get; set; }
 
-        /// <summary>
-        /// PID.40
-        /// </summary>
-        public string PatientTelecommunicationInformation { get; set; }
-
-        // Constructors
         public PID()
         {
             SegmentType = SegmentType.Universal;
-            SetID = string.Empty;
-            PatientID = string.Empty;
-            PatientIdentifierList = string.Empty;
-            AlternatePatientID = string.Empty;
-            PatientName = string.Empty;
-            MothersMaidenName = string.Empty;
-            DateTimeofBirth = string.Empty;
-            AdministrativeSex = string.Empty;
-            PatientAlias = string.Empty;
-            Race = string.Empty;
-            PatientAddress = string.Empty;
-            CountyCode = string.Empty;
-            PhoneNumberHome = string.Empty;
-            PhoneNumberBusiness = string.Empty;
-            PrimaryLanguage = string.Empty;
-            MaritalStatus = string.Empty;
-            Religion = string.Empty;
-            PatientAccountNumber = string.Empty;
-            SocialSecurityNumberPatient = string.Empty;
-            DriversLicenseNumberPatient = string.Empty;
-            MothersIdentifier = string.Empty;
-            EthnicGroup = string.Empty;
-            BirthPlace = string.Empty;
-            MultipleBirthIndicator = string.Empty;
-            BirthOrder = string.Empty;
-            Citizenship = string.Empty;
-            VeteransMilitaryStatus = string.Empty;
-            Nationality = string.Empty;
-            PatientDeathDateandTime = string.Empty;
-            PatientDeathIndicator = string.Empty;
-            IdentityUnknownIndicator = string.Empty;
-            IdentityReliabilityCode = string.Empty;
-            LastUpdateDateTime = string.Empty;
-            LastUpdateFacility = string.Empty;
-            SpeciesCode = string.Empty;
-            BreedCode = string.Empty;
-            Strain = string.Empty;
-            ProductionClassCode = string.Empty;
-            TribalCitizenship = string.Empty;
-            PatientTelecommunicationInformation = string.Empty;
+            
+            SetID = default;
+            PatientID = default;
+            DateTimeofBirth = default;
+            AdministrativeSex = default;
+            CountyCode = default;
+            PrimaryLanguage = default;
+            MaritalStatus = default;
+            Religion = default;
+            PatientAccountNumber = default;
+            SocialSecurityNumberPatient = default;
+            DriversLicenseNumberPatient = default;
+            BirthPlace = default;
+            MultipleBirthIndicator = default;
+            BirthOrder = default;
+            VeteransMilitaryStatus = default;
+            Nationality = default;
+            PatientDeathDateandTime = default;
+            PatientDeathIndicator = default;
+            IdentityUnknownIndicator = default;
+            LastUpdateDateTime = default;
+            LastUpdateFacility = default;
+            SpeciesCode = default;
+            BreedCode = default;
+            Strain = default;
+            ProductionClassCode = default;
+            
+            PatientIdentifierList = Array.Empty<CX>();
+            AlternatePatientID = Array.Empty<CX>();
+            PatientName = Array.Empty<XPN>();
+            MothersMaidenName = Array.Empty<XPN>();
+            PatientAlias = Array.Empty<XPN>();
+            Race = Array.Empty<CE>();
+            PatientAddress = Array.Empty<XAD>();
+            PhoneNumberHome = Array.Empty<XTN>();
+            PhoneNumberBusiness = Array.Empty<XTN>();
+            MothersIdentifier = Array.Empty<CX>();
+            EthnicGroup = Array.Empty<CE>();
+            Citizenship = Array.Empty<CE>();
+            IdentityReliabilityCode = Array.Empty<IS>();
+            TribalCitizenship = Array.Empty<CWE>();
+            PatientTelecommunicationInformation = Array.Empty<XTN>();
         }
 
-        // Methods
         public void SetValue(string value, int element)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             switch (element)
             {
-                case 1: SetID = value; break;
+                case 1: SetID = new SI(value); break;
                 case 2: PatientID = value; break;
-                case 3: PatientIdentifierList = value; break;
-                case 4: AlternatePatientID = value; break;
-                case 5: PatientName = value; break;
-                case 6: MothersMaidenName = value; break;
-                case 7: DateTimeofBirth = value; break;
-                case 8: AdministrativeSex = value; break;
-                case 9: PatientAlias = value; break;
-                case 10: Race = value; break;
-                case 11: PatientAddress = value; break;
-                case 12: CountyCode = value; break;
-                case 13: PhoneNumberHome = value; break;
-                case 14: PhoneNumberBusiness = value; break;
+                case 3: PatientIdentifierList = SegmentFieldHelper.ParseRepeatingField<CX>(value, delimiters); break;
+                case 4: AlternatePatientID = SegmentFieldHelper.ParseRepeatingField<CX>(value, delimiters); break;
+                case 5: PatientName = SegmentFieldHelper.ParseRepeatingField<XPN>(value, delimiters); break;
+                case 6: MothersMaidenName = SegmentFieldHelper.ParseRepeatingField<XPN>(value, delimiters); break;
+                case 7: DateTimeofBirth = new DTM(value); break;
+                case 8: AdministrativeSex = new IS(value); break;
+                case 9: PatientAlias = SegmentFieldHelper.ParseRepeatingField<XPN>(value, delimiters); break;
+                case 10: Race = SegmentFieldHelper.ParseRepeatingField<CE>(value, delimiters); break;
+                case 11: PatientAddress = SegmentFieldHelper.ParseRepeatingField<XAD>(value, delimiters); break;
+                case 12: CountyCode = new IS(value); break;
+                case 13: PhoneNumberHome = SegmentFieldHelper.ParseRepeatingField<XTN>(value, delimiters); break;
+                case 14: PhoneNumberBusiness = SegmentFieldHelper.ParseRepeatingField<XTN>(value, delimiters); break;
                 case 15: PrimaryLanguage = value; break;
                 case 16: MaritalStatus = value; break;
                 case 17: Religion = value; break;
                 case 18: PatientAccountNumber = value; break;
-                case 19: SocialSecurityNumberPatient = value; break;
-                case 20: DriversLicenseNumberPatient = value; break;
-                case 21: MothersIdentifier = value; break;
-                case 22: EthnicGroup = value; break;
-                case 23: BirthPlace = value; break;
-                case 24: MultipleBirthIndicator = value; break;
-                case 25: BirthOrder = value; break;
-                case 26: Citizenship = value; break;
+                case 19: SocialSecurityNumberPatient = new ST(value); break;
+                case 20: DriversLicenseNumberPatient = new ST(value); break;
+                case 21: MothersIdentifier = SegmentFieldHelper.ParseRepeatingField<CX>(value, delimiters); break;
+                case 22: EthnicGroup = SegmentFieldHelper.ParseRepeatingField<CE>(value, delimiters); break;
+                case 23: BirthPlace = new ST(value); break;
+                case 24: MultipleBirthIndicator = new ID(value); break;
+                case 25: BirthOrder = new NM(value); break;
+                case 26: Citizenship = SegmentFieldHelper.ParseRepeatingField<CE>(value, delimiters); break;
                 case 27: VeteransMilitaryStatus = value; break;
                 case 28: Nationality = value; break;
-                case 29: PatientDeathDateandTime = value; break;
-                case 30: PatientDeathIndicator = value; break;
-                case 31: IdentityUnknownIndicator = value; break;
-                case 32: IdentityReliabilityCode = value; break;
-                case 33: LastUpdateDateTime = value; break;
-                case 34: LastUpdateFacility = value; break;
+                case 29: PatientDeathDateandTime = new DTM(value); break;
+                case 30: PatientDeathIndicator = new ID(value); break;
+                case 31: IdentityUnknownIndicator = new ID(value); break;
+                case 32: IdentityReliabilityCode = SegmentFieldHelper.ParseRepeatingField<IS>(value, delimiters); break;
+                case 33: LastUpdateDateTime = new DTM(value); break;
+                case 34:
+                    var hd = new HD();
+                    hd.Parse(value.AsSpan(), delimiters);
+                    LastUpdateFacility = hd;
+                    break;
                 case 35: SpeciesCode = value; break;
                 case 36: BreedCode = value; break;
-                case 37: Strain = value; break;
+                case 37: Strain = new ST(value); break;
                 case 38: ProductionClassCode = value; break;
-                case 39: TribalCitizenship = value; break;
-                case 40: PatientTelecommunicationInformation = value; break;
+                case 39: TribalCitizenship = SegmentFieldHelper.ParseRepeatingField<CWE>(value, delimiters); break;
+                case 40: PatientTelecommunicationInformation = SegmentFieldHelper.ParseRepeatingField<XTN>(value, delimiters); break;
                 default: break;
             }
         }
 
         public string[] GetValues()
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return
             [
                 SegmentId,
-                SetID,
-                PatientID,
-                PatientIdentifierList,
-                AlternatePatientID,
-                PatientName,
-                MothersMaidenName,
-                DateTimeofBirth,
-                AdministrativeSex,
-                PatientAlias,
-                Race,
-                PatientAddress,
-                CountyCode,
-                PhoneNumberHome,
-                PhoneNumberBusiness,
-                PrimaryLanguage,
-                MaritalStatus,
-                Religion,
-                PatientAccountNumber,
-                SocialSecurityNumberPatient,
-                DriversLicenseNumberPatient,
-                MothersIdentifier,
-                EthnicGroup,
-                BirthPlace,
-                MultipleBirthIndicator,
-                BirthOrder,
-                Citizenship,
-                VeteransMilitaryStatus,
-                Nationality,
-                PatientDeathDateandTime,
-                PatientDeathIndicator,
-                IdentityUnknownIndicator,
-                IdentityReliabilityCode,
-                LastUpdateDateTime,
-                LastUpdateFacility,
-                SpeciesCode,
-                BreedCode,
-                Strain,
-                ProductionClassCode,
-                TribalCitizenship,
-                PatientTelecommunicationInformation
+                SetID.ToHL7String(delimiters),
+                PatientID.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(PatientIdentifierList, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(AlternatePatientID, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(PatientName, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(MothersMaidenName, delimiters),
+                DateTimeofBirth.ToHL7String(delimiters),
+                AdministrativeSex.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(PatientAlias, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(Race, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(PatientAddress, delimiters),
+                CountyCode.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(PhoneNumberHome, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(PhoneNumberBusiness, delimiters),
+                PrimaryLanguage.ToHL7String(delimiters),
+                MaritalStatus.ToHL7String(delimiters),
+                Religion.ToHL7String(delimiters),
+                PatientAccountNumber.ToHL7String(delimiters),
+                SocialSecurityNumberPatient.ToHL7String(delimiters),
+                DriversLicenseNumberPatient.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(MothersIdentifier, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(EthnicGroup, delimiters),
+                BirthPlace.ToHL7String(delimiters),
+                MultipleBirthIndicator.ToHL7String(delimiters),
+                BirthOrder.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(Citizenship, delimiters),
+                VeteransMilitaryStatus.ToHL7String(delimiters),
+                Nationality.ToHL7String(delimiters),
+                PatientDeathDateandTime.ToHL7String(delimiters),
+                PatientDeathIndicator.ToHL7String(delimiters),
+                IdentityUnknownIndicator.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(IdentityReliabilityCode, delimiters),
+                LastUpdateDateTime.ToHL7String(delimiters),
+                LastUpdateFacility.ToHL7String(delimiters),
+                SpeciesCode.ToHL7String(delimiters),
+                BreedCode.ToHL7String(delimiters),
+                Strain.ToHL7String(delimiters),
+                ProductionClassCode.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(TribalCitizenship, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(PatientTelecommunicationInformation, delimiters)
             ];
         }
 
         public string? GetField(int index)
         {
-            return index switch
-            {
-                0 => SegmentId,
-                1 => SetID,
-                2 => PatientID,
-                3 => PatientIdentifierList,
-                4 => AlternatePatientID,
-                5 => PatientName,
-                6 => MothersMaidenName,
-                7 => DateTimeofBirth,
-                8 => AdministrativeSex,
-                9 => PatientAlias,
-                10 => Race,
-                11 => PatientAddress,
-                12 => CountyCode,
-                13 => PhoneNumberHome,
-                14 => PhoneNumberBusiness,
-                15 => PrimaryLanguage,
-                16 => MaritalStatus,
-                17 => Religion,
-                18 => PatientAccountNumber,
-                19 => SocialSecurityNumberPatient,
-                20 => DriversLicenseNumberPatient,
-                21 => MothersIdentifier,
-                22 => EthnicGroup,
-                23 => BirthPlace,
-                24 => MultipleBirthIndicator,
-                25 => BirthOrder,
-                26 => Citizenship,
-                27 => VeteransMilitaryStatus,
-                28 => Nationality,
-                29 => PatientDeathDateandTime,
-                30 => PatientDeathIndicator,
-                31 => IdentityUnknownIndicator,
-                32 => IdentityReliabilityCode,
-                33 => LastUpdateDateTime,
-                34 => LastUpdateFacility,
-                35 => SpeciesCode,
-                36 => BreedCode,
-                37 => Strain,
-                38 => ProductionClassCode,
-                39 => TribalCitizenship,
-                40 => PatientTelecommunicationInformation,
-                _ => null
-            };
+            var values = GetValues();
+            return index >= 0 && index < values.Length ? values[index] : null;
         }
     }
 }

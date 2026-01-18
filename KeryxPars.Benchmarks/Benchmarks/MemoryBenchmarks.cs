@@ -2,6 +2,7 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
 using KeryxPars.Benchmarks.Data;
 using KeryxPars.HL7.Serialization;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.Benchmarks.Benchmarks;
 
@@ -72,9 +73,9 @@ public class MemoryBenchmarks
         {
             var message = result.Value;
             return (
-                message.Msh?.MessageControlID,
-                message.Pid?.PatientName,
-                message.Pv1?.PatientClass,
+                message.Msh?.MessageControlID.Value,
+                message.Pid?.PatientName?[0].GetFormattedName(NameFormat.GivenFamily) ?? string.Empty,
+                message.Pv1?.PatientClass.Value,
                 message.Allergies.Count,
                 message.Diagnoses.Count,
                 message.Insurance.Count

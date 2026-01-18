@@ -1,10 +1,13 @@
 ﻿using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
+using KeryxPars.HL7.DataTypes.Primitive;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.HL7.Segments
 {
     /// <summary>
     /// HL7 Segment: Timing Quantity
+    /// Refactored to use strongly-typed HL7 datatypes.
     /// </summary>
     public class TQ1 : ISegment
     {
@@ -13,158 +16,182 @@ namespace KeryxPars.HL7.Segments
         public SegmentType SegmentType { get; private set; }
 
         /// <summary>
-        /// TQ1.1
+        /// TQ1.1 - Set ID - TQ1
         /// </summary>
-        public string SetID { get; set; }
+        public SI SetID { get; set; }
 
         /// <summary>
-        /// TQ1.2
+        /// TQ1.2 - Quantity
         /// </summary>
-        public string Quantity { get; set; }
+        public CQ Quantity { get; set; }
 
         /// <summary>
-        /// TQ1.3
+        /// TQ1.3 - Repeat Pattern
         /// </summary>
-        public string RepeatPattern { get; set; }
+        public ST[] RepeatPattern { get; set; }
 
         /// <summary>
-        /// TQ1.4
+        /// TQ1.4 - Explicit Time
         /// </summary>
-        public string ExplicitTime { get; set; }
+        public TM[] ExplicitTime { get; set; }
 
         /// <summary>
-        /// TQ1.5
+        /// TQ1.5 - Relative Time and Units
         /// </summary>
-        public string RelativeTimeAndUnits { get; set; }
+        public CQ[] RelativeTimeAndUnits { get; set; }
 
         /// <summary>
-        /// TQ1.6
+        /// TQ1.6 - Service Duration
         /// </summary>
-        public string ServiceDuration { get; set; }
+        public CQ ServiceDuration { get; set; }
 
         /// <summary>
-        /// TQ1.7
+        /// TQ1.7 - Start Date/Time
         /// </summary>
-        public string StartDateTime { get; set; }
+        public DTM StartDateTime { get; set; }
 
         /// <summary>
-        /// TQ1.8
+        /// TQ1.8 - End Date/Time
         /// </summary>
-        public string EndDateTime { get; set; }
+        public DTM EndDateTime { get; set; }
 
         /// <summary>
-        /// TQ1.9
+        /// TQ1.9 - Priority
         /// </summary>
-        public string Priority { get; set; }
+        public CWE[] Priority { get; set; }
 
         /// <summary>
-        /// TQ1.10
+        /// TQ1.10 - Condition Text
         /// </summary>
-        public string ConditionText { get; set; }
+        public TX ConditionText { get; set; }
 
         /// <summary>
-        /// TQ1.11
+        /// TQ1.11 - Text Instruction
         /// </summary>
-        public string TextInstruction { get; set; }
+        public TX TextInstruction { get; set; }
 
         /// <summary>
-        /// TQ1.12
+        /// TQ1.12 - Conjunction
         /// </summary>
-        public string Conjunction { get; set; }
+        public ID Conjunction { get; set; }
 
         /// <summary>
-        /// TQ1.13
+        /// TQ1.13 - Occurrence Duration
         /// </summary>
-        public string OccurrenceDuration { get; set; }
+        public CQ OccurrenceDuration { get; set; }
 
         /// <summary>
-        /// TQ1.14
+        /// TQ1.14 - Total Occurrences
         /// </summary>
-        public string TotalOccurrences { get; set; }
+        public NM TotalOccurrences { get; set; }
 
-        // Constructors
         public TQ1()
         {
             SegmentType = SegmentType.MedOrder;
-            SetID = string.Empty;
-            Quantity = string.Empty;
-            RepeatPattern = string.Empty;
-            ExplicitTime = string.Empty;
-            RelativeTimeAndUnits = string.Empty;
-            ServiceDuration = string.Empty;
-            StartDateTime = string.Empty;
-            EndDateTime = string.Empty;
-            Priority = string.Empty;
-            ConditionText = string.Empty;
-            TextInstruction = string.Empty;
-            Conjunction = string.Empty;
-            OccurrenceDuration = string.Empty;
-            TotalOccurrences = string.Empty;
+            SetID = default;
+            Quantity = default;
+            RepeatPattern = [];
+            ExplicitTime = [];
+            RelativeTimeAndUnits = [];
+            ServiceDuration = default;
+            StartDateTime = default;
+            EndDateTime = default;
+            Priority = [];
+            ConditionText = default;
+            TextInstruction = default;
+            Conjunction = default;
+            OccurrenceDuration = default;
+            TotalOccurrences = default;
         }
 
-        // Methods
         public void SetValue(string value, int element)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             switch (element)
             {
-                case 1: SetID = value; break;
-                case 2: Quantity = value; break;
-                case 3: RepeatPattern = value; break;
-                case 4: ExplicitTime = value; break;
-                case 5: RelativeTimeAndUnits = value; break;
-                case 6: ServiceDuration = value; break;
-                case 7: StartDateTime = value; break;
-                case 8: EndDateTime = value; break;
-                case 9: Priority = value; break;
-                case 10: ConditionText = value; break;
-                case 11: TextInstruction = value; break;
-                case 12: Conjunction = value; break;
-                case 13: OccurrenceDuration = value; break;
-                case 14: TotalOccurrences = value; break;
+                case 1: SetID = new SI(value); break;
+                case 2:
+                    var cq2 = new CQ();
+                    cq2.Parse(value.AsSpan(), delimiters);
+                    Quantity = cq2;
+                    break;
+                case 3:
+                    RepeatPattern = SegmentFieldHelper.ParseRepeatingField<ST>(value, delimiters);
+                    break;
+                case 4:
+                    ExplicitTime = SegmentFieldHelper.ParseRepeatingField<TM>(value, delimiters);
+                    break;
+                case 5:
+                    RelativeTimeAndUnits = SegmentFieldHelper.ParseRepeatingField<CQ>(value, delimiters);
+                    break;
+                case 6:
+                    var cq6 = new CQ();
+                    cq6.Parse(value.AsSpan(), delimiters);
+                    ServiceDuration = cq6;
+                    break;
+                case 7: StartDateTime = new DTM(value); break;
+                case 8: EndDateTime = new DTM(value); break;
+                case 9:
+                    Priority = SegmentFieldHelper.ParseRepeatingField<CWE>(value, delimiters);
+                    break;
+                case 10: ConditionText = new TX(value); break;
+                case 11: TextInstruction = new TX(value); break;
+                case 12: Conjunction = new ID(value); break;
+                case 13:
+                    var cq13 = new CQ();
+                    cq13.Parse(value.AsSpan(), delimiters);
+                    OccurrenceDuration = cq13;
+                    break;
+                case 14: TotalOccurrences = new NM(value); break;
             }
         }
 
         public string[] GetValues()
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return
             [
                 SegmentId,
-                SetID,
-                Quantity,
-                RepeatPattern,
-                ExplicitTime,
-                RelativeTimeAndUnits,
-                ServiceDuration,
-                StartDateTime,
-                EndDateTime,
-                Priority,
-                ConditionText,
-                TextInstruction,
-                Conjunction,
-                OccurrenceDuration,
-                TotalOccurrences
+                SetID.ToHL7String(delimiters),
+                Quantity.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(RepeatPattern, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(ExplicitTime, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(RelativeTimeAndUnits, delimiters),
+                ServiceDuration.ToHL7String(delimiters),
+                StartDateTime.ToHL7String(delimiters),
+                EndDateTime.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(Priority, delimiters),
+                ConditionText.ToHL7String(delimiters),
+                TextInstruction.ToHL7String(delimiters),
+                Conjunction.ToHL7String(delimiters),
+                OccurrenceDuration.ToHL7String(delimiters),
+                TotalOccurrences.ToHL7String(delimiters)
             ];
         }
 
         public string? GetField(int index)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return index switch
             {
                 0 => SegmentId,
-                1 => SetID,
-                2 => Quantity,
-                3 => RepeatPattern,
-                4 => ExplicitTime,
-                5 => RelativeTimeAndUnits,
-                6 => ServiceDuration,
-                7 => StartDateTime,
-                8 => EndDateTime,
-                9 => Priority,
-                10 => ConditionText,
-                11 => TextInstruction,
-                12 => Conjunction,
-                13 => OccurrenceDuration,
-                14 => TotalOccurrences,
+                1 => SetID.Value,
+                2 => Quantity.ToHL7String(delimiters),
+                3 => SegmentFieldHelper.JoinRepeatingField(RepeatPattern, delimiters),
+                4 => SegmentFieldHelper.JoinRepeatingField(ExplicitTime, delimiters),
+                5 => SegmentFieldHelper.JoinRepeatingField(RelativeTimeAndUnits, delimiters),
+                6 => ServiceDuration.ToHL7String(delimiters),
+                7 => StartDateTime.Value,
+                8 => EndDateTime.Value,
+                9 => SegmentFieldHelper.JoinRepeatingField(Priority, delimiters),
+                10 => ConditionText.Value,
+                11 => TextInstruction.Value,
+                12 => Conjunction.Value,
+                13 => OccurrenceDuration.ToHL7String(delimiters),
+                14 => TotalOccurrences.Value,
                 _ => null
             };
         }

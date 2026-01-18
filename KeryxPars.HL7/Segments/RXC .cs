@@ -1,10 +1,13 @@
 ﻿using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
+using KeryxPars.HL7.DataTypes.Primitive;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.HL7.Segments
 {
     /// <summary>
     /// HL7 Segment: Pharmacy Component (Compounds)
+    /// Refactored to use strongly-typed HL7 datatypes.
     /// </summary>
     public class RXC : ISegment
     {
@@ -13,113 +16,135 @@ namespace KeryxPars.HL7.Segments
         public SegmentType SegmentType { get; private set; }
 
         /// <summary>
-        /// RXC.1
+        /// RXC.1 - RX Component Type
         /// </summary>
-        public string RxComponentType { get; set; } // used for medselect
+        public ID RxComponentType { get; set; }
 
         /// <summary>
-        /// RXC.2
+        /// RXC.2 - Component Code
         /// </summary>
-        public string ComponentCode { get; set; } // used for medselect
+        public CE ComponentCode { get; set; }
 
         /// <summary>
-        /// RXC.3
+        /// RXC.3 - Component Amount
         /// </summary>
-        public string ComponentAmount { get; set; } // used for medselect
+        public NM ComponentAmount { get; set; }
 
         /// <summary>
-        /// RXC.4
+        /// RXC.4 - Component Units
         /// </summary>
-        public string ComponentUnits { get; set; } // used for medselect
+        public CE ComponentUnits { get; set; }
 
         /// <summary>
-        /// RXC.5
+        /// RXC.5 - Component Strength
         /// </summary>
-        public string ComponentStrength { get; set; }
+        public NM ComponentStrength { get; set; }
 
         /// <summary>
-        /// RXC.6
+        /// RXC.6 - Component Strength Units
         /// </summary>
-        public string ComponentStrengthUnits { get; set; }
+        public CE ComponentStrengthUnits { get; set; }
 
         /// <summary>
-        /// RXC.7
+        /// RXC.7 - Supplementary Code
         /// </summary>
-        public string SupplementaryCode { get; set; }
+        public CE[] SupplementaryCode { get; set; }
 
         /// <summary>
-        /// RXC.8
+        /// RXC.8 - Component Drug Strength Volume
         /// </summary>
-        public string ComponentDrugStrengthVolume { get; set; }
+        public NM ComponentDrugStrengthVolume { get; set; }
 
         /// <summary>
-        /// RXC.9
+        /// RXC.9 - Component Drug Strength Volume Units
         /// </summary>
-        public string ComponentDrugStrengthVolumeUnits { get; set; }
+        public CWE ComponentDrugStrengthVolumeUnits { get; set; }
 
-        // Constructors
         public RXC()
         {
             SegmentType = SegmentType.MedOrder;
-            RxComponentType = string.Empty;
-            ComponentCode = string.Empty;
-            ComponentAmount = string.Empty;
-            ComponentUnits = string.Empty;
-            ComponentStrength = string.Empty;
-            ComponentStrengthUnits = string.Empty;
-            SupplementaryCode = string.Empty;
-            ComponentDrugStrengthVolume = string.Empty;
-            ComponentDrugStrengthVolumeUnits = string.Empty;
+            RxComponentType = default;
+            ComponentCode = default;
+            ComponentAmount = default;
+            ComponentUnits = default;
+            ComponentStrength = default;
+            ComponentStrengthUnits = default;
+            SupplementaryCode = [];
+            ComponentDrugStrengthVolume = default;
+            ComponentDrugStrengthVolumeUnits = default;
         }
 
-        // Methods
         public void SetValue(string value, int element)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             switch (element)
             {
-                case 1: RxComponentType = value; break; // used for medselect
-                case 2: ComponentCode = value; break;// used for medselect
-                case 3: ComponentAmount = value; break;// used for medselect
-                case 4: ComponentUnits = value; break;// used for medselect
-                case 5: ComponentStrength = value; break;
-                case 6: ComponentStrengthUnits = value; break;
-                case 7: SupplementaryCode = value; break;
-                case 8: ComponentDrugStrengthVolume = value; break;
-                case 9: ComponentDrugStrengthVolumeUnits = value; break;
+                case 1: RxComponentType = new ID(value); break;
+                case 2:
+                    var ce2 = new CE();
+                    ce2.Parse(value.AsSpan(), delimiters);
+                    ComponentCode = ce2;
+                    break;
+                case 3: ComponentAmount = new NM(value); break;
+                case 4:
+                    var ce4 = new CE();
+                    ce4.Parse(value.AsSpan(), delimiters);
+                    ComponentUnits = ce4;
+                    break;
+                case 5: ComponentStrength = new NM(value); break;
+                case 6:
+                    var ce6 = new CE();
+                    ce6.Parse(value.AsSpan(), delimiters);
+                    ComponentStrengthUnits = ce6;
+                    break;
+                case 7:
+                    SupplementaryCode = SegmentFieldHelper.ParseRepeatingField<CE>(value, delimiters);
+                    break;
+                case 8: ComponentDrugStrengthVolume = new NM(value); break;
+                case 9:
+                    var cwe9 = new CWE();
+                    cwe9.Parse(value.AsSpan(), delimiters);
+                    ComponentDrugStrengthVolumeUnits = cwe9;
+                    break;
             }
         }
         
         public string[] GetValues()
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return
             [
                 SegmentId,
-                RxComponentType,
-                ComponentCode,
-                ComponentAmount,
-                ComponentUnits,
-                ComponentStrength,
-                ComponentStrengthUnits,
-                SupplementaryCode,
-                ComponentDrugStrengthVolume,
-                ComponentDrugStrengthVolumeUnits
+                RxComponentType.ToHL7String(delimiters),
+                ComponentCode.ToHL7String(delimiters),
+                ComponentAmount.ToHL7String(delimiters),
+                ComponentUnits.ToHL7String(delimiters),
+                ComponentStrength.ToHL7String(delimiters),
+                ComponentStrengthUnits.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(SupplementaryCode, delimiters),
+                ComponentDrugStrengthVolume.ToHL7String(delimiters),
+                ComponentDrugStrengthVolumeUnits.ToHL7String(delimiters)
             ];
         }
 
         public string? GetField(int index)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return index switch
             {
                 0 => SegmentId,
-                1 => RxComponentType,
-                2 => ComponentCode,
-                3 => ComponentAmount,
-                4 => ComponentUnits,
-                5 => ComponentStrength,
-                6 => ComponentStrengthUnits,
-                7 => SupplementaryCode,
-                8 => ComponentDrugStrengthVolume,
-                9 => ComponentDrugStrengthVolumeUnits,
+                1 => RxComponentType.Value,
+                2 => ComponentCode.ToHL7String(delimiters),
+                3 => ComponentAmount.Value,
+                4 => ComponentUnits.ToHL7String(delimiters),
+                5 => ComponentStrength.Value,
+                6 => ComponentStrengthUnits.ToHL7String(delimiters),
+                7 => SegmentFieldHelper.JoinRepeatingField(SupplementaryCode, delimiters),
+                8 => ComponentDrugStrengthVolume.Value,
+                9 => ComponentDrugStrengthVolumeUnits.ToHL7String(delimiters),
                 _ => null
             };
         }

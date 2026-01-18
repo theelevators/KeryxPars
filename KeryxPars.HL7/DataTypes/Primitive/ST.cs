@@ -5,10 +5,9 @@ namespace KeryxPars.HL7.DataTypes.Primitive;
 
 /// <summary>
 /// ST - String Data Type
-/// A string data type is used to represent displayable text.
-/// Maximum length: 199 characters.
+/// Represents a string data value (maximum 199 characters).
 /// </summary>
-public readonly struct ST : IPrimitiveDataType
+public readonly struct ST : IPrimitiveDataType, IEquatable<string>
 {
     private readonly string _value;
 
@@ -47,10 +46,10 @@ public readonly struct ST : IPrimitiveDataType
     public bool Validate(out List<string> errors)
     {
         errors = new List<string>();
-        
+
         if (_value != null && _value.Length > 199)
         {
-            errors.Add($"ST data type exceeds maximum length of 199 characters (actual: {_value.Length})");
+            errors.Add($"ST data type exceeds maximum length of 199 characters: '{_value.Length}' characters");
             return false;
         }
 
@@ -67,12 +66,32 @@ public readonly struct ST : IPrimitiveDataType
     /// </summary>
     public static implicit operator string(ST st) => st._value ?? string.Empty;
 
+    /// <summary>
+    /// Determines whether the specified string is equal to the current ST value.
+    /// </summary>
+    public bool Equals(string? other) => _value == other;
+
     /// <inheritdoc/>
     public override string ToString() => _value ?? string.Empty;
 
     /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is ST other && _value == other._value;
+    public override bool Equals(object? obj)
+    {
+        return obj switch
+        {
+            ST other => _value == other._value,
+            string str => _value == str,
+            _ => false
+        };
+    }
 
     /// <inheritdoc/>
     public override int GetHashCode() => _value?.GetHashCode() ?? 0;
+
+    public static bool operator ==(ST left, ST right) => left.Equals(right);
+    public static bool operator !=(ST left, ST right) => !left.Equals(right);
+    public static bool operator ==(ST left, string? right) => left.Equals(right);
+    public static bool operator !=(ST left, string? right) => !left.Equals(right);
+    public static bool operator ==(string? left, ST right) => right.Equals(left);
+    public static bool operator !=(string? left, ST right) => !right.Equals(left);
 }

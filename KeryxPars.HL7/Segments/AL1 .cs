@@ -1,100 +1,120 @@
 ﻿using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
+using KeryxPars.HL7.DataTypes.Primitive;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.HL7.Segments
 {
+    /// <summary>
+    /// HL7 Segment: Patient Allergy Information
+    /// Refactored to use strongly-typed HL7 datatypes.
+    /// </summary>
     public class AL1 : ISegment
     {
         public string SegmentId => nameof(AL1);
 
         public SegmentType SegmentType { get; private set; }
 
-        // Auto-Implemented Properties
+        /// <summary>
+        /// AL1.1 - Set ID - AL1
+        /// </summary>
+        public SI SetID { get; set; }
 
         /// <summary>
-        /// AL1.1
+        /// AL1.2 - Allergen Type Code
         /// </summary>
-        public string SetID { get; set; }
+        public CE AllergenTypeCode { get; set; }
 
         /// <summary>
-        /// AL1.2
+        /// AL1.3 - Allergen Code/Mnemonic/Description
         /// </summary>
-        public string AllergenTypeCode { get; set; }
+        public CE AllergenCodeMnemonicDescription { get; set; }
 
         /// <summary>
-        /// AL1.3
+        /// AL1.4 - Allergy Severity Code
         /// </summary>
-        public string AllergenCodeMnemonicDescription { get; set; }
+        public CE AllergySeverityCode { get; set; }
 
         /// <summary>
-        /// AL1.4
+        /// AL1.5 - Allergy Reaction Code
         /// </summary>
-        public string AllergySeverityCode { get; set; }
+        public ST[] AllergyReactionCode { get; set; }
 
         /// <summary>
-        /// AL1.5
+        /// AL1.6 - Identification Date
         /// </summary>
-        public string AllergyReactionCode { get; set; }
+        public DT IdentificationDate { get; set; }
 
-        /// <summary>
-        /// AL1.6
-        /// </summary>
-        public string IdentificationDate { get; set; }
-
-
-        // Constructors
         public AL1()
         {
             SegmentType = SegmentType.ADT;
-
-            SetID = string.Empty;
-            AllergenTypeCode = string.Empty;
-            AllergenCodeMnemonicDescription = string.Empty;
-            AllergySeverityCode = string.Empty;
-            AllergyReactionCode = string.Empty;
-            IdentificationDate = string.Empty;
+            SetID = default;
+            AllergenTypeCode = default;
+            AllergenCodeMnemonicDescription = default;
+            AllergySeverityCode = default;
+            AllergyReactionCode = [];
+            IdentificationDate = default;
         }
 
-        // Methods
         public void SetValue(string value, int element)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             switch (element)
             {
-                case 1: SetID = value; break;
-                case 2: AllergenTypeCode = value; break;
-                case 3: AllergenCodeMnemonicDescription = value; break;
-                case 4: AllergySeverityCode = value; break;
-                case 5: AllergyReactionCode = value; break;
-                case 6: IdentificationDate = value; break;
+                case 1: SetID = new SI(value); break;
+                case 2:
+                    var ce2 = new CE();
+                    ce2.Parse(value.AsSpan(), delimiters);
+                    AllergenTypeCode = ce2;
+                    break;
+                case 3:
+                    var ce3 = new CE();
+                    ce3.Parse(value.AsSpan(), delimiters);
+                    AllergenCodeMnemonicDescription = ce3;
+                    break;
+                case 4:
+                    var ce4 = new CE();
+                    ce4.Parse(value.AsSpan(), delimiters);
+                    AllergySeverityCode = ce4;
+                    break;
+                case 5:
+                    AllergyReactionCode = SegmentFieldHelper.ParseRepeatingField<ST>(value, delimiters);
+                    break;
+                case 6: IdentificationDate = new DT(value); break;
                 default: break;
             }
         }
 
         public string[] GetValues()
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return
             [
                 SegmentId,
-                SetID,
-                AllergenTypeCode,
-                AllergenCodeMnemonicDescription,
-                AllergySeverityCode,
-                AllergyReactionCode,
-                IdentificationDate
+                SetID.ToHL7String(delimiters),
+                AllergenTypeCode.ToHL7String(delimiters),
+                AllergenCodeMnemonicDescription.ToHL7String(delimiters),
+                AllergySeverityCode.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(AllergyReactionCode, delimiters),
+                IdentificationDate.ToHL7String(delimiters)
             ];
         }
 
         public string? GetField(int index)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return index switch
             {
                 0 => SegmentId,
-                1 => SetID,
-                2 => AllergenTypeCode,
-                3 => AllergenCodeMnemonicDescription,
-                4 => AllergySeverityCode,
-                5 => AllergyReactionCode,
-                6 => IdentificationDate,
+                1 => SetID.Value,
+                2 => AllergenTypeCode.ToHL7String(delimiters),
+                3 => AllergenCodeMnemonicDescription.ToHL7String(delimiters),
+                4 => AllergySeverityCode.ToHL7String(delimiters),
+                5 => SegmentFieldHelper.JoinRepeatingField(AllergyReactionCode, delimiters),
+                6 => IdentificationDate.Value,
                 _ => null
             };
         }

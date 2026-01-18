@@ -4,6 +4,7 @@ using KeryxPars.Benchmarks.Data;
 using KeryxPars.HL7.Serialization;
 using KeryxPars.HL7.Extensions;
 using KeryxPars.HL7.Serialization.Configuration;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.Benchmarks.Benchmarks;
 
@@ -107,8 +108,8 @@ public class DeserializationBenchmarks
         if (result.IsSuccess)
         {
             var message = result.Value;
-            var patientName = message.Pid?.PatientName;
-            var orderControl = message.Orders.Count > 0 ? message.Orders[0].AsMedicationOrder().Orc?.OrderControl : null;
+            var patientName = message.Pid?.PatientName?[0].GetFormattedName(NameFormat.GivenFamily) ?? string.Empty;
+            var orderControl = message.Orders.Count > 0 ? message.Orders[0].AsMedicationOrder().Orc?.OrderControl.Value : null;
             var orderCount = message.Orders.Count;
             return (patientName, orderControl, orderCount);
         }

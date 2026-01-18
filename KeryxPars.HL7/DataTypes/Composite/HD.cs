@@ -8,10 +8,10 @@ namespace KeryxPars.HL7.DataTypes.Composite;
 
 /// <summary>
 /// HD - Hierarchic Designator
-/// HL7 2.5 Composite Data Type representing a hierarchical identifier.
+/// HL7 2.5 Composite Data Type representing a hierarchical entity identifier.
 /// Format: NamespaceID^UniversalID^UniversalIDType
 /// </summary>
-public readonly struct HD : ICompositeDataType
+public readonly struct HD : ICompositeDataType, IEquatable<string>
 {
     private readonly IS _namespaceId;
     private readonly ST _universalId;
@@ -86,19 +86,18 @@ public readonly struct HD : ICompositeDataType
     public string ToHL7String(in HL7Delimiters delimiters)
     {
         var sb = new StringBuilder();
+        
         if (!_namespaceId.IsEmpty)
             sb.Append(_namespaceId.ToHL7String(delimiters));
         
         sb.Append(delimiters.ComponentSeparator);
-        
         if (!_universalId.IsEmpty)
             sb.Append(_universalId.ToHL7String(delimiters));
         
         sb.Append(delimiters.ComponentSeparator);
-        
         if (!_universalIdType.IsEmpty)
             sb.Append(_universalIdType.ToHL7String(delimiters));
-        
+
         return sb.ToString().TrimEnd(delimiters.ComponentSeparator);
     }
 
@@ -111,7 +110,7 @@ public readonly struct HD : ICompositeDataType
         while (enumerator.MoveNext() && index < ComponentCount)
         {
             var component = enumerator.Current;
-            
+
             switch (index)
             {
                 case 0:
@@ -124,7 +123,7 @@ public readonly struct HD : ICompositeDataType
                     System.Runtime.CompilerServices.Unsafe.AsRef(in _universalIdType) = new ID(component.ToString());
                     break;
             }
-            
+
             index++;
         }
     }
@@ -136,19 +135,43 @@ public readonly struct HD : ICompositeDataType
 
         if (!_namespaceId.Validate(out var nsErrors))
             errors.AddRange(nsErrors.Select(e => $"NamespaceId: {e}"));
-        if (!_universalId.Validate(out var uidErrors))
-            errors.AddRange(uidErrors.Select(e => $"UniversalId: {e}"));
-        if (!_universalIdType.Validate(out var typeErrors))
-            errors.AddRange(typeErrors.Select(e => $"UniversalIdType: {e}"));
+        if (!_universalId.Validate(out var uiErrors))
+            errors.AddRange(uiErrors.Select(e => $"UniversalId: {e}"));
+        if (!_universalIdType.Validate(out var uitErrors))
+            errors.AddRange(uitErrors.Select(e => $"UniversalIdType: {e}"));
 
         return errors.Count == 0;
     }
 
-    /// <inheritdoc/>
-    public override string ToString() => !_namespaceId.IsEmpty ? _namespaceId.Value : _universalId.Value;
+    /// <summary>
+    /// Determines whether the specified string is equal to the current HD value.
+    /// Supports both full HL7 string format and simple NamespaceId comparison.
+    /// </summary>
+    public bool Equals(string? other)
+    {
+        if (other == null) return IsEmpty;
+        
+        // First try full HL7 string comparison
+        var hl7String = ToHL7String(HL7Delimiters.Default);
+        if (hl7String == other) return true;
+        
+        // Fallback to NamespaceId comparison for simple cases (backward compatibility)
+        return _namespaceId.Value == other;
+    }
 
     /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is HD other && ToHL7String(HL7Delimiters.Default) == other.ToHL7String(HL7Delimiters.Default);
+    public override string ToString() => _namespaceId.Value ?? string.Empty;
+
+    /// <inheritdoc/>
+    public override bool Equals(object? obj)
+    {
+        return obj switch
+        {
+            HD other => ToHL7String(HL7Delimiters.Default) == other.ToHL7String(HL7Delimiters.Default),
+            string str => Equals(str),
+            _ => false
+        };
+    }
 
     /// <inheritdoc/>
     public override int GetHashCode() => ToHL7String(HL7Delimiters.Default).GetHashCode();
@@ -160,14 +183,21 @@ public readonly struct HD : ICompositeDataType
     {
         if (string.IsNullOrWhiteSpace(value))
             return default;
-        
+
         var hd = new HD();
         hd.Parse(value.AsSpan(), HL7Delimiters.Default);
         return hd;
     }
 
     /// <summary>
-    /// Implicit conversion from HD to string.
+    /// Implicit conversion from HD to string (returns NamespaceId for simple cases).
     /// </summary>
     public static implicit operator string(HD hd) => hd.ToString();
+
+    public static bool operator ==(HD left, HD right) => left.Equals(right);
+    public static bool operator !=(HD left, HD right) => !left.Equals(right);
+    public static bool operator ==(HD left, string? right) => left.Equals(right);
+    public static bool operator !=(HD left, string? right) => !left.Equals(right);
+    public static bool operator ==(string? left, HD right) => right.Equals(left);
+    public static bool operator !=(string? left, HD right) => !right.Equals(left);
 }

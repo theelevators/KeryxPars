@@ -1,10 +1,13 @@
 ﻿using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
+using KeryxPars.HL7.DataTypes.Primitive;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.HL7.Segments
 {
     /// <summary>
     /// HL7 Segment: Common Order
+    /// Refactored to use strongly-typed HL7 datatypes.
     /// </summary>
     public class ORC : ISegment
     {
@@ -12,334 +15,305 @@ namespace KeryxPars.HL7.Segments
         
         public SegmentType SegmentType { get; private set; }
 
-        // Auto-Implemented Properties
         /// <summary>
-        /// ORC.1
+        /// ORC.1 - Order Control
         /// </summary>
-        public string OrderControl { get; set; } // values in table 0119
+        public ID OrderControl { get; set; }
 
         /// <summary>
-        /// ORC.2
+        /// ORC.2 - Placer Order Number
         /// </summary>
-        public string PlacerOrderNumber { get; set; }
+        public EI PlacerOrderNumber { get; set; }
 
         /// <summary>
-        /// ORC.3
+        /// ORC.3 - Filler Order Number
         /// </summary>
-        public string FillerOrderNumber { get; set; }
+        public EI FillerOrderNumber { get; set; }
 
         /// <summary>
-        /// ORC.4
+        /// ORC.4 - Placer Group Number
         /// </summary>
-        public string PlacerGroupNumber { get; set; }
+        public EI PlacerGroupNumber { get; set; }
 
         /// <summary>
-        /// ORC.5
+        /// ORC.5 - Order Status
         /// </summary>
-        public string OrderStatus { get; set; }
+        public ID OrderStatus { get; set; }
 
         /// <summary>
-        /// ORC.6
+        /// ORC.6 - Response Flag
         /// </summary>
-        public string ResponseFlag { get; set; }
+        public ID ResponseFlag { get; set; }
 
         /// <summary>
-        /// ORC.7
+        /// ORC.7 - Quantity/Timing - deprecated, use TQ1/TQ2
         /// </summary>
-        public string QuantityTiming { get; set; }
+        public ST QuantityTiming { get; set; }
 
         /// <summary>
-        /// ORC.8
+        /// ORC.8 - Parent Order
         /// </summary>
-        public string ParentOrder { get; set; }
+        public ST ParentOrder { get; set; }
 
         /// <summary>
-        /// ORC.9
+        /// ORC.9 - Date/Time of Transaction
         /// </summary>
-        public string DateTimeOfTransaction { get; set; }
+        public DTM DateTimeOfTransaction { get; set; }
 
         /// <summary>
-        /// ORC.10
+        /// ORC.10 - Entered By (repeating)
         /// </summary>
-        public string EnteredBy { get; set; }
+        public XCN[] EnteredBy { get; set; }
 
         /// <summary>
-        /// ORC.11
+        /// ORC.11 - Verified By (repeating)
         /// </summary>
-        public string VerifiedBy { get; set; }
+        public XCN[] VerifiedBy { get; set; }
 
         /// <summary>
-        /// ORC.12
+        /// ORC.12 - Ordering Provider (repeating)
         /// </summary>
-        public string OrderingProvider { get; set; }
+        public XCN[] OrderingProvider { get; set; }
 
         /// <summary>
-        /// ORC.13
+        /// ORC.13 - Enterer's Location
         /// </summary>
-        public string EnterersLocation { get; set; }
+        public PL EnterersLocation { get; set; }
 
         /// <summary>
-        /// ORC.14
+        /// ORC.14 - Call Back Phone Number (repeating)
         /// </summary>
-        public string CallBackPhoneNumber { get; set; }
+        public XTN[] CallBackPhoneNumber { get; set; }
 
         /// <summary>
-        /// ORC.15
+        /// ORC.15 - Order Effective Date/Time
         /// </summary>
-        public string OrderEffectiveDateTime { get; set; }
+        public DTM OrderEffectiveDateTime { get; set; }
 
         /// <summary>
-        /// ORC.16
+        /// ORC.16 - Order Control Code Reason
         /// </summary>
-        public string OrderControlCodeReason { get; set; }
+        public CE OrderControlCodeReason { get; set; }
 
         /// <summary>
-        /// ORC.17
+        /// ORC.17 - Entering Organization
         /// </summary>
-        public string EnteringOrganization { get; set; }
+        public CE EnteringOrganization { get; set; }
 
         /// <summary>
-        /// ORC.18
+        /// ORC.18 - Entering Device
         /// </summary>
-        public string EnteringDevice { get; set; }
+        public CE EnteringDevice { get; set; }
 
         /// <summary>
-        /// ORC.19
+        /// ORC.19 - Action By (repeating)
         /// </summary>
-        public string ActionBy { get; set; }
+        public XCN[] ActionBy { get; set; }
 
         /// <summary>
-        /// ORC.20
+        /// ORC.20 - Advanced Beneficiary Notice Code
         /// </summary>
-        public string AdvancedBeneficiaryNoticeCode { get; set; }
+        public CE AdvancedBeneficiaryNoticeCode { get; set; }
 
         /// <summary>
-        /// ORC.21
+        /// ORC.21 - Ordering Facility Name (repeating)
         /// </summary>
-        public string OrderingFacilityName { get; set; }
+        public XON[] OrderingFacilityName { get; set; }
 
         /// <summary>
-        /// ORC.22
+        /// ORC.22 - Ordering Facility Address (repeating)
         /// </summary>
-        public string OrderingFacilityAddress { get; set; }
+        public XAD[] OrderingFacilityAddress { get; set; }
 
         /// <summary>
-        /// ORC.23
+        /// ORC.23 - Ordering Facility Phone Number (repeating)
         /// </summary>
-        public string OrderingFacilityPhoneNumber { get; set; }
+        public XTN[] OrderingFacilityPhoneNumber { get; set; }
 
         /// <summary>
-        /// ORC.24
+        /// ORC.24 - Ordering Provider Address (repeating)
         /// </summary>
-        public string OrderingProviderAddress { get; set; }
+        public XAD[] OrderingProviderAddress { get; set; }
 
         /// <summary>
-        /// ORC.25
+        /// ORC.25 - Order Status Modifier
         /// </summary>
-        public string OrderStatusModifier { get; set; }
+        public CWE OrderStatusModifier { get; set; }
 
         /// <summary>
-        /// ORC.26
+        /// ORC.26 - Advanced Beneficiary Notice Override Reason
         /// </summary>
-        public string AdvancedBeneficiaryNoticeOverrideReason { get; set; }
+        public CWE AdvancedBeneficiaryNoticeOverrideReason { get; set; }
 
         /// <summary>
-        /// ORC.27
+        /// ORC.27 - Filler's Expected Availability Date/Time
         /// </summary>
-        public string FillersExpectedAvailabilityDateTime { get; set; }
+        public DTM FillersExpectedAvailabilityDateTime { get; set; }
 
         /// <summary>
-        /// ORC.28
+        /// ORC.28 - Confidentiality Code
         /// </summary>
-        public string ConfidentialityCode { get; set; }
+        public CWE ConfidentialityCode { get; set; }
 
         /// <summary>
-        /// ORC.29
+        /// ORC.29 - Order Type
         /// </summary>
-        public string OrderType { get; set; }
+        public CWE OrderType { get; set; }
 
         /// <summary>
-        /// ORC.30
+        /// ORC.30 - Enterer Authorization Mode
         /// </summary>
-        public string EntererAuthorizationMode { get; set; }
+        public ST EntererAuthorizationMode { get; set; }
 
         /// <summary>
-        /// ORC.31
+        /// ORC.31 - Parent Universal Service Identifier
         /// </summary>
-        public string ParentUniversalServiceIdentifier { get; set; }
+        public CWE ParentUniversalServiceIdentifier { get; set; }
 
         /// <summary>
-        /// ORC.32
+        /// ORC.32 - Advanced Beneficiary Notice Date
         /// </summary>
-        public string AdvancedBeneficiaryNoticeDate { get; set; }
+        public DT AdvancedBeneficiaryNoticeDate { get; set; }
 
         /// <summary>
-        /// ORC.33
+        /// ORC.33 - Alternate Placer Order Number (repeating)
         /// </summary>
-        public string AlternatePlacerOrderNumber { get; set; }
+        public CX[] AlternatePlacerOrderNumber { get; set; }
 
-        // constructors
         public ORC()
         {
             SegmentType = SegmentType.MedOrder;
-            OrderControl = string.Empty;
-            PlacerOrderNumber = string.Empty;
-            FillerOrderNumber = string.Empty;
-            PlacerGroupNumber = string.Empty;
-            OrderStatus = string.Empty;
-            ResponseFlag = string.Empty;
-            QuantityTiming = string.Empty;
-            ParentOrder = string.Empty;
-            DateTimeOfTransaction = string.Empty;
-            EnteredBy = string.Empty;
-            VerifiedBy = string.Empty;
-            OrderingProvider = string.Empty;
-            EnterersLocation = string.Empty;
-            CallBackPhoneNumber = string.Empty;
-            OrderEffectiveDateTime = string.Empty;
-            OrderControlCodeReason = string.Empty;
-            EnteringOrganization = string.Empty;
-            EnteringDevice = string.Empty;
-            ActionBy = string.Empty;
-            AdvancedBeneficiaryNoticeCode = string.Empty;
-            OrderingFacilityName = string.Empty;
-            OrderingFacilityAddress = string.Empty;
-            OrderingFacilityPhoneNumber = string.Empty;
-            OrderingProviderAddress = string.Empty;
-            OrderStatusModifier = string.Empty;
-            AdvancedBeneficiaryNoticeOverrideReason = string.Empty;
-            FillersExpectedAvailabilityDateTime = string.Empty;
-            ConfidentialityCode = string.Empty;
-            OrderType = string.Empty;
-            EntererAuthorizationMode = string.Empty;
-            ParentUniversalServiceIdentifier = string.Empty;
-            AdvancedBeneficiaryNoticeDate = string.Empty;
-            AlternatePlacerOrderNumber = string.Empty;
+            
+            OrderControl = default;
+            PlacerOrderNumber = default;
+            FillerOrderNumber = default;
+            PlacerGroupNumber = default;
+            OrderStatus = default;
+            ResponseFlag = default;
+            QuantityTiming = default;
+            ParentOrder = default;
+            DateTimeOfTransaction = default;
+            EnterersLocation = default;
+            OrderEffectiveDateTime = default;
+            OrderControlCodeReason = default;
+            EnteringOrganization = default;
+            EnteringDevice = default;
+            AdvancedBeneficiaryNoticeCode = default;
+            OrderStatusModifier = default;
+            AdvancedBeneficiaryNoticeOverrideReason = default;
+            FillersExpectedAvailabilityDateTime = default;
+            ConfidentialityCode = default;
+            OrderType = default;
+            EntererAuthorizationMode = default;
+            ParentUniversalServiceIdentifier = default;
+            AdvancedBeneficiaryNoticeDate = default;
+            
+            EnteredBy = Array.Empty<XCN>();
+            VerifiedBy = Array.Empty<XCN>();
+            OrderingProvider = Array.Empty<XCN>();
+            CallBackPhoneNumber = Array.Empty<XTN>();
+            ActionBy = Array.Empty<XCN>();
+            OrderingFacilityName = Array.Empty<XON>();
+            OrderingFacilityAddress = Array.Empty<XAD>();
+            OrderingFacilityPhoneNumber = Array.Empty<XTN>();
+            OrderingProviderAddress = Array.Empty<XAD>();
+            AlternatePlacerOrderNumber = Array.Empty<CX>();
         }
 
-        // methods
         public void SetValue(string value, int element)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             switch (element)
             {
-                case 1: OrderControl = value; break;
+                case 1: OrderControl = new ID(value); break;
                 case 2: PlacerOrderNumber = value; break;
                 case 3: FillerOrderNumber = value; break;
                 case 4: PlacerGroupNumber = value; break;
-                case 5: OrderStatus = value; break;
-                case 6: ResponseFlag = value; break;
-                case 7: QuantityTiming = value; break;
-                case 8: ParentOrder = value; break;
-                case 9: DateTimeOfTransaction = value; break;
-                case 10: EnteredBy = value; break;
-                case 11: VerifiedBy = value; break;
-                case 12: OrderingProvider = value; break;
-                case 13: EnterersLocation = value; break;
-                case 14: CallBackPhoneNumber = value; break;
-                case 15: OrderEffectiveDateTime = value; break;
+                case 5: OrderStatus = new ID(value); break;
+                case 6: ResponseFlag = new ID(value); break;
+                case 7: QuantityTiming = new ST(value); break;
+                case 8: ParentOrder = new ST(value); break;
+                case 9: DateTimeOfTransaction = new DTM(value); break;
+                case 10: EnteredBy = SegmentFieldHelper.ParseRepeatingField<XCN>(value, delimiters); break;
+                case 11: VerifiedBy = SegmentFieldHelper.ParseRepeatingField<XCN>(value, delimiters); break;
+                case 12: OrderingProvider = SegmentFieldHelper.ParseRepeatingField<XCN>(value, delimiters); break;
+                case 13:
+                    var pl = new PL();
+                    pl.Parse(value.AsSpan(), delimiters);
+                    EnterersLocation = pl;
+                    break;
+                case 14: CallBackPhoneNumber = SegmentFieldHelper.ParseRepeatingField<XTN>(value, delimiters); break;
+                case 15: OrderEffectiveDateTime = new DTM(value); break;
                 case 16: OrderControlCodeReason = value; break;
                 case 17: EnteringOrganization = value; break;
                 case 18: EnteringDevice = value; break;
-                case 19: ActionBy = value; break;
+                case 19: ActionBy = SegmentFieldHelper.ParseRepeatingField<XCN>(value, delimiters); break;
                 case 20: AdvancedBeneficiaryNoticeCode = value; break;
-                case 21: OrderingFacilityName = value; break;
-                case 22: OrderingFacilityAddress = value; break;
-                case 23: OrderingFacilityPhoneNumber = value; break;
-                case 24: OrderingProviderAddress = value; break;
+                case 21: OrderingFacilityName = SegmentFieldHelper.ParseRepeatingField<XON>(value, delimiters); break;
+                case 22: OrderingFacilityAddress = SegmentFieldHelper.ParseRepeatingField<XAD>(value, delimiters); break;
+                case 23: OrderingFacilityPhoneNumber = SegmentFieldHelper.ParseRepeatingField<XTN>(value, delimiters); break;
+                case 24: OrderingProviderAddress = SegmentFieldHelper.ParseRepeatingField<XAD>(value, delimiters); break;
                 case 25: OrderStatusModifier = value; break;
                 case 26: AdvancedBeneficiaryNoticeOverrideReason = value; break;
-                case 27: FillersExpectedAvailabilityDateTime = value; break;
+                case 27: FillersExpectedAvailabilityDateTime = new DTM(value); break;
                 case 28: ConfidentialityCode = value; break;
                 case 29: OrderType = value; break;
-                case 30: EntererAuthorizationMode = value; break;
+                case 30: EntererAuthorizationMode = new ST(value); break;
                 case 31: ParentUniversalServiceIdentifier = value; break;
-                case 32: AdvancedBeneficiaryNoticeDate = value; break;
-                case 33: AlternatePlacerOrderNumber = value; break;
+                case 32: AdvancedBeneficiaryNoticeDate = new DT(value); break;
+                case 33: AlternatePlacerOrderNumber = SegmentFieldHelper.ParseRepeatingField<CX>(value, delimiters); break;
                 default: break;
             }
         }
         
         public string[] GetValues()
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return
             [
                 SegmentId,
-                OrderControl,
-                PlacerOrderNumber,
-                FillerOrderNumber,
-                PlacerGroupNumber,
-                OrderStatus,
-                ResponseFlag,
-                QuantityTiming,
-                ParentOrder,
-                DateTimeOfTransaction,
-                EnteredBy,
-                VerifiedBy,
-                OrderingProvider,
-                EnterersLocation,
-                CallBackPhoneNumber,
-                OrderEffectiveDateTime,
-                OrderControlCodeReason,
-                EnteringOrganization,
-                EnteringDevice,
-                ActionBy,
-                AdvancedBeneficiaryNoticeCode,
-                OrderingFacilityName,
-                OrderingFacilityAddress,
-                OrderingFacilityPhoneNumber,
-                OrderingProviderAddress,
-                OrderStatusModifier,
-                AdvancedBeneficiaryNoticeOverrideReason,
-                FillersExpectedAvailabilityDateTime,
-                ConfidentialityCode,
-                OrderType,
-                EntererAuthorizationMode,
-                ParentUniversalServiceIdentifier,
-                AdvancedBeneficiaryNoticeDate,
-                AlternatePlacerOrderNumber
+                OrderControl.ToHL7String(delimiters),
+                PlacerOrderNumber.ToHL7String(delimiters),
+                FillerOrderNumber.ToHL7String(delimiters),
+                PlacerGroupNumber.ToHL7String(delimiters),
+                OrderStatus.ToHL7String(delimiters),
+                ResponseFlag.ToHL7String(delimiters),
+                QuantityTiming.ToHL7String(delimiters),
+                ParentOrder.ToHL7String(delimiters),
+                DateTimeOfTransaction.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(EnteredBy, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(VerifiedBy, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(OrderingProvider, delimiters),
+                EnterersLocation.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(CallBackPhoneNumber, delimiters),
+                OrderEffectiveDateTime.ToHL7String(delimiters),
+                OrderControlCodeReason.ToHL7String(delimiters),
+                EnteringOrganization.ToHL7String(delimiters),
+                EnteringDevice.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(ActionBy, delimiters),
+                AdvancedBeneficiaryNoticeCode.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(OrderingFacilityName, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(OrderingFacilityAddress, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(OrderingFacilityPhoneNumber, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(OrderingProviderAddress, delimiters),
+                OrderStatusModifier.ToHL7String(delimiters),
+                AdvancedBeneficiaryNoticeOverrideReason.ToHL7String(delimiters),
+                FillersExpectedAvailabilityDateTime.ToHL7String(delimiters),
+                ConfidentialityCode.ToHL7String(delimiters),
+                OrderType.ToHL7String(delimiters),
+                EntererAuthorizationMode.ToHL7String(delimiters),
+                ParentUniversalServiceIdentifier.ToHL7String(delimiters),
+                AdvancedBeneficiaryNoticeDate.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(AlternatePlacerOrderNumber, delimiters)
             ];
         }
 
         public string? GetField(int index)
         {
-            return index switch
-            {
-                0 => SegmentId,
-                1 => OrderControl,
-                2 => PlacerOrderNumber,
-                3 => FillerOrderNumber,
-                4 => PlacerGroupNumber,
-                5 => OrderStatus,
-                6 => ResponseFlag,
-                7 => QuantityTiming,
-                8 => ParentOrder,
-                9 => DateTimeOfTransaction,
-                10 => EnteredBy,
-                11 => VerifiedBy,
-                12 => OrderingProvider,
-                13 => EnterersLocation,
-                14 => CallBackPhoneNumber,
-                15 => OrderEffectiveDateTime,
-                16 => OrderControlCodeReason,
-                17 => EnteringOrganization,
-                18 => EnteringDevice,
-                19 => ActionBy,
-                20 => AdvancedBeneficiaryNoticeCode,
-                21 => OrderingFacilityName,
-                22 => OrderingFacilityAddress,
-                23 => OrderingFacilityPhoneNumber,
-                24 => OrderingProviderAddress,
-                25 => OrderStatusModifier,
-                26 => AdvancedBeneficiaryNoticeOverrideReason,
-                27 => FillersExpectedAvailabilityDateTime,
-                28 => ConfidentialityCode,
-                29 => OrderType,
-                30 => EntererAuthorizationMode,
-                31 => ParentUniversalServiceIdentifier,
-                32 => AdvancedBeneficiaryNoticeDate,
-                33 => AlternatePlacerOrderNumber,
-                _ => null
-            };
+            var values = GetValues();
+            return index >= 0 && index < values.Length ? values[index] : null;
         }
     }
 }

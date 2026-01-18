@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Docs/">
+    <File Path="KeryxPars.HL7/Segments/SEGMENT-REFACTORING-STATUS.md" />
+    <File Path="KeryxPars.HL7/Segments/TEST-MIGRATION-GUIDE.md" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
     <File Path="LICENSE.txt" />

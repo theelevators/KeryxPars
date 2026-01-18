@@ -9,7 +9,7 @@ namespace KeryxPars.HL7.DataTypes.Primitive;
 /// DTM - Date/Time Data Type
 /// Represents a date and time in the format YYYY[MM[DD[HH[MM[SS[.S[S[S[S]]]]]]]]][+/-ZZZZ].
 /// </summary>
-public readonly struct DTM : IPrimitiveDataType
+public readonly struct DTM : IPrimitiveDataType, IEquatable<string>
 {
     private readonly string _value;
 
@@ -136,12 +136,32 @@ public readonly struct DTM : IPrimitiveDataType
     /// </summary>
     public static implicit operator DTM(DateTime value) => new(value);
 
+    /// <summary>
+    /// Determines whether the specified string is equal to the current DTM value.
+    /// </summary>
+    public bool Equals(string? other) => _value == other;
+
     /// <inheritdoc/>
     public override string ToString() => _value ?? string.Empty;
 
     /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is DTM other && _value == other._value;
+    public override bool Equals(object? obj)
+    {
+        return obj switch
+        {
+            DTM other => _value == other._value,
+            string str => _value == str,
+            _ => false
+        };
+    }
 
     /// <inheritdoc/>
     public override int GetHashCode() => _value?.GetHashCode() ?? 0;
+
+    public static bool operator ==(DTM left, DTM right) => left.Equals(right);
+    public static bool operator !=(DTM left, DTM right) => !left.Equals(right);
+    public static bool operator ==(DTM left, string? right) => left.Equals(right);
+    public static bool operator !=(DTM left, string? right) => !left.Equals(right);
+    public static bool operator ==(string? left, DTM right) => right.Equals(left);
+    public static bool operator !=(string? left, DTM right) => !right.Equals(left);
 }
