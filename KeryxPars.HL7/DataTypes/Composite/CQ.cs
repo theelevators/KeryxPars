@@ -127,7 +127,7 @@ public readonly struct CQ : ICompositeDataType
 
     /// <inheritdoc/>
     public override string ToString() => !_units.IsEmpty ? 
-        $"{_quantity.Value} {_units.Text.Value}" : 
+        $"{_quantity.Value} {_units.ToString()}" : 
         _quantity.Value;
 
     /// <inheritdoc/>
