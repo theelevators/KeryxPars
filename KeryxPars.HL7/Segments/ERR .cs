@@ -1,10 +1,13 @@
 ﻿using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
+using KeryxPars.HL7.DataTypes.Primitive;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.HL7.Segments
 {
     /// <summary>
     /// HL7 Segment: Error Information
+    /// Refactored to use strongly-typed HL7 datatypes.
     /// </summary>
     public class ERR : ISegment
     {
@@ -12,173 +15,253 @@ namespace KeryxPars.HL7.Segments
         
         public SegmentType SegmentType { get; private set; }
 
-        // Auto-properties
         /// <summary>
-        /// ERR.1
+        /// ERR.1 - Error Code and Location (deprecated in 2.5, use ERR.2 and ERR.3)
         /// </summary>
-        public string ErrorCodeAndLocation { get; set; }
+        public ST ErrorCodeAndLocation { get; set; }
 
         /// <summary>
-        /// ERR.2
+        /// ERR.2 - Error Location
         /// </summary>
-        public string ErrorLocation { get; set; }
+        public ST[] ErrorLocation { get; set; }
 
         /// <summary>
-        /// ERR.3
+        /// ERR.3 - HL7 Error Code
         /// </summary>
-        public string Hl7ErrorCode { get; set; }
+        public CWE Hl7ErrorCode { get; set; }
 
         /// <summary>
-        /// ERR.4
+        /// ERR.4 - Severity
         /// </summary>
-        public string Severity { get; set; }
+        public ID Severity { get; set; }
 
         /// <summary>
-        /// ERR.5
+        /// ERR.5 - Application Error Code
         /// </summary>
-        public string ApplicationErrorCode { get; set; }
+        public CWE ApplicationErrorCode { get; set; }
 
         /// <summary>
-        /// ERR.6
+        /// ERR.6 - Application Error Parameter
         /// </summary>
-        public string ApplicationErrorParameter { get; set; }
+        public ST[] ApplicationErrorParameter { get; set; }
 
         /// <summary>
-        /// ERR.7
+        /// ERR.7 - Diagnostic Information
         /// </summary>
-        public string DiagnosticInformation { get; set; }
+        public TX DiagnosticInformation { get; set; }
 
         /// <summary>
-        /// ERR.8
+        /// ERR.8 - User Message
         /// </summary>
-        public string UserMessage { get; set; }
+        public TX UserMessage { get; set; }
 
         /// <summary>
-        /// ERR.9
+        /// ERR.9 - Inform Person Indicator
         /// </summary>
-        public string InformPersonIndicator { get; set; }
+        public IS[] InformPersonIndicator { get; set; }
 
         /// <summary>
-        /// ERR.10
+        /// ERR.10 - Override Type
         /// </summary>
-        public string OverrideType { get; set; }
+        public CWE OverrideType { get; set; }
 
         /// <summary>
-        /// ERR.11
+        /// ERR.11 - Override Reason Code
         /// </summary>
-        public string OverrideReasonCode { get; set; }
+        public CWE[] OverrideReasonCode { get; set; }
 
         /// <summary>
-        /// ERR.12
+        /// ERR.12 - Help Desk Contact Point
         /// </summary>
-        public string HelpDeskContactPoint { get; set; }
-
-        // Constructors
+        public XTN[] HelpDeskContactPoint { get; set; }
 
         public ERR()
         {
             SegmentType = SegmentType.Universal;
+            ErrorCodeAndLocation = default;
+            ErrorLocation = [];
+            Hl7ErrorCode = default;
+            Severity = default;
+            ApplicationErrorCode = default;
+            ApplicationErrorParameter = [];
+            DiagnosticInformation = default;
+            UserMessage = default;
+            InformPersonIndicator = [];
+            OverrideType = default;
+            OverrideReasonCode = [];
+            HelpDeskContactPoint = [];
         }
 
         public ERR(string severity, string message)
         {
             SegmentType = SegmentType.Universal;
-            Severity = severity;
-            UserMessage = message;
+            Severity = new ID(severity);
+            UserMessage = new TX(message);
+            ErrorCodeAndLocation = default;
+            ErrorLocation = [];
+            Hl7ErrorCode = default;
+            ApplicationErrorCode = default;
+            ApplicationErrorParameter = [];
+            DiagnosticInformation = default;
+            InformPersonIndicator = [];
+            OverrideType = default;
+            OverrideReasonCode = [];
+            HelpDeskContactPoint = [];
         }
 
         public ERR(string severity, string medIdentifier, string message)
         {
             SegmentType = SegmentType.Universal;
-            Severity = severity;
-            DiagnosticInformation = medIdentifier;
-            UserMessage = message;
+            Severity = new ID(severity);
+            DiagnosticInformation = new TX(medIdentifier);
+            UserMessage = new TX(message);
+            ErrorCodeAndLocation = default;
+            ErrorLocation = [];
+            Hl7ErrorCode = default;
+            ApplicationErrorCode = default;
+            ApplicationErrorParameter = [];
+            InformPersonIndicator = [];
+            OverrideType = default;
+            OverrideReasonCode = [];
+            HelpDeskContactPoint = [];
         }
 
         public ERR(string severity, ErrorCode errorCode, string message)
         {
             SegmentType = SegmentType.Universal;
-            Severity = severity;
-            UserMessage = message;
-            Hl7ErrorCode = Convert.ToString((int)errorCode);
+            Severity = new ID(severity);
+            UserMessage = new TX(message);
+            Hl7ErrorCode = new CWE(identifier: new ST(Convert.ToString((int)errorCode)));
+            ErrorCodeAndLocation = default;
+            ErrorLocation = [];
+            ApplicationErrorCode = default;
+            ApplicationErrorParameter = [];
+            DiagnosticInformation = default;
+            InformPersonIndicator = [];
+            OverrideType = default;
+            OverrideReasonCode = [];
+            HelpDeskContactPoint = [];
         }
 
         public ERR(string severity, ErrorCode errorCode, string message, string segment, char separator, int field)
         {
             SegmentType = SegmentType.Universal;
-            ErrorLocation = segment + separator + separator + field.ToString();
-            Severity = severity;
-            UserMessage = message;
-            Hl7ErrorCode = Convert.ToString((int)errorCode);
+            ErrorLocation = [new ST(segment + separator + separator + field.ToString())];
+            Severity = new ID(severity);
+            UserMessage = new TX(message);
+            Hl7ErrorCode = new CWE(identifier: new ST(Convert.ToString((int)errorCode)));
+            ErrorCodeAndLocation = default;
+            ApplicationErrorCode = default;
+            ApplicationErrorParameter = [];
+            DiagnosticInformation = default;
+            InformPersonIndicator = [];
+            OverrideType = default;
+            OverrideReasonCode = [];
+            HelpDeskContactPoint = [];
         }
 
         public ERR(string severity, ErrorCode errorCode, string message, string segment, char separator, int field, int component)
         {
             SegmentType = SegmentType.Universal;
-            ErrorLocation = segment + separator + separator + field.ToString() + separator + separator + component.ToString();
-            Severity = severity;
-            UserMessage = message;
-            Hl7ErrorCode = Convert.ToString((int)errorCode);
+            ErrorLocation = [new ST(segment + separator + separator + field.ToString() + separator + separator + component.ToString())];
+            Severity = new ID(severity);
+            UserMessage = new TX(message);
+            Hl7ErrorCode = new CWE(identifier: new ST(Convert.ToString((int)errorCode)));
+            ErrorCodeAndLocation = default;
+            ApplicationErrorCode = default;
+            ApplicationErrorParameter = [];
+            DiagnosticInformation = default;
+            InformPersonIndicator = [];
+            OverrideType = default;
+            OverrideReasonCode = [];
+            HelpDeskContactPoint = [];
         }
 
-        // Methods
         public void SetValue(string value, int element)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             switch (element)
             {
-                case 1: ErrorCodeAndLocation = value; break;
-                case 2: ErrorLocation = value; break;
-                case 3: Hl7ErrorCode = value; break;
-                case 4: Severity = value; break;
-                case 5: ApplicationErrorCode = value; break;
-                case 6: ApplicationErrorParameter = value; break;
-                case 7: DiagnosticInformation = value; break;
-                case 8: UserMessage = value; break;
-                case 9: InformPersonIndicator = value; break;
-                case 10: OverrideType = value; break;
-                case 11: OverrideReasonCode = value; break;
-                case 12: HelpDeskContactPoint = value; break;
+                case 1: ErrorCodeAndLocation = new ST(value); break;
+                case 2:
+                    ErrorLocation = SegmentFieldHelper.ParseRepeatingField<ST>(value, delimiters);
+                    break;
+                case 3:
+                    var cwe3 = new CWE();
+                    cwe3.Parse(value.AsSpan(), delimiters);
+                    Hl7ErrorCode = cwe3;
+                    break;
+                case 4: Severity = new ID(value); break;
+                case 5:
+                    var cwe5 = new CWE();
+                    cwe5.Parse(value.AsSpan(), delimiters);
+                    ApplicationErrorCode = cwe5;
+                    break;
+                case 6:
+                    ApplicationErrorParameter = SegmentFieldHelper.ParseRepeatingField<ST>(value, delimiters);
+                    break;
+                case 7: DiagnosticInformation = new TX(value); break;
+                case 8: UserMessage = new TX(value); break;
+                case 9:
+                    InformPersonIndicator = SegmentFieldHelper.ParseRepeatingField<IS>(value, delimiters);
+                    break;
+                case 10:
+                    var cwe10 = new CWE();
+                    cwe10.Parse(value.AsSpan(), delimiters);
+                    OverrideType = cwe10;
+                    break;
+                case 11:
+                    OverrideReasonCode = SegmentFieldHelper.ParseRepeatingField<CWE>(value, delimiters);
+                    break;
+                case 12:
+                    HelpDeskContactPoint = SegmentFieldHelper.ParseRepeatingField<XTN>(value, delimiters);
+                    break;
                 default: break;
             }
         }
         
         public string[] GetValues()
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return
             [
                 SegmentId,
-                ErrorCodeAndLocation,
-                ErrorLocation,
-                Hl7ErrorCode,
-                Severity,
-                ApplicationErrorCode,
-                ApplicationErrorParameter,
-                DiagnosticInformation,
-                UserMessage,
-                InformPersonIndicator,
-                OverrideType,
-                OverrideReasonCode,
-                HelpDeskContactPoint
+                ErrorCodeAndLocation.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(ErrorLocation, delimiters),
+                Hl7ErrorCode.ToHL7String(delimiters),
+                Severity.ToHL7String(delimiters),
+                ApplicationErrorCode.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(ApplicationErrorParameter, delimiters),
+                DiagnosticInformation.ToHL7String(delimiters),
+                UserMessage.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(InformPersonIndicator, delimiters),
+                OverrideType.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(OverrideReasonCode, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(HelpDeskContactPoint, delimiters)
             ];
         }
 
         public string? GetField(int index)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return index switch
             {
                 0 => SegmentId,
-                1 => ErrorCodeAndLocation,
-                2 => ErrorLocation,
-                3 => Hl7ErrorCode,
-                4 => Severity,
-                5 => ApplicationErrorCode,
-                6 => ApplicationErrorParameter,
-                7 => DiagnosticInformation,
-                8 => UserMessage,
-                9 => InformPersonIndicator,
-                10 => OverrideType,
-                11 => OverrideReasonCode,
-                12 => HelpDeskContactPoint,
+                1 => ErrorCodeAndLocation.Value,
+                2 => SegmentFieldHelper.JoinRepeatingField(ErrorLocation, delimiters),
+                3 => Hl7ErrorCode.ToHL7String(delimiters),
+                4 => Severity.Value,
+                5 => ApplicationErrorCode.ToHL7String(delimiters),
+                6 => SegmentFieldHelper.JoinRepeatingField(ApplicationErrorParameter, delimiters),
+                7 => DiagnosticInformation.Value,
+                8 => UserMessage.Value,
+                9 => SegmentFieldHelper.JoinRepeatingField(InformPersonIndicator, delimiters),
+                10 => OverrideType.ToHL7String(delimiters),
+                11 => SegmentFieldHelper.JoinRepeatingField(OverrideReasonCode, delimiters),
+                12 => SegmentFieldHelper.JoinRepeatingField(HelpDeskContactPoint, delimiters),
                 _ => null
             };
         }
