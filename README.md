@@ -6,9 +6,10 @@
 [![Segments](https://img.shields.io/badge/Segments-50%2F120-green)](Docs/SEGMENT_IMPLEMENTATION_STATUS.md)
 [![Coverage](https://img.shields.io/badge/HL7%20v2.5-42%25-brightgreen)](Docs/PHASE2_COMPLETE_50SEGMENTS.md)
 
+
 > **Keryx** (κῆρυξ) - Greek for "herald" or "messenger" | **Pars** - Latin for "part"
 
-A high-performance, modern .NET HL7 v2.5 parser built for healthcare interoperability. KeryxPars delivers enterprise-grade speed and memory efficiency with zero custom converter code needed.
+A high-performance, modern .NET parser built for healthcare interoperability. KeryxPars delivers enterprise-grade speed and memory efficiency with zero custom converter code needed.
 
 ## 🎯 Why KeryxPars?
 
@@ -447,51 +448,6 @@ registry.Register(new GenericSegmentConverter<ZPI>());
 var options = new SerializerOptions { SegmentRegistry = registry };
 ```
 
-## 📈 Performance
-
-### Benchmarks vs. Popular Libraries
-
-```
-BenchmarkDotNet v0.13.12, Windows 11
-Intel Core i7-12700K, 12 cores
-
-| Method           | Library          | Mean      | Allocated |
-|------------------|------------------|-----------|-----------|
-| Parse ADT        | KeryxPars        |   5.4 μs  |    0 KB   |
-| Parse ADT        | HL7-dotnetcore   |  45.2 μs  |   12 KB   |
-| Parse ADT        | NHapi            |  89.6 μs  |   28 KB   |
-|                  |                  |           |           |
-| Parse Pharmacy   | KeryxPars        |   9.6 μs  |    0 KB   |
-| Parse Pharmacy   | HL7-dotnetcore   |  78.4 μs  |   24 KB   |
-| Parse Pharmacy   | NHapi            | 142.1 μs  |   56 KB   |
-|                  |                  |           |           |
-| Parse Lab Result | KeryxPars        |   6.8 μs  |    0 KB   |
-| Parse Lab Result | HL7-dotnetcore   |  52.3 μs  |   16 KB   |
-| Parse Lab Result | NHapi            |  95.7 μs  |   32 KB   |
-```
-
-**KeryxPars is:**
-- **8-15x faster** than HL7-dotnetcore
-- **10-20x faster** than NHapi
-- **Zero allocations** (100% heap allocation free in hot paths)
-
-### Throughput
-
-- **Sustained:** >100,000 messages/second
-- **Peak:** >200,000 messages/second  
-- **Latency (p99):** <50μs
-
-## 📚 Documentation
-
-### Getting Started
-- [Quick Start Guide](Docs/QUICKSTART.md)
-- [Adding Custom Segments](Docs/ADDING_SEGMENTS_GUIDE.md)
-
-### Implementation Details
-- [Segment Implementation Status](Docs/SEGMENT_IMPLEMENTATION_STATUS.md)
-- [Phase 2 Complete Report](Docs/PHASE2_COMPLETE_50SEGMENTS.md)
-- [Implementation Summary](Docs/SEGMENT_IMPLEMENTATION_SUMMARY.md)
-
 ### Architecture
 All segments follow consistent patterns:
 - Generic converter support
@@ -499,34 +455,6 @@ All segments follow consistent patterns:
 - HL7 data type compliance
 - Zero-allocation parsing
 - Comprehensive XML documentation
-
-## 🗺️ Roadmap
-
-### Phase 2 ✅ COMPLETE
-- ✅ 50 production-ready segments
-- ✅ 42% HL7 v2.5 coverage
-- ✅ Pharmacy complete lifecycle
-- ✅ Laboratory workflow support
-- ✅ Scheduling system integration
-- ✅ Query/response messages
-- ✅ Financial transaction support
-
-### Phase 3 🎯 In Progress
-- 🔄 **MAUI Blazor Message Viewer** - Visual HL7 message inspection
-- 🔲 Master File segments (MFE, MFI, MFA)
-- 🔲 Additional billing (UB1, UB2, PRC)
-- 🔲 Personnel management (STF, PRA, ORG)
-- 🔲 Location/facility (LOC, LDP, LCC)
-- 🔲 Equipment tracking (EQP, EQU, INV)
-- **Target:** 75 segments (62% coverage)
-
-### Phase 4 🚀 Future
-- 🔲 Complete HL7 v2.5 specification (120 segments)
-- 🔲 HL7 v2.3, v2.4, v2.6+ version support
-- 🔲 Source generators for custom mappings
-- 🔲 Validation framework
-- 🔲 FHIR integration
-- 🔲 NuGet package publication
 
 ## 🤝 Contributing
 
