@@ -1,7 +1,7 @@
 # KeryxPars
 
-[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
-[![C#](https://img.shields.io/badge/C%23-14.0-239120)](https://docs.microsoft.com/en-us/dotnet/csharp/)
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/)
+[![C#](https://img.shields.io/badge/C%23-12.0-239120)](https://docs.microsoft.com/en-us/dotnet/csharp/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 > **Keryx** (κῆρυξ) - Greek for "herald" or "messenger" | **Pars** - Latin for "part"
@@ -363,9 +363,7 @@ else
 - 🔲 **FHIR Support**: HL7 FHIR parser and converters
 - 🔲 **HL7 v3** support
 - 🔲 **Bidirectional Conversion**: FHIR ↔ HL7 v2.x transformation
-- 🔲 Integration with popular healthcare frameworks
-- 🔲 Cloud-native features (Azure Health Data Services, AWS HealthLake)
-- 🔲 Real-time message streaming support
+
 
 ## 🤝 Contributing
 
