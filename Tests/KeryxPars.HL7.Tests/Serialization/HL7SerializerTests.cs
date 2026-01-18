@@ -126,7 +126,7 @@ public class HL7SerializerTests
                       "RXR|PO^Oral|||";
 
 
-        var result = HL7Serializer.Deserialize(message.AsSpan(), SerializerOptions.ForMedicationOrders());
+        var result = HL7Serializer.Deserialize<PharmacyMessage>(message.AsSpan(), SerializerOptions.ForMedicationOrders());
 
 
         result.IsSuccess.ShouldBeTrue();

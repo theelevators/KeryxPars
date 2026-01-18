@@ -1,4 +1,5 @@
 ﻿using KeryxPars.Core.Models;
+using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
 using KeryxPars.HL7.Segments;
 using KeryxPars.HL7.Serialization.Configuration;
@@ -13,7 +14,7 @@ internal sealed class DeserializationContext
     private readonly List<HL7Error> _errors;
     private readonly SerializerOptions _options;
 
-    public HL7Message Message { get; }
+    public IHL7Message Message { get; }
     public IReadOnlyList<HL7Error> Errors => _errors;
     public bool HasErrors => _errors.Count > 0;
 
@@ -21,7 +22,17 @@ internal sealed class DeserializationContext
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _errors = [];
-        Message = new HL7Message();
+        // Default to HL7DefaultMessage if no specific type is provided
+        Message = options.MessageType switch
+        {
+            var t when t == typeof(PharmacyMessage) => new PharmacyMessage(),
+            var t when t == typeof(LabMessage) => new LabMessage(),
+            var t when t == typeof(HospiceMessage) => new HospiceMessage(),
+            var t when t == typeof(SchedulingMessage) => new SchedulingMessage(),
+            var t when t == typeof(FinancialMessage) => new FinancialMessage(),
+            var t when t == typeof(DietaryMessage) => new DietaryMessage(),
+            _ => new HL7DefaultMessage()
+        };
     }
 
     /// <summary>
@@ -61,7 +72,7 @@ internal sealed class DeserializationContext
     /// <summary>
     /// Converts the context to a serializer result.
     /// </summary>
-    public Result<HL7Message, HL7Error[]> ToResult()
+    public Result<IHL7Message, HL7Error[]> ToResult()
     {
         if (_errors.Count > 0)
         {
@@ -84,10 +95,10 @@ internal sealed class DeserializationContext
                 case ErrorHandlingStrategy.Silent:
                     break;
                 case ErrorHandlingStrategy.FailFast:
-                    return Result<HL7Message, HL7Error[]>.Failure(_errors.ToArray());
+                    return Result<IHL7Message, HL7Error[]>.Failure(_errors.ToArray());
             }
         }
 
-        return Message;
+        return Result<IHL7Message, HL7Error[]>.Success(Message);
     }
 }

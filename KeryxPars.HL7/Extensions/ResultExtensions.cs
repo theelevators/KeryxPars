@@ -1,5 +1,5 @@
-﻿
-using KeryxPars.Core.Models;
+﻿using KeryxPars.Core.Models;
+using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
 using KeryxPars.HL7.Segments;
 using System.Text;
@@ -10,7 +10,21 @@ public static class ResultExtensions
 {
     public static string AsNack(this Result<HL7Message, HL7Error[]> serializationResult, string sendingFacility, string sendingApplication, string versionId, string? receivingApplication = null, string? receivingFacility = null, string? security = null, string? processingId = null, string? controlId = null, string? newLineSeparator = "\r\n")
     {
+        return CreateNack(serializationResult.Error!, sendingFacility, sendingApplication, versionId, receivingApplication, receivingFacility, security, processingId, controlId, newLineSeparator);
+    }
 
+    public static string AsNack(this Result<HL7DefaultMessage, HL7Error[]> serializationResult, string sendingFacility, string sendingApplication, string versionId, string? receivingApplication = null, string? receivingFacility = null, string? security = null, string? processingId = null, string? controlId = null, string? newLineSeparator = "\r\n")
+    {
+        return CreateNack(serializationResult.Error!, sendingFacility, sendingApplication, versionId, receivingApplication, receivingFacility, security, processingId, controlId, newLineSeparator);
+    }
+
+    public static string AsNack(this Result<IHL7Message, HL7Error[]> serializationResult, string sendingFacility, string sendingApplication, string versionId, string? receivingApplication = null, string? receivingFacility = null, string? security = null, string? processingId = null, string? controlId = null, string? newLineSeparator = "\r\n")
+    {
+        return CreateNack(serializationResult.Error!, sendingFacility, sendingApplication, versionId, receivingApplication, receivingFacility, security, processingId, controlId, newLineSeparator);
+    }
+
+    private static string CreateNack(HL7Error[] errors, string sendingFacility, string sendingApplication, string versionId, string? receivingApplication, string? receivingFacility, string? security, string? processingId, string? controlId, string? newLineSeparator)
+    {
         var hl7Base = HL7Delimiters.Default;
         MSH mshResponse = new();
         string messageType = "ACK" + hl7Base.ComponentSeparator;
@@ -55,7 +69,7 @@ public static class ResultExtensions
         ack.Append(controlId ?? "" + fs + fs + fs + fs);
 
         // Order errors by severity (forces severe errors first) and add each one to ack
-        foreach (var error in serializationResult.Error!)
+        foreach (var error in errors)
         {
             ack.Append(newLineSeparator);
             ack.Append("ERR" + fs + fs);
@@ -74,6 +88,4 @@ public static class ResultExtensions
 
         return ack.ToString();
     }
-
-
 }

@@ -4,31 +4,20 @@ using System.Text.Json;
 namespace KeryxPars.HL7.Definitions;
 
 /// <summary>
-/// Incoming HL7 message. Can be either ADT or Medication type.
+/// Legacy HL7 message class maintained for backward compatibility.
+/// This is now a type alias for HL7DefaultMessage.
+/// 
+/// For new code, consider using:
+/// - HL7DefaultMessage for general-purpose messages
+/// - PharmacyMessage for pharmacy/medication orders
+/// - LabMessage for laboratory orders and results
+/// - HospiceMessage for hospice patient care
+/// - SchedulingMessage for appointment scheduling
+/// - FinancialMessage for billing transactions
+/// - DietaryMessage for dietary orders
 /// </summary>
-public class HL7Message
+[Obsolete("Use HL7DefaultMessage or specialized message types (PharmacyMessage, LabMessage, etc.) instead. This class is maintained for backward compatibility.", false)]
+public class HL7Message : HL7DefaultMessage
 {
-    public string MessageControlID { get; internal set; }
-    public IncomingMessageType MessageType { get; internal set; }
-
-    public MSH Msh { get; set; } = new();
-    public EVN Evn { get; set; } = new();
-    public PID Pid { get; set; } = new();
-    public PV1 Pv1 { get; set; } = new();
-    public PV2 Pv2 { get; set; } = new();
-    public MSH MshResponse { get; set; } = new();
-
-    // These segments are repeatable in messages
-    public List<ERR> Errors { get; set; } = [];
-    public List<AL1> Allergies { get; set; } = [];
-    public List<DG1> Diagnoses { get; set; } = [];
-    public List<IN1> Insurance { get; set; } = [];
-    public List<OrderGroup> Orders { get; set; } = [];
-
-    public EventType EventType { get; set; } = EventType.Unknown;
-
-    public string Dump()
-    {
-        return JsonSerializer.Serialize(this);
-    }
+    // All implementation inherited from HL7DefaultMessage
 }

@@ -1,9 +1,10 @@
 ﻿namespace KeryxPars.HL7.Serialization;
 
 using global::KeryxPars.Core.Models;
+using global::KeryxPars.HL7.Contracts;
 using global::KeryxPars.HL7.Definitions;
+using global::KeryxPars.HL7.Extensions;
 using global::KeryxPars.HL7.Segments;
-using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Serialization.Configuration;
 using System.Buffers;
 
@@ -14,7 +15,66 @@ public static class HL7Serializer
 {
     private static readonly SearchValues<char> s_lineBreaks = SearchValues.Create("\r\n");
 
-    public static Result<HL7Message, HL7Error[]> Deserialize(ReadOnlySpan<char> message, SerializerOptions? options = null)
+    /// <summary>
+    /// Deserializes an HL7 message into HL7DefaultMessage (backward compatible).
+    /// For specialized message types, use Deserialize&lt;T&gt; or pass SerializerOptions with MessageType set.
+    /// </summary>
+    public static Result<HL7DefaultMessage, HL7Error[]> Deserialize(ReadOnlySpan<char> message, SerializerOptions? options = null)
+    {
+        var result = DeserializeToInterface(message, options);
+        if (!result.IsSuccess)
+            return Result<HL7DefaultMessage, HL7Error[]>.Failure(result.Error!);
+        
+        // Cast or convert to HL7DefaultMessage for backward compatibility
+        if (result.Value is HL7DefaultMessage defaultMsg)
+            return Result<HL7DefaultMessage, HL7Error[]>.Success(defaultMsg);
+        
+        // If it's an HL7Message (legacy), it inherits from HL7DefaultMessage
+        if (result.Value is HL7Message legacyMsg)
+            return Result<HL7DefaultMessage, HL7Error[]>.Success(legacyMsg);
+            
+        // This shouldn't happen with default options, but handle it gracefully
+        return Result<HL7DefaultMessage, HL7Error[]>.Failure(
+            new[] { new HL7Error(ErrorSeverity.Error, ErrorCode.ApplicationInternalError, 
+                "Unexpected message type returned from deserialization") });
+    }
+
+    /// <summary>
+    /// Deserializes an HL7 message into a specific message type.
+    /// </summary>
+    public static Result<T, HL7Error[]> Deserialize<T>(ReadOnlySpan<char> message, SerializerOptions? options = null) 
+        where T : class, IHL7Message
+    {
+        // Override the message type in options if provided
+        var opts = options ?? SerializerOptions.Default;
+        if (opts.MessageType != typeof(T))
+        {
+            opts = new SerializerOptions
+            {
+                SegmentRegistry = opts.SegmentRegistry,
+                IgnoreUnknownSegments = opts.IgnoreUnknownSegments,
+                ErrorHandling = opts.ErrorHandling,
+                ValidationStrategy = opts.ValidationStrategy,
+                UseStringPooling = opts.UseStringPooling,
+                InitialBufferSize = opts.InitialBufferSize,
+                MessageType = typeof(T),
+                OrderGrouping = opts.OrderGrouping
+            };
+        }
+
+        var result = DeserializeToInterface(message, opts);
+        if (!result.IsSuccess)
+            return Result<T, HL7Error[]>.Failure(result.Error!);
+
+        if (result.Value is T typedMessage)
+            return Result<T, HL7Error[]>.Success(typedMessage);
+
+        return Result<T, HL7Error[]>.Failure(
+            new[] { new HL7Error(ErrorSeverity.Error, ErrorCode.ApplicationInternalError, 
+                $"Expected message type {typeof(T).Name} but got {result.Value?.GetType().Name}") });
+    }
+
+    private static Result<IHL7Message, HL7Error[]> DeserializeToInterface(ReadOnlySpan<char> message, SerializerOptions? options = null)
     {
         var opts = options ?? SerializerOptions.Default;
         var context = new DeserializationContext(opts);
@@ -72,12 +132,14 @@ public static class HL7Serializer
 
         // Add last order group if exists
         if (currentOrder != null)
-            context.Message.Orders.Add(currentOrder);
+        {
+            context.Message.AddOrderGroup(currentOrder);
+        }
 
         return context.ToResult();
     }
 
-    public static Result<string, HL7Error> Serialize(HL7Message message, HL7Delimiters delimiters = default, SerializerOptions? options = null)
+    public static Result<string, HL7Error> Serialize(IHL7Message message, HL7Delimiters delimiters = default, SerializerOptions? options = null)
     {
         var opts = options ?? SerializerOptions.Default;
         delimiters = delimiters.AreUninitialized ? HL7Delimiters.Default : delimiters;
@@ -88,69 +150,46 @@ public static class HL7Serializer
 
         var writer = new SegmentWriter(opts.InitialBufferSize);
 
-        // Write MSH segment
-        WriteSegmentIfPresent(message.Msh, ref writer, in delimiters, opts);
+        // Write common segments
+        writer.WriteSegmentIfPresent(message.Msh, in delimiters, opts);
+        writer.WriteSegmentIfPresent(message.Evn, in delimiters, opts);
+        writer.WriteSegmentIfPresent(message.Pid, in delimiters, opts);
 
-        // Write other segments
-        WriteSegmentIfPresent(message.Evn, ref writer, in delimiters, opts);
-        WriteSegmentIfPresent(message.Pid, ref writer, in delimiters, opts);
-        WriteSegmentIfPresent(message.Pv1, ref writer, in delimiters, opts);
-        WriteSegmentIfPresent(message.Pv2, ref writer, in delimiters, opts);
-
-        // Write repeatable segments
-        foreach (var allergy in message.Allergies)
-            WriteSegmentIfPresent(allergy, ref writer, in delimiters, opts);
-
-        foreach (var diagnosis in message.Diagnoses)
-            WriteSegmentIfPresent(diagnosis, ref writer, in delimiters, opts);
-
-        foreach (var insurance in message.Insurance)
-            WriteSegmentIfPresent(insurance, ref writer, in delimiters, opts);
-
-        // Write order groups
-        foreach (var orderGroup in message.Orders)
-            WriteOrderGroup(orderGroup, ref writer, in delimiters, opts);
+        // Write message type-specific segments using extension methods (DDD pattern)
+        message.WriteMessageSpecificSegments(ref writer, in delimiters, opts);
 
         return writer.ToString();
     }
 
-    private static void WriteSegmentIfPresent(
-        ISegment? segment,
-        ref SegmentWriter writer,
-        in HL7Delimiters delimiters,
-        SerializerOptions options)
+    /// <summary>
+    /// Writes message-specific segments using pattern matching and extension methods.
+    /// Follows Domain-Driven Design by delegating to message-specific extension methods.
+    /// </summary>
+    private static void WriteMessageSpecificSegments(this IHL7Message message, ref SegmentWriter writer, in HL7Delimiters delimiters, SerializerOptions options)
     {
-        if (segment == null)
-            return;
-
-        var values = segment.GetValues();
-        if (values.Length > 1 && values[1..].Any(v => !string.IsNullOrEmpty(v)))
+        switch (message)
         {
-            var converter = options.SegmentRegistry.GetConverter(segment.SegmentId);
-            converter?.Write(segment, ref writer, in delimiters, options);
-            writer.Write("\r\n");
-        }
-    }
-
-    private static void WriteOrderGroup(
-        OrderGroup orderGroup,
-        ref SegmentWriter writer,
-        in HL7Delimiters delimiters,
-        SerializerOptions options)
-    {
-        // Write primary segment (e.g., ORC)
-        if (orderGroup.PrimarySegment != null)
-            WriteSegmentIfPresent(orderGroup.PrimarySegment, ref writer, in delimiters, options);
-
-        // Write detail segments (RXE, RXO, OBR, etc.)
-        foreach (var detailSegment in orderGroup.DetailSegments.Values)
-            WriteSegmentIfPresent(detailSegment, ref writer, in delimiters, options);
-
-        // Write repeatable segments (RXR, RXC, TQ1, OBX, NTE, etc.)
-        foreach (var segmentList in orderGroup.RepeatableSegments.Values)
-        {
-            foreach (var segment in segmentList)
-                WriteSegmentIfPresent(segment, ref writer, in delimiters, options);
+            case HospiceMessage hospice:
+                hospice.WriteSegments(ref writer, in delimiters, options);
+                break;
+            case PharmacyMessage pharmacy:
+                pharmacy.WriteSegments(ref writer, in delimiters, options);
+                break;
+            case LabMessage lab:
+                lab.WriteSegments(ref writer, in delimiters, options);
+                break;
+            case SchedulingMessage scheduling:
+                scheduling.WriteSegments(ref writer, in delimiters, options);
+                break;
+            case FinancialMessage financial:
+                financial.WriteSegments(ref writer, in delimiters, options);
+                break;
+            case DietaryMessage dietary:
+                dietary.WriteSegments(ref writer, in delimiters, options);
+                break;
+            case HL7DefaultMessage defaultMsg:
+                defaultMsg.WriteSegments(ref writer, in delimiters, options);
+                break;
         }
     }
 
@@ -172,52 +211,15 @@ public static class HL7Serializer
         // Check if this segment belongs to an order group
         if (config != null && config.BelongsToOrderGroup(segmentId))
         {
-            // Check if this is a trigger segment (starts new order group)
-            if (config.IsTriggerSegment(segmentId))
-            {
-                // Save previous order group
-                if (currentOrder != null)
-                    context.Message.Orders.Add(currentOrder);
-
-                // Start new order group
-                currentOrder = new OrderGroup
-                {
-                    OrderType = config.OrderType,
-                    PrimarySegment = segment
-                };
-                currentOrder.SegmentStatus[segmentId.ToString()] = true;
-            }
-            else if (currentOrder != null)
-            {
-                // Add to current order group
-                currentOrder.AddSegment(segment);
-            }
+            HandleOrderGroupSegment(segment, segmentId, config, context, ref currentOrder);
             return;
         }
 
-        // Fallback: Handle order segments even without configuration (for backward compatibility)
+        // Handle non-order segments using pattern matching and extension methods
         switch (segment)
         {
-            // Handle non-order segments
             case MSH msh:
-                if (mshProcessed)
-                {
-                    context.AddError(ErrorSeverity.Error, ErrorCode.SegmentSequenceError, "Multiple MSH segments");
-                    return;
-                }
-                context.Message.Msh = msh;
-                context.Message.MessageControlID = msh.MessageControlID;
-                mshProcessed = true;
-
-                // Parse event type
-                var messageTypeValue = msh.MessageType.Value;
-                if (!string.IsNullOrEmpty(messageTypeValue))
-                {
-                    var parts = messageTypeValue.Split(delimiters.ComponentSeparator);
-                    var eventCode = parts.Length > 1 ? parts[1] : null;
-                    if (eventCode != null)
-                        (context.Message.EventType, context.Message.MessageType) = ParseEventString(eventCode);
-                }
+                HandleMSH(msh, context, ref mshProcessed, in delimiters);
                 break;
 
             case EVN evn:
@@ -231,26 +233,164 @@ public static class HL7Serializer
                 break;
 
             case PV1 pv1:
-                context.Message.Pv1 = pv1;
+                context.Message.AssignSegment(pv1);
                 pv1Processed = true;
                 break;
 
             case PV2 pv2:
-                context.Message.Pv2 = pv2;
+                context.Message.AssignSegment(pv2);
                 pv2Processed = true;
                 break;
 
+            case PD1 pd1 when context.Message is HospiceMessage hospice:
+                hospice.Pd1 = pd1;
+                break;
+
+            case NK1 nk1 when context.Message is HospiceMessage hospice:
+                hospice.NextOfKin.Add(nk1);
+                break;
+
             case AL1 al1:
-                context.Message.Allergies.Add(al1);
+                context.Message.AssignSegment(al1);
                 break;
 
             case DG1 dg1:
-                context.Message.Diagnoses.Add(dg1);
+                context.Message.AssignSegment(dg1);
                 break;
 
             case IN1 in1:
-                context.Message.Insurance.Add(in1);
+                context.Message.AssignSegment(in1);
                 break;
+
+            case IN2 in2:
+                context.Message.AssignSegment(in2);
+                break;
+
+            case PR1 pr1:
+                context.Message.AssignSegment(pr1);
+                break;
+
+            case GT1 gt1:
+                context.Message.AssignSegment(gt1);
+                break;
+
+            case DRG drg:
+                context.Message.AssignSegment(drg);
+                break;
+
+            case ACC acc:
+                context.Message.AssignSegment(acc);
+                break;
+
+            case ROL rol when context.Message is HospiceMessage hospice:
+                hospice.Roles.Add(rol);
+                break;
+
+            case MRG mrg when context.Message is HospiceMessage hospice:
+                hospice.MergeInfo = mrg;
+                break;
+
+            case FT1 ft1 when context.Message is FinancialMessage financial:
+                financial.Transactions.Add(ft1);
+                break;
+
+            case SPM spm when context.Message is LabMessage lab:
+                lab.Specimens.Add(spm);
+                break;
+
+            case SAC sac when context.Message is LabMessage lab:
+                lab.Containers.Add(sac);
+                break;
+
+            case CTI cti when context.Message is LabMessage lab:
+                lab.ClinicalTrials.Add(cti);
+                break;
+
+            case SCH sch when context.Message is SchedulingMessage scheduling:
+                scheduling.Schedule = sch;
+                break;
+
+            case AIL ail when context.Message is SchedulingMessage scheduling:
+                scheduling.LocationResources.Add(ail);
+                break;
+
+            case AIP aip when context.Message is SchedulingMessage scheduling:
+                scheduling.PersonnelResources.Add(aip);
+                break;
+
+            case AIS ais when context.Message is SchedulingMessage scheduling:
+                scheduling.ServiceResources.Add(ais);
+                break;
+
+            case NTE nte:
+                context.Message.AssignSegment(nte);
+                break;
+
+            case ODS ods when context.Message is DietaryMessage dietary:
+                dietary.DietaryOrders.Add(ods);
+                break;
+
+            case ODT odt when context.Message is DietaryMessage dietary:
+                dietary.TrayInstructions.Add(odt);
+                break;
+
+            case ORC orc when context.Message is DietaryMessage dietary:
+                dietary.Orders.Add(orc);
+                break;
+        }
+    }
+
+    private static void HandleOrderGroupSegment(
+        ISegment segment,
+        ReadOnlySpan<char> segmentId,
+        OrderGroupingConfiguration config,
+        DeserializationContext context,
+        ref OrderGroup? currentOrder)
+    {
+        if (config.IsTriggerSegment(segmentId))
+        {
+            // Save previous order group
+            if (currentOrder != null)
+            {
+                context.Message.AddOrderGroup(currentOrder);
+            }
+
+            // Start new order group
+            currentOrder = new OrderGroup
+            {
+                OrderType = config.OrderType,
+                PrimarySegment = segment
+            };
+            currentOrder.SegmentStatus[segmentId.ToString()] = true;
+        }
+        else if (currentOrder != null)
+        {
+            // Add to current order group
+            currentOrder.AddSegment(segment);
+        }
+    }
+
+    private static void HandleMSH(MSH msh, DeserializationContext context, ref bool mshProcessed, in HL7Delimiters delimiters)
+    {
+        if (mshProcessed)
+        {
+            context.AddError(ErrorSeverity.Error, ErrorCode.SegmentSequenceError, "Multiple MSH segments");
+            return;
+        }
+
+        context.Message.Msh = msh;
+        context.Message.MessageControlID = msh.MessageControlID;
+        mshProcessed = true;
+
+        // Parse event type
+        var messageTypeValue = msh.MessageType.Value;
+        if (!string.IsNullOrEmpty(messageTypeValue))
+        {
+            var parts = messageTypeValue.Split(delimiters.ComponentSeparator);
+            if (parts.Length > 1 && parts[1] is string eventCode)
+            {
+                (context.Message.EventType, context.Message.MessageType) = ParseEventString(eventCode);
+            }
         }
     }
 
