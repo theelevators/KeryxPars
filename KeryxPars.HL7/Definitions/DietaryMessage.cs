@@ -1,0 +1,47 @@
+namespace KeryxPars.HL7.Definitions;
+
+using KeryxPars.HL7.Segments;
+
+/// <summary>
+/// Specialized HL7 message for dietary orders.
+/// Supports ORM message types with ODS/ODT segments.
+/// </summary>
+public class DietaryMessage : HL7BaseMessage
+{
+    public PV1? Pv1 { get; set; }
+
+    /// <summary>
+    /// Common order segments for dietary orders
+    /// </summary>
+    public List<ORC> Orders { get; set; } = [];
+
+    /// <summary>
+    /// Dietary orders, supplements, and preferences
+    /// </summary>
+    public List<ODS> DietaryOrders { get; set; } = [];
+
+    /// <summary>
+    /// Diet tray instructions
+    /// </summary>
+    public List<ODT> TrayInstructions { get; set; } = [];
+
+    /// <summary>
+    /// Notes and comments for dietary orders
+    /// </summary>
+    public List<NTE> Notes { get; set; } = [];
+
+    /// <summary>
+    /// Allergies relevant to dietary restrictions
+    /// </summary>
+    public List<AL1> Allergies { get; set; } = [];
+
+    /// <summary>
+    /// Diagnoses affecting dietary requirements
+    /// </summary>
+    public List<DG1> Diagnoses { get; set; } = [];
+
+    /// <summary>
+    /// Grouped Orders
+    /// </summary>
+    public List<OrderGroup> GroupedOrders { get; set; } = [];
+}

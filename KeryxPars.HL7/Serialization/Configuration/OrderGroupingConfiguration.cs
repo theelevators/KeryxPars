@@ -59,6 +59,28 @@ public sealed class OrderGroupingConfiguration
     };
 
     /// <summary>
+    /// Predefined dietary order configuration
+    /// </summary>
+    public static OrderGroupingConfiguration Dietary { get; } = new()
+    {
+        TriggerSegmentId = "ORC",
+        DetailSegmentIds = new HashSet<string> { "ODS", "ODT" },
+        RepeatableSegmentIds = new HashSet<string> { "NTE" },
+        OrderType = "Dietary"
+    };
+
+    /// <summary>
+    /// No order grouping - for messages that don't use order structures
+    /// </summary>
+    public static OrderGroupingConfiguration None { get; } = new()
+    {
+        TriggerSegmentId = "",
+        DetailSegmentIds = new HashSet<string>(),
+        RepeatableSegmentIds = new HashSet<string>(),
+        OrderType = "None"
+    };
+
+    /// <summary>
     /// Checks if the segment should trigger a new order group
     /// </summary>
     public bool IsTriggerSegment(ReadOnlySpan<char> segmentId) 

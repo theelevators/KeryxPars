@@ -1,0 +1,69 @@
+namespace KeryxPars.HL7.Definitions;
+
+using KeryxPars.HL7.Segments;
+
+/// <summary>
+/// Specialized HL7 message for hospice patient care.
+/// Focused on ADT message types with enhanced patient visit and clinical information.
+/// </summary>
+public class HospiceMessage : HL7BaseMessage
+{
+    public PV1 Pv1 { get; set; } = new();
+    public PV2 Pv2 { get; set; } = new();
+    public PD1? Pd1 { get; set; }
+
+    /// <summary>
+    /// Next of kin / emergency contacts
+    /// </summary>
+    public List<NK1> NextOfKin { get; set; } = [];
+
+    /// <summary>
+    /// Patient allergies
+    /// </summary>
+    public List<AL1> Allergies { get; set; } = [];
+
+    /// <summary>
+    /// Diagnoses and clinical conditions
+    /// </summary>
+    public List<DG1> Diagnoses { get; set; } = [];
+
+    /// <summary>
+    /// Procedures performed
+    /// </summary>
+    public List<PR1> Procedures { get; set; } = [];
+
+    /// <summary>
+    /// Guarantor information for billing
+    /// </summary>
+    public List<GT1> Guarantors { get; set; } = [];
+
+    /// <summary>
+    /// Insurance information
+    /// </summary>
+    public List<IN1> Insurance { get; set; } = [];
+
+    /// <summary>
+    /// Additional insurance details
+    /// </summary>
+    public List<IN2> InsuranceAdditional { get; set; } = [];
+
+    /// <summary>
+    /// Diagnosis Related Group for billing
+    /// </summary>
+    public DRG? DiagnosisRelatedGroup { get; set; }
+
+    /// <summary>
+    /// Accident information if applicable
+    /// </summary>
+    public ACC? Accident { get; set; }
+
+    /// <summary>
+    /// Role information for care team members
+    /// </summary>
+    public List<ROL> Roles { get; set; } = [];
+
+    /// <summary>
+    /// Patient merge information for record reconciliation
+    /// </summary>
+    public MRG? MergeInfo { get; set; }
+}
