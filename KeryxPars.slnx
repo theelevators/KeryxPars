@@ -1,4 +1,10 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="LICENSE.txt" />
+    <File Path="QUICKSTART.md" />
+    <File Path="README.md" />
+  </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/KeryxPars.HL7.Tests/KeryxPars.HL7.Tests.csproj" />
   </Folder>
