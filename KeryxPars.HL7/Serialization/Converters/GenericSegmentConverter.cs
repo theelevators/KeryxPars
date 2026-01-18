@@ -51,9 +51,11 @@ public class GenericSegmentConverter<TSegment> : ISegmentConverter where TSegmen
             // Special handling for MSH segment (field 1 is the encoding characters)
             if (_segmentId == "MSH")
             {
-                // MSH field 1 is the encoding characters ^~\&
-                var encodingChars = $"{delimiters.ComponentSeparator}{delimiters.FieldRepeatSeparator}{delimiters.EscapeCharacter}{delimiters.SubComponentSeparator}";
-                segment.SetValue(encodingChars, fieldIndex++);
+                // Read the encoding characters field (they appear right after MSH|)
+                if (reader.TryReadField(delimiters.FieldSeparator, out var encodingCharsField))
+                {
+                    segment.SetValue(encodingCharsField.ToString(), fieldIndex++);
+                }
             }
 
             // Read remaining fields

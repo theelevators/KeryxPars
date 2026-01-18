@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/KeryxPars.HL7.Tests/KeryxPars.HL7.Tests.csproj" />
+  </Folder>
   <Project Path="KeryxPars.Benchmarks/KeryxPars.Benchmarks.csproj" />
   <Project Path="KeryxPars.Core/KeryxPars.Core.csproj" />
   <Project Path="KeryxPars.HL7/KeryxPars.HL7.csproj" />

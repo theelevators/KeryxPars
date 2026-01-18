@@ -46,7 +46,8 @@ public readonly ref struct HL7Delimiters(
             return false;
         }
 
-        var controlCharacters = message[3..8];
+        // The encoding characters are in positions 4-7 (after MSH and field separator)
+        var controlCharacters = message[4..8];
 
         // terminate parsing if the characters were not provided.
         if (controlCharacters.IsEmpty)
