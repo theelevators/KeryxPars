@@ -1,129 +1,161 @@
 ﻿using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
+using KeryxPars.HL7.DataTypes.Primitive;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.HL7.Segments
 {
     /// <summary>
     /// HL7 Segment: Message Header
+    /// Refactored to use strongly-typed HL7 datatypes.
     /// </summary>
     public class MSH : ISegment
     {
         public string SegmentId => nameof(MSH);
-        
+
         public SegmentType SegmentType { get; private set; }
 
-        #region Properties
+        /// <summary>
+        /// MSH.1 - Field Separator
+        /// </summary>
+        public ST FieldSeparator { get; set; }
 
         /// <summary>
-        /// MSA.1
+        /// MSH.2 - Encoding Characters (MSH.1 is field separator)
         /// </summary>
-        public string SendingApplication { get; set; }
+        public ST EncodingCharacters { get; set; }
 
         /// <summary>
-        /// MSA.2
+        /// MSH.3 - Sending Application
         /// </summary>
-        public string SendingFacility { get; set; }
+        public HD SendingApplication { get; set; }
 
         /// <summary>
-        /// MSA.3
+        /// MSH.4 - Sending Facility
         /// </summary>
-        public string ReceivingApplication { get; set; }
+        public HD SendingFacility { get; set; }
 
         /// <summary>
-        /// MSA.4
+        /// MSH.5 - Receiving Application
         /// </summary>
-        public string ReceivingFacility { get; set; }
+        public HD ReceivingApplication { get; set; }
 
         /// <summary>
-        /// MSA.5
+        /// MSH.6 - Receiving Facility
         /// </summary>
-        public string DateTimeOfMessage { get; set; }
+        public HD ReceivingFacility { get; set; }
 
         /// <summary>
-        /// MSA.6
+        /// MSH.7 - Date/Time of Message
         /// </summary>
-        public string Security { get; set; }
+        public DTM DateTimeOfMessage { get; set; }
 
         /// <summary>
-        /// MSA.7
+        /// MSH.8 - Security
         /// </summary>
-        public string MessageType { get; set; }
+        public ST Security { get; set; }
 
         /// <summary>
-        /// MSA.8
+        /// MSH.9 - Message Type
         /// </summary>
-        public string MessageControlID { get; set; }
+        public ST MessageType { get; set; }
 
         /// <summary>
-        /// MSA.9
+        /// MSH.10 - Message Control ID
         /// </summary>
-        public string ProcessingID { get; set; }
+        public ST MessageControlID { get; set; }
 
         /// <summary>
-        /// MSA.10
+        /// MSH.11 - Processing ID
         /// </summary>
-        public string VersionID { get; set; }
+        public ST ProcessingID { get; set; }
 
         /// <summary>
-        /// MSA.11
+        /// MSH.12 - Version ID
         /// </summary>
-        public string SequenceNumber { get; set; }
+        public ST VersionID { get; set; }
 
-        #endregion
+        /// <summary>
+        /// MSH.13 - Sequence Number
+        /// </summary>
+        public NM SequenceNumber { get; set; }
 
-        // Constructors
         public MSH()
         {
             SegmentType = SegmentType.Universal;
-            SendingApplication = string.Empty;
-            SendingFacility = string.Empty;
-            ReceivingApplication = string.Empty;
-            ReceivingFacility = string.Empty;
-            DateTimeOfMessage = string.Empty;
-            Security = string.Empty;
-            MessageType = string.Empty;
-            MessageControlID = string.Empty;
-            ProcessingID = string.Empty;
-            VersionID = string.Empty;
-            SequenceNumber = string.Empty;
+            FieldSeparator = new ST("|");
+            EncodingCharacters = new ST("^~\\&");
+            SendingApplication = default;
+            SendingFacility = default;
+            ReceivingApplication = default;
+            ReceivingFacility = default;
+            DateTimeOfMessage = default;
+            Security = default;
+            MessageType = default;
+            MessageControlID = default;
+            ProcessingID = default;
+            VersionID = default;
+            SequenceNumber = default;
         }
 
         public void SetValue(string value, int element)
         {
+            var delimiters = HL7Delimiters.Default;
+
             switch (element)
             {
-                case 2: SendingApplication = value; break;
-                case 3: SendingFacility = value; break;
-                case 4: ReceivingApplication = value; break;
-                case 5: ReceivingFacility = value; break;
-                case 6: DateTimeOfMessage = value; break;
-                case 7: Security = value; break;
-                case 8: MessageType = value; break;
-                case 9: MessageControlID = value; break;
-                case 10: ProcessingID = value; break;
-                case 11: VersionID = value; break;
-                case 12: SequenceNumber = value; break;
+                case 1: EncodingCharacters = new ST(value); break;
+                case 2:
+                    var hd2 = new HD();
+                    hd2.Parse(value.AsSpan(), delimiters);
+                    SendingApplication = hd2;
+                    break;
+                case 3:
+                    var hd3 = new HD();
+                    hd3.Parse(value.AsSpan(), delimiters);
+                    SendingFacility = hd3;
+                    break;
+                case 4:
+                    var hd4 = new HD();
+                    hd4.Parse(value.AsSpan(), delimiters);
+                    ReceivingApplication = hd4;
+                    break;
+                case 5:
+                    var hd5 = new HD();
+                    hd5.Parse(value.AsSpan(), delimiters);
+                    ReceivingFacility = hd5;
+                    break;
+                case 6: DateTimeOfMessage = new DTM(value); break;
+                case 7: Security = new ST(value); break;
+                case 8: MessageType = new ST(value); break;
+                case 9: MessageControlID = new ST(value); break;
+                case 10: ProcessingID = new ST(value); break;
+                case 11: VersionID = new ST(value); break;
+                case 12: SequenceNumber = new NM(value); break;
                 default: break;
             }
         }
 
         public string[] GetValues()
         {
+            var delimiters = HL7Delimiters.Default;
+
             return
             [
                 SegmentId,
-                null, // MSH.1 is field separator (not stored in properties)
-                SendingApplication,
-                SendingFacility,
-                ReceivingApplication,
-                ReceivingFacility,
-                DateTimeOfMessage,
-                Security,
-                MessageType,
-                MessageControlID,
-                ProcessingID,
-                VersionID,
-                SequenceNumber
+                FieldSeparator,
+                EncodingCharacters.ToHL7String(delimiters),
+                SendingApplication.ToHL7String(delimiters),
+                SendingFacility.ToHL7String(delimiters),
+                ReceivingApplication.ToHL7String(delimiters),
+                ReceivingFacility.ToHL7String(delimiters),
+                DateTimeOfMessage.ToHL7String(delimiters),
+                Security.ToHL7String(delimiters),
+                MessageType.ToHL7String(delimiters),
+                MessageControlID.ToHL7String(delimiters),
+                ProcessingID.ToHL7String(delimiters),
+                VersionID.ToHL7String(delimiters),
+                SequenceNumber.ToHL7String(delimiters)
             ];
         }
 
@@ -132,17 +164,19 @@ namespace KeryxPars.HL7.Segments
             return index switch
             {
                 0 => SegmentId,
-                2 => SendingApplication,
-                3 => SendingFacility,
-                4 => ReceivingApplication,
-                5 => ReceivingFacility,
-                6 => DateTimeOfMessage,
-                7 => Security,
-                8 => MessageType,
-                9 => MessageControlID,
-                10 => ProcessingID,
-                11 => VersionID,
-                12 => SequenceNumber,
+                1 => FieldSeparator, // Field separator
+                2 => EncodingCharacters.Value,
+                3 => SendingApplication.ToHL7String(HL7Delimiters.Default),
+                4 => SendingFacility.ToHL7String(HL7Delimiters.Default),
+                5 => ReceivingApplication.ToHL7String(HL7Delimiters.Default),
+                6 => ReceivingFacility.ToHL7String(HL7Delimiters.Default),
+                7 => DateTimeOfMessage.Value,
+                8 => Security.Value,
+                9 => MessageType.Value,
+                10 => MessageControlID.Value,
+                11 => ProcessingID.Value,
+                12 => VersionID.Value,
+                13 => SequenceNumber.Value,
                 _ => null
             };
         }

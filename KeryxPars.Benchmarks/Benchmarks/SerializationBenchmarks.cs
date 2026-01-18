@@ -4,6 +4,7 @@ using KeryxPars.Benchmarks.Data;
 using KeryxPars.HL7.Serialization;
 using KeryxPars.HL7.Definitions;
 using KeryxPars.HL7.Segments;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.Benchmarks.Benchmarks;
 
@@ -40,8 +41,8 @@ public class SerializationBenchmarks
             Pid = new PID
             {
                 SetID = "1",
-                PatientIdentifierList = "123456",
-                PatientName = "DOE^JOHN^A",
+                PatientIdentifierList = new[] { (CX)"123456" },
+                PatientName = new[] { (XPN)"DOE^JOHN^A" },
                 DateTimeofBirth = "19800101",
                 AdministrativeSex = "M"
             }
@@ -61,8 +62,8 @@ public class SerializationBenchmarks
             },
             Pid = new PID
             {
-                PatientIdentifierList = "987654",
-                PatientName = "SMITH^JANE^M"
+                PatientIdentifierList = new[] { (CX)"987654" },
+                PatientName = new[] { (XPN)"SMITH^JANE^M" }
             }
         };
 
@@ -96,7 +97,7 @@ public class SerializationBenchmarks
             },
             Pid = new PID
             {
-                PatientName = "COMPLEX^PATIENT^TEST",
+                PatientName = new[] { (XPN)"COMPLEX^PATIENT^TEST" },
                 DateTimeofBirth = "19900101"
             },
             Pv1 = new PV1

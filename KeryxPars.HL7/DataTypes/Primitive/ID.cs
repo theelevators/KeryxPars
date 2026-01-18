@@ -8,7 +8,7 @@ namespace KeryxPars.HL7.DataTypes.Primitive;
 /// The value of the ID data type is coded from an HL7 table.
 /// Maximum length: 199 characters.
 /// </summary>
-public readonly struct ID : IPrimitiveDataType
+public readonly struct ID : IPrimitiveDataType, IEquatable<string>
 {
     private readonly string _value;
 
@@ -67,12 +67,32 @@ public readonly struct ID : IPrimitiveDataType
     /// </summary>
     public static implicit operator string(ID id) => id._value ?? string.Empty;
 
+    /// <summary>
+    /// Determines whether the specified string is equal to the current ID value.
+    /// </summary>
+    public bool Equals(string? other) => _value == other;
+
     /// <inheritdoc/>
     public override string ToString() => _value ?? string.Empty;
 
     /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is ID other && _value == other._value;
+    public override bool Equals(object? obj)
+    {
+        return obj switch
+        {
+            ID other => _value == other._value,
+            string str => _value == str,
+            _ => false
+        };
+    }
 
     /// <inheritdoc/>
     public override int GetHashCode() => _value?.GetHashCode() ?? 0;
+
+    public static bool operator ==(ID left, ID right) => left.Equals(right);
+    public static bool operator !=(ID left, ID right) => !left.Equals(right);
+    public static bool operator ==(ID left, string? right) => left.Equals(right);
+    public static bool operator !=(ID left, string? right) => !left.Equals(right);
+    public static bool operator ==(string? left, ID right) => right.Equals(left);
+    public static bool operator !=(string? left, ID right) => !right.Equals(left);
 }

@@ -1,10 +1,13 @@
 ﻿using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
+using KeryxPars.HL7.DataTypes.Primitive;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.HL7.Segments
 {
     /// <summary>
     /// HL7 Segment: Patient Visit
+    /// Refactored to use strongly-typed HL7 datatypes.
     /// </summary>
     public class PV1 : ISegment
     {
@@ -12,395 +15,416 @@ namespace KeryxPars.HL7.Segments
         
         public SegmentType SegmentType { get; private set; }
 
-        // Auto-Implemented Properties
+        /// <summary>
+        /// PV1.1 - Set ID - PV1
+        /// </summary>
+        public SI SetID { get; set; }
 
         /// <summary>
-        /// PV1.1
+        /// PV1.2 - Patient Class
         /// </summary>
-        public string SetID { get; set; }
+        public IS PatientClass { get; set; }
 
         /// <summary>
-        /// PV1.2
+        /// PV1.3 - Assigned Patient Location
         /// </summary>
-        public string PatientClass { get; set; }
+        public PL AssignedPatientLocation { get; set; }
 
         /// <summary>
-        /// PV1.3
+        /// PV1.4 - Admission Type
         /// </summary>
-        public string AssignedPatientLocation { get; set; }
+        public IS AdmissionType { get; set; }
 
         /// <summary>
-        /// PV1.4
+        /// PV1.5 - Preadmit Number
         /// </summary>
-        public string AdmissionType { get; set; }
+        public CX PreadmitNumber { get; set; }
 
         /// <summary>
-        /// PV1.5
+        /// PV1.6 - Prior Patient Location
         /// </summary>
-        public string PreadmitNumber { get; set; }
+        public PL PriorPatientLocation { get; set; }
 
         /// <summary>
-        /// PV1.6
+        /// PV1.7 - Attending Doctor (repeating)
         /// </summary>
-        public string PriorPatientLocation { get; set; }
+        public XCN[] AttendingDoctor { get; set; }
 
         /// <summary>
-        /// PV1.7
+        /// PV1.8 - Referring Doctor (repeating)
         /// </summary>
-        public string AttendingDoctor { get; set; }
+        public XCN[] ReferringDoctor { get; set; }
 
         /// <summary>
-        /// PV1.8
+        /// PV1.9 - Consulting Doctor (repeating)
         /// </summary>
-        public string ReferringDoctor { get; set; }
+        public XCN[] ConsultingDoctor { get; set; }
 
         /// <summary>
-        /// PV1.9
+        /// PV1.10 - Hospital Service
         /// </summary>
-        public string ConsultingDoctor { get; set; }
+        public IS HospitalService { get; set; }
 
         /// <summary>
-        /// PV1.10
+        /// PV1.11 - Temporary Location
         /// </summary>
-        public string HospitalService { get; set; }
+        public PL TemporaryLocation { get; set; }
 
         /// <summary>
-        /// PV1.11
+        /// PV1.12 - Preadmit Test Indicator
         /// </summary>
-        public string TemporaryLocation { get; set; }
+        public IS PreadmitTestIndicator { get; set; }
 
         /// <summary>
-        /// PV1.12
+        /// PV1.13 - Re-admission Indicator
         /// </summary>
-        public string PreadmitTestIndicator { get; set; }
+        public IS ReadmissionIndicator { get; set; }
 
         /// <summary>
-        /// PV1.13
+        /// PV1.14 - Admit Source
         /// </summary>
-        public string ReadmissionIndicator { get; set; }
+        public IS AdmitSource { get; set; }
 
         /// <summary>
-        /// PV1.14
+        /// PV1.15 - Ambulatory Status (repeating)
         /// </summary>
-        public string AdmitSource { get; set; }
+        public IS[] AmbulatoryStatus { get; set; }
 
         /// <summary>
-        /// PV1.15
+        /// PV1.16 - VIP Indicator
         /// </summary>
-        public string AmbulatoryStatus { get; set; }
+        public IS VipIndicator { get; set; }
 
         /// <summary>
-        /// PV1.16
+        /// PV1.17 - Admitting Doctor (repeating)
         /// </summary>
-        public string VipIndicator { get; set; }
+        public XCN[] AdmittingDoctor { get; set; }
 
         /// <summary>
-        /// PV1.17
+        /// PV1.18 - Patient Type
         /// </summary>
-        public string AdmittingDoctor { get; set; }
+        public IS PatientType { get; set; }
 
         /// <summary>
-        /// PV1.18
+        /// PV1.19 - Visit Number
         /// </summary>
-        public string PatientType { get; set; }
+        public CX VisitNumber { get; set; }
 
         /// <summary>
-        /// PV1.19
+        /// PV1.20 - Financial Class (repeating)
         /// </summary>
-        public string VisitNumber { get; set; }
+        public ST[] FinancialClass { get; set; }
 
         /// <summary>
-        /// PV1.20
+        /// PV1.21 - Charge Price Indicator
         /// </summary>
-        public string FinancialClass { get; set; }
+        public IS ChargePriceIndicator { get; set; }
 
         /// <summary>
-        /// PV1.21
+        /// PV1.22 - Courtesy Code
         /// </summary>
-        public string ChargePriceIndicator { get; set; }
+        public IS CourtesyCode { get; set; }
 
         /// <summary>
-        /// PV1.22
+        /// PV1.23 - Credit Rating
         /// </summary>
-        public string CourtesyCode { get; set; }
+        public IS CreditRating { get; set; }
 
         /// <summary>
-        /// PV1.23
+        /// PV1.24 - Contract Code (repeating)
         /// </summary>
-        public string CreditRating { get; set; }
+        public IS[] ContractCode { get; set; }
 
         /// <summary>
-        /// PV1.24
+        /// PV1.25 - Contract Effective Date (repeating)
         /// </summary>
-        public string ContractCode { get; set; }
+        public DT[] ContractEffectiveDate { get; set; }
 
         /// <summary>
-        /// PV1.25
+        /// PV1.26 - Contract Amount (repeating)
         /// </summary>
-        public string ContractEffectiveDate { get; set; }
+        public NM[] ContractAmount { get; set; }
 
         /// <summary>
-        /// PV1.26
+        /// PV1.27 - Contract Period (repeating)
         /// </summary>
-        public string ContractAmount { get; set; }
+        public NM[] ContractPeriod { get; set; }
 
         /// <summary>
-        /// PV1.27
+        /// PV1.28 - Interest Code
         /// </summary>
-        public string ContractPeriod { get; set; }
+        public IS InterestCode { get; set; }
 
         /// <summary>
-        /// PV1.28
+        /// PV1.29 - Transfer to Bad Debt Code
         /// </summary>
-        public string InterestCode { get; set; }
+        public IS TransferToBadDebtCode { get; set; }
 
         /// <summary>
-        /// PV1.29
+        /// PV1.30 - Transfer to Bad Debt Date
         /// </summary>
-        public string TransferToBadDebtCode { get; set; }
+        public DT TransferToBadDebtDate { get; set; }
 
         /// <summary>
-        /// PV1.30
+        /// PV1.31 - Bad Debt Agency Code
         /// </summary>
-        public string TransferToBadDebtDate { get; set; }
+        public IS BadDebtAgencyCode { get; set; }
 
         /// <summary>
-        /// PV1.31
+        /// PV1.32 - Bad Debt Transfer Amount
         /// </summary>
-        public string BadDebtAgencyCode { get; set; }
+        public NM BadDebtTransferAmount { get; set; }
 
         /// <summary>
-        /// PV1.32
+        /// PV1.33 - Bad Debt Recovery Amount
         /// </summary>
-        public string BadDebtTransferAmount { get; set; }
+        public NM BadDebtRecoveryAmount { get; set; }
 
         /// <summary>
-        /// PV1.33
+        /// PV1.34 - Delete Account Indicator
         /// </summary>
-        public string BadDebtRecoveryAmount { get; set; }
+        public IS DeleteAccountIndicator { get; set; }
 
         /// <summary>
-        /// PV1.34
+        /// PV1.35 - Delete Account Date
         /// </summary>
-        public string DeleteAccountIndicator { get; set; }
+        public DT DeleteaccountDate { get; set; }
 
         /// <summary>
-        /// PV1.35
+        /// PV1.36 - Discharge Disposition
         /// </summary>
-        public string DeleteaccountDate { get; set; }
+        public IS DischargeDisposition { get; set; }
 
         /// <summary>
-        /// PV1.36
+        /// PV1.37 - Discharged to Location
         /// </summary>
-        public string DischargeDisposition { get; set; }
+        public ST DischargedToLocation { get; set; }
 
         /// <summary>
-        /// PV1.37
+        /// PV1.38 - Diet Type
         /// </summary>
-        public string DischargedToLocation { get; set; }
+        public CE DietType { get; set; }
 
         /// <summary>
-        /// PV1.38
+        /// PV1.39 - Servicing Facility
         /// </summary>
-        public string DietType { get; set; }
+        public IS ServicingFacility { get; set; }
 
         /// <summary>
-        /// PV1.39
+        /// PV1.40 - Bed Status - deprecated
         /// </summary>
-        public string ServicingFacility { get; set; }
+        public IS BedStatus { get; set; }
 
         /// <summary>
-        /// PV1.40
+        /// PV1.41 - Account Status
         /// </summary>
-        public string BedStatus { get; set; }
+        public IS AccountStatus { get; set; }
 
         /// <summary>
-        /// PV1.41
+        /// PV1.42 - Pending Location
         /// </summary>
-        public string AccountStatus { get; set; }
+        public PL PendingLocation { get; set; }
 
         /// <summary>
-        /// PV1.42
+        /// PV1.43 - Prior Temporary Location
         /// </summary>
-        public string PendingLocation { get; set; }
+        public PL PriorTemporaryLocation { get; set; }
 
         /// <summary>
-        /// PV1.43
+        /// PV1.44 - Admit Date/Time
         /// </summary>
-        public string PriorTemporaryLocation { get; set; }
+        public DTM AdmitDateTime { get; set; }
 
         /// <summary>
-        /// PV1.44
+        /// PV1.45 - Discharge Date/Time (repeating)
         /// </summary>
-        public string AdmitDateTime { get; set; }
+        public DTM[] DischargeDateTime { get; set; }
 
         /// <summary>
-        /// PV1.45
+        /// PV1.46 - Current Patient Balance
         /// </summary>
-        public string DischargeDateTime { get; set; }
+        public NM CurrentPatientBalance { get; set; }
 
         /// <summary>
-        /// PV1.46
+        /// PV1.47 - Total Charges
         /// </summary>
-        public string CurrentPatientBalance { get; set; }
+        public NM TotalCharges { get; set; }
 
         /// <summary>
-        /// PV1.47
+        /// PV1.48 - Total Adjustments
         /// </summary>
-        public string TotalCharges { get; set; }
+        public NM TotalAdjustments { get; set; }
 
         /// <summary>
-        /// PV1.48
+        /// PV1.49 - Total Payments
         /// </summary>
-        public string TotalAdjustments { get; set; }
+        public NM TotalPayment { get; set; }
 
         /// <summary>
-        /// PV1.49
+        /// PV1.50 - Alternate Visit ID
         /// </summary>
-        public string TotalPayment { get; set; }
+        public CX AlternateVisitID { get; set; }
 
         /// <summary>
-        /// PV1.50
+        /// PV1.51 - Visit Indicator
         /// </summary>
-        public string AlternateVisitID { get; set; }
+        public IS VisitIndicator { get; set; }
 
         /// <summary>
-        /// PV1.51
+        /// PV1.52 - Other Healthcare Provider (repeating)
         /// </summary>
-        public string VisitIndicator { get; set; }
+        public XCN[] OtherHealthcareProvider { get; set; }
 
         /// <summary>
-        /// PV1.52
+        /// PV1.53 - Service Episode Description
         /// </summary>
-        public string OtherHealthcareProvider { get; set; }
+        public ST ServiceEpisodeDescription { get; set; }
 
         /// <summary>
-        /// PV1.53
+        /// PV1.54 - Service Episode Identifier
         /// </summary>
-        public string ServiceEpisodeDescription { get; set; }
+        public CX ServiceEpisodeIdentifier { get; set; }
 
-        /// <summary>
-        /// PV1.54
-        /// </summary>
-        public string ServiceEpisodeIdentifier { get; set; }
-
-
-        // Constructors
         public PV1()
         {
             SegmentType = SegmentType.ADT;
-            SetID = string.Empty;
-            PatientClass = string.Empty;
-            AssignedPatientLocation = string.Empty;
-            AdmissionType = string.Empty;
-            PreadmitNumber = string.Empty;
-            PriorPatientLocation = string.Empty;
-            AttendingDoctor = string.Empty;
-            ReferringDoctor = string.Empty;
-            ConsultingDoctor = string.Empty;
-            HospitalService = string.Empty;
-            TemporaryLocation = string.Empty;
-            PreadmitTestIndicator = string.Empty;
-            ReadmissionIndicator = string.Empty;
-            AdmitSource = string.Empty;
-            AmbulatoryStatus = string.Empty;
-            VipIndicator = string.Empty;
-            AdmittingDoctor = string.Empty;
-            PatientType = string.Empty;
-            VisitNumber = string.Empty;
-            FinancialClass = string.Empty;
-            ChargePriceIndicator = string.Empty;
-            CourtesyCode = string.Empty;
-            CreditRating = string.Empty;
-            ContractCode = string.Empty;
-            ContractEffectiveDate = string.Empty;
-            ContractAmount = string.Empty;
-            ContractPeriod = string.Empty;
-            InterestCode = string.Empty;
-            TransferToBadDebtCode = string.Empty;
-            TransferToBadDebtDate = string.Empty;
-            BadDebtAgencyCode = string.Empty;
-            BadDebtTransferAmount = string.Empty;
-            BadDebtRecoveryAmount = string.Empty;
-            DeleteAccountIndicator = string.Empty;
-            DeleteaccountDate = string.Empty;
-            DischargeDisposition = string.Empty;
-            DischargedToLocation = string.Empty;
-            DietType = string.Empty;
-            ServicingFacility = string.Empty;
-            BedStatus = string.Empty;
-            AccountStatus = string.Empty;
-            PendingLocation = string.Empty;
-            PriorTemporaryLocation = string.Empty;
-            AdmitDateTime = string.Empty;
-            DischargeDateTime = string.Empty;
-            CurrentPatientBalance = string.Empty;
-            TotalCharges = string.Empty;
-            TotalAdjustments = string.Empty;
-            TotalPayment = string.Empty;
-            AlternateVisitID = string.Empty;
-            VisitIndicator = string.Empty;
+            
+            SetID = default;
+            PatientClass = default;
+            AssignedPatientLocation = default;
+            AdmissionType = default;
+            PreadmitNumber = default;
+            PriorPatientLocation = default;
+            HospitalService = default;
+            TemporaryLocation = default;
+            PreadmitTestIndicator = default;
+            ReadmissionIndicator = default;
+            AdmitSource = default;
+            VipIndicator = default;
+            PatientType = default;
+            VisitNumber = default;
+            ChargePriceIndicator = default;
+            CourtesyCode = default;
+            CreditRating = default;
+            InterestCode = default;
+            TransferToBadDebtCode = default;
+            TransferToBadDebtDate = default;
+            BadDebtAgencyCode = default;
+            BadDebtTransferAmount = default;
+            BadDebtRecoveryAmount = default;
+            DeleteAccountIndicator = default;
+            DeleteaccountDate = default;
+            DischargeDisposition = default;
+            DischargedToLocation = default;
+            DietType = default;
+            ServicingFacility = default;
+            BedStatus = default;
+            AccountStatus = default;
+            PendingLocation = default;
+            PriorTemporaryLocation = default;
+            AdmitDateTime = default;
+            CurrentPatientBalance = default;
+            TotalCharges = default;
+            TotalAdjustments = default;
+            TotalPayment = default;
+            AlternateVisitID = default;
+            VisitIndicator = default;
+            ServiceEpisodeDescription = default;
+            ServiceEpisodeIdentifier = default;
+            
+            AttendingDoctor = Array.Empty<XCN>();
+            ReferringDoctor = Array.Empty<XCN>();
+            ConsultingDoctor = Array.Empty<XCN>();
+            AmbulatoryStatus = Array.Empty<IS>();
+            AdmittingDoctor = Array.Empty<XCN>();
+            FinancialClass = Array.Empty<ST>();
+            ContractCode = Array.Empty<IS>();
+            ContractEffectiveDate = Array.Empty<DT>();
+            ContractAmount = Array.Empty<NM>();
+            ContractPeriod = Array.Empty<NM>();
+            DischargeDateTime = Array.Empty<DTM>();
+            OtherHealthcareProvider = Array.Empty<XCN>();
         }
 
-
-        // Methods
         public void SetValue(string value, int element)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             switch (element)
             {
-                case 1: SetID = value; break;
-                case 2: PatientClass = value; break;
-                case 3: AssignedPatientLocation = value; break;
-                case 4: AdmissionType = value; break;
+                case 1: SetID = new SI(value); break;
+                case 2: PatientClass = new IS(value); break;
+                case 3:
+                    var pl3 = new PL();
+                    pl3.Parse(value.AsSpan(), delimiters);
+                    AssignedPatientLocation = pl3;
+                    break;
+                case 4: AdmissionType = new IS(value); break;
                 case 5: PreadmitNumber = value; break;
-                case 6: PriorPatientLocation = value; break;
-                case 7: AttendingDoctor = value; break;
-                case 8: ReferringDoctor = value; break;
-                case 9: ConsultingDoctor = value; break;
-                case 10: HospitalService = value; break;
-                case 11: TemporaryLocation = value; break;
-                case 12: PreadmitTestIndicator = value; break;
-                case 13: ReadmissionIndicator = value; break;
-                case 14: AdmitSource = value; break;
-                case 15: AmbulatoryStatus = value; break;
-                case 16: VipIndicator = value; break;
-                case 17: AdmittingDoctor = value; break;
-                case 18: PatientType = value; break;
+                case 6:
+                    var pl6 = new PL();
+                    pl6.Parse(value.AsSpan(), delimiters);
+                    PriorPatientLocation = pl6;
+                    break;
+                case 7: AttendingDoctor = SegmentFieldHelper.ParseRepeatingField<XCN>(value, delimiters); break;
+                case 8: ReferringDoctor = SegmentFieldHelper.ParseRepeatingField<XCN>(value, delimiters); break;
+                case 9: ConsultingDoctor = SegmentFieldHelper.ParseRepeatingField<XCN>(value, delimiters); break;
+                case 10: HospitalService = new IS(value); break;
+                case 11:
+                    var pl11 = new PL();
+                    pl11.Parse(value.AsSpan(), delimiters);
+                    TemporaryLocation = pl11;
+                    break;
+                case 12: PreadmitTestIndicator = new IS(value); break;
+                case 13: ReadmissionIndicator = new IS(value); break;
+                case 14: AdmitSource = new IS(value); break;
+                case 15: AmbulatoryStatus = SegmentFieldHelper.ParseRepeatingField<IS>(value, delimiters); break;
+                case 16: VipIndicator = new IS(value); break;
+                case 17: AdmittingDoctor = SegmentFieldHelper.ParseRepeatingField<XCN>(value, delimiters); break;
+                case 18: PatientType = new IS(value); break;
                 case 19: VisitNumber = value; break;
-                case 20: FinancialClass = value; break;
-                case 21: ChargePriceIndicator = value; break;
-                case 22: CourtesyCode = value; break;
-                case 23: CreditRating = value; break;
-                case 24: ContractCode = value; break;
-                case 25: ContractEffectiveDate = value; break;
-                case 26: ContractAmount = value; break;
-                case 27: ContractPeriod = value; break;
-                case 28: InterestCode = value; break;
-                case 29: TransferToBadDebtCode = value; break;
-                case 30: TransferToBadDebtDate = value; break;
-                case 31: BadDebtAgencyCode = value; break;
-                case 32: BadDebtTransferAmount = value; break;
-                case 33: BadDebtRecoveryAmount = value; break;
-                case 34: DeleteAccountIndicator = value; break;
-                case 35: DeleteaccountDate = value; break;
-                case 36: DischargeDisposition = value; break;
-                case 37: DischargedToLocation = value; break;
+                case 20: FinancialClass = SegmentFieldHelper.ParseRepeatingField<ST>(value, delimiters); break;
+                case 21: ChargePriceIndicator = new IS(value); break;
+                case 22: CourtesyCode = new IS(value); break;
+                case 23: CreditRating = new IS(value); break;
+                case 24: ContractCode = SegmentFieldHelper.ParseRepeatingField<IS>(value, delimiters); break;
+                case 25: ContractEffectiveDate = SegmentFieldHelper.ParseRepeatingField<DT>(value, delimiters); break;
+                case 26: ContractAmount = SegmentFieldHelper.ParseRepeatingField<NM>(value, delimiters); break;
+                case 27: ContractPeriod = SegmentFieldHelper.ParseRepeatingField<NM>(value, delimiters); break;
+                case 28: InterestCode = new IS(value); break;
+                case 29: TransferToBadDebtCode = new IS(value); break;
+                case 30: TransferToBadDebtDate = new DT(value); break;
+                case 31: BadDebtAgencyCode = new IS(value); break;
+                case 32: BadDebtTransferAmount = new NM(value); break;
+                case 33: BadDebtRecoveryAmount = new NM(value); break;
+                case 34: DeleteAccountIndicator = new IS(value); break;
+                case 35: DeleteaccountDate = new DT(value); break;
+                case 36: DischargeDisposition = new IS(value); break;
+                case 37: DischargedToLocation = new ST(value); break;
                 case 38: DietType = value; break;
-                case 39: ServicingFacility = value; break;
-                case 40: BedStatus = value; break;
-                case 41: AccountStatus = value; break;
-                case 42: PendingLocation = value; break;
-                case 43: PriorTemporaryLocation = value; break;
-                case 44: AdmitDateTime = value; break;
-                case 45: DischargeDateTime = value; break;
-                case 46: CurrentPatientBalance = value; break;
-                case 47: TotalCharges = value; break;
-                case 48: TotalAdjustments = value; break;
-                case 49: TotalPayment = value; break;
+                case 39: ServicingFacility = new IS(value); break;
+                case 40: BedStatus = new IS(value); break;
+                case 41: AccountStatus = new IS(value); break;
+                case 42:
+                    var pl42 = new PL();
+                    pl42.Parse(value.AsSpan(), delimiters);
+                    PendingLocation = pl42;
+                    break;
+                case 43:
+                    var pl43 = new PL();
+                    pl43.Parse(value.AsSpan(), delimiters);
+                    PriorTemporaryLocation = pl43;
+                    break;
+                case 44: AdmitDateTime = new DTM(value); break;
+                case 45: DischargeDateTime = SegmentFieldHelper.ParseRepeatingField<DTM>(value, delimiters); break;
+                case 46: CurrentPatientBalance = new NM(value); break;
+                case 47: TotalCharges = new NM(value); break;
+                case 48: TotalAdjustments = new NM(value); break;
+                case 49: TotalPayment = new NM(value); break;
                 case 50: AlternateVisitID = value; break;
-                case 51: VisitIndicator = value; break;
-                case 52: OtherHealthcareProvider = value; break;
-                case 53: ServiceEpisodeDescription = value; break;
+                case 51: VisitIndicator = new IS(value); break;
+                case 52: OtherHealthcareProvider = SegmentFieldHelper.ParseRepeatingField<XCN>(value, delimiters); break;
+                case 53: ServiceEpisodeDescription = new ST(value); break;
                 case 54: ServiceEpisodeIdentifier = value; break;
                 default: break;
             }
@@ -408,127 +432,72 @@ namespace KeryxPars.HL7.Segments
         
         public string[] GetValues()
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return
             [
                 SegmentId,
-                SetID,
-                PatientClass,
-                AssignedPatientLocation,
-                AdmissionType,
-                PreadmitNumber,
-                PriorPatientLocation,
-                AttendingDoctor,
-                ReferringDoctor,
-                ConsultingDoctor,
-                HospitalService,
-                TemporaryLocation,
-                PreadmitTestIndicator,
-                ReadmissionIndicator,
-                AdmitSource,
-                AmbulatoryStatus,
-                VipIndicator,
-                AdmittingDoctor,
-                PatientType,
-                VisitNumber,
-                FinancialClass,
-                ChargePriceIndicator,
-                CourtesyCode,
-                CreditRating,
-                ContractCode,
-                ContractEffectiveDate,
-                ContractAmount,
-                ContractPeriod,
-                InterestCode,
-                TransferToBadDebtCode,
-                TransferToBadDebtDate,
-                BadDebtAgencyCode,
-                BadDebtTransferAmount,
-                BadDebtRecoveryAmount,
-                DeleteAccountIndicator,
-                DeleteaccountDate,
-                DischargeDisposition,
-                DischargedToLocation,
-                DietType,
-                ServicingFacility,
-                BedStatus,
-                AccountStatus,
-                PendingLocation,
-                PriorTemporaryLocation,
-                AdmitDateTime,
-                DischargeDateTime,
-                CurrentPatientBalance,
-                TotalCharges,
-                TotalAdjustments,
-                TotalPayment,
-                AlternateVisitID,
-                VisitIndicator,
-                OtherHealthcareProvider,
-                ServiceEpisodeDescription,
-                ServiceEpisodeIdentifier
+                SetID.ToHL7String(delimiters),
+                PatientClass.ToHL7String(delimiters),
+                AssignedPatientLocation.ToHL7String(delimiters),
+                AdmissionType.ToHL7String(delimiters),
+                PreadmitNumber.ToHL7String(delimiters),
+                PriorPatientLocation.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(AttendingDoctor, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(ReferringDoctor, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(ConsultingDoctor, delimiters),
+                HospitalService.ToHL7String(delimiters),
+                TemporaryLocation.ToHL7String(delimiters),
+                PreadmitTestIndicator.ToHL7String(delimiters),
+                ReadmissionIndicator.ToHL7String(delimiters),
+                AdmitSource.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(AmbulatoryStatus, delimiters),
+                VipIndicator.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(AdmittingDoctor, delimiters),
+                PatientType.ToHL7String(delimiters),
+                VisitNumber.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(FinancialClass, delimiters),
+                ChargePriceIndicator.ToHL7String(delimiters),
+                CourtesyCode.ToHL7String(delimiters),
+                CreditRating.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(ContractCode, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(ContractEffectiveDate, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(ContractAmount, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(ContractPeriod, delimiters),
+                InterestCode.ToHL7String(delimiters),
+                TransferToBadDebtCode.ToHL7String(delimiters),
+                TransferToBadDebtDate.ToHL7String(delimiters),
+                BadDebtAgencyCode.ToHL7String(delimiters),
+                BadDebtTransferAmount.ToHL7String(delimiters),
+                BadDebtRecoveryAmount.ToHL7String(delimiters),
+                DeleteAccountIndicator.ToHL7String(delimiters),
+                DeleteaccountDate.ToHL7String(delimiters),
+                DischargeDisposition.ToHL7String(delimiters),
+                DischargedToLocation.ToHL7String(delimiters),
+                DietType.ToHL7String(delimiters),
+                ServicingFacility.ToHL7String(delimiters),
+                BedStatus.ToHL7String(delimiters),
+                AccountStatus.ToHL7String(delimiters),
+                PendingLocation.ToHL7String(delimiters),
+                PriorTemporaryLocation.ToHL7String(delimiters),
+                AdmitDateTime.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(DischargeDateTime, delimiters),
+                CurrentPatientBalance.ToHL7String(delimiters),
+                TotalCharges.ToHL7String(delimiters),
+                TotalAdjustments.ToHL7String(delimiters),
+                TotalPayment.ToHL7String(delimiters),
+                AlternateVisitID.ToHL7String(delimiters),
+                VisitIndicator.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(OtherHealthcareProvider, delimiters),
+                ServiceEpisodeDescription.ToHL7String(delimiters),
+                ServiceEpisodeIdentifier.ToHL7String(delimiters)
             ];
         }
 
         public string? GetField(int index)
         {
-            return index switch
-            {
-                0 => SegmentId,
-                1 => SetID,
-                2 => PatientClass,
-                3 => AssignedPatientLocation,
-                4 => AdmissionType,
-                5 => PreadmitNumber,
-                6 => PriorPatientLocation,
-                7 => AttendingDoctor,
-                8 => ReferringDoctor,
-                9 => ConsultingDoctor,
-                10 => HospitalService,
-                11 => TemporaryLocation,
-                12 => PreadmitTestIndicator,
-                13 => ReadmissionIndicator,
-                14 => AdmitSource,
-                15 => AmbulatoryStatus,
-                16 => VipIndicator,
-                17 => AdmittingDoctor,
-                18 => PatientType,
-                19 => VisitNumber,
-                20 => FinancialClass,
-                21 => ChargePriceIndicator,
-                22 => CourtesyCode,
-                23 => CreditRating,
-                24 => ContractCode,
-                25 => ContractEffectiveDate,
-                26 => ContractAmount,
-                27 => ContractPeriod,
-                28 => InterestCode,
-                29 => TransferToBadDebtCode,
-                30 => TransferToBadDebtDate,
-                31 => BadDebtAgencyCode,
-                32 => BadDebtTransferAmount,
-                33 => BadDebtRecoveryAmount,
-                34 => DeleteAccountIndicator,
-                35 => DeleteaccountDate,
-                36 => DischargeDisposition,
-                37 => DischargedToLocation,
-                38 => DietType,
-                39 => ServicingFacility,
-                40 => BedStatus,
-                41 => AccountStatus,
-                42 => PendingLocation,
-                43 => PriorTemporaryLocation,
-                44 => AdmitDateTime,
-                45 => DischargeDateTime,
-                46 => CurrentPatientBalance,
-                47 => TotalCharges,
-                48 => TotalAdjustments,
-                49 => TotalPayment,
-                50 => AlternateVisitID,
-                51 => VisitIndicator,
-                52 => OtherHealthcareProvider,
-                53 => ServiceEpisodeDescription,
-                54 => ServiceEpisodeIdentifier,
-                _ => null
-            };
+            var values = GetValues();
+            return index >= 0 && index < values.Length ? values[index] : null;
         }
     }
 }

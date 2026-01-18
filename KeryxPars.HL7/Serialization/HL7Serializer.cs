@@ -210,9 +210,14 @@ public static class HL7Serializer
                 mshProcessed = true;
 
                 // Parse event type
-                var eventCode = msh.MessageType.Split(delimiters.ComponentSeparator).ElementAtOrDefault(1);
-                if (eventCode != null)
-                    (context.Message.EventType, context.Message.MessageType) = ParseEventString(eventCode);
+                var messageTypeValue = msh.MessageType.Value;
+                if (!string.IsNullOrEmpty(messageTypeValue))
+                {
+                    var parts = messageTypeValue.Split(delimiters.ComponentSeparator);
+                    var eventCode = parts.Length > 1 ? parts[1] : null;
+                    if (eventCode != null)
+                        (context.Message.EventType, context.Message.MessageType) = ParseEventString(eventCode);
+                }
                 break;
 
             case EVN evn:

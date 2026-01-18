@@ -61,10 +61,7 @@ public class GenericSegmentConverter<TSegment> : ISegmentConverter where TSegmen
             // Read remaining fields
             while (reader.TryReadField(delimiters.FieldSeparator, out var field))
             {
-                if (!field.IsEmpty)
-                {
-                    segment.SetValue(field.ToString(), fieldIndex);
-                }
+                segment.SetValue(field.ToString(), fieldIndex);
                 fieldIndex++;
             }
 
@@ -105,16 +102,17 @@ public class GenericSegmentConverter<TSegment> : ISegmentConverter where TSegmen
         if (_segmentId == "MSH")
         {
             // MSH field 1 is the encoding characters ^~\&
-            writer.Write(delimiters.ComponentSeparator);
-            writer.Write(delimiters.FieldRepeatSeparator);
-            writer.Write(delimiters.EscapeCharacter);
-            writer.Write(delimiters.SubComponentSeparator);
-            writer.Write(delimiters.FieldSeparator);
+            // Write them manually based on delimiters
+            writer.Write(delimiters.ComponentSeparator);       // ^
+            writer.Write(delimiters.FieldRepeatSeparator);     // ~
+            writer.Write(delimiters.EscapeCharacter);          // \
+            writer.Write(delimiters.SubComponentSeparator);    // &
+            writer.Write(delimiters.FieldSeparator);           // |
             
-            // Write remaining fields starting from index 2
-            for (int i = 2; i < values.Length; i++)
+            // Write remaining fields starting from index 3 (skip index 1=null, index 2=encoding chars)
+            for (int i = 3; i < values.Length; i++)
             {
-                if (i > 2)
+                if (i > 3)
                     writer.Write(delimiters.FieldSeparator);
                 
                 if (!string.IsNullOrEmpty(values[i]))

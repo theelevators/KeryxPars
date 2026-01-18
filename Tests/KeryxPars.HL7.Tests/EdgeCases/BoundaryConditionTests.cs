@@ -125,7 +125,7 @@ public class BoundaryConditionTests
 
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value!.Msh.SendingApplication.Length.ShouldBe(1_000_000);
+        result.Value!.Msh.SendingApplication.ToHL7String(HL7Delimiters.Default).Length.ShouldBe(1_000_000);
     }
 
     [Fact]
@@ -219,7 +219,7 @@ public class BoundaryConditionTests
     {
 
         var span = "a|b|c".AsSpan();
-        var enumerator = new FieldEnumerator(span, '|');
+        var enumerator = new FieldEnumerator(span,('|'));
 
         //- Move through all items
         while (enumerator.MoveNext()) { }

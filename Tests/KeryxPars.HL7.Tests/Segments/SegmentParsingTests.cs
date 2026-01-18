@@ -283,12 +283,12 @@ public class SegmentParsingTests
         };
 
 
-        var field2 = msh.GetField(2);
-        var field9 = msh.GetField(9);
+        var field3 = msh.GetField(3); // MSH.3 = Sending Application
+        var field10 = msh.GetField(10); // MSH.10 = Message Control ID
 
 
-        field2.ShouldBe("TEST");
-        field9.ShouldBe("MSG001");
+        field3.ShouldBe("TEST");
+        field10.ShouldBe("MSG001");
     }
 
     [Fact]
@@ -311,8 +311,8 @@ public class SegmentParsingTests
         var msh = new MSH();
 
 
-        msh.SetValue("TESTAPP", 2);
-        msh.SetValue("CTRL123", 9);
+        msh.SetValue("TESTAPP", 2); // Element 2 in SetValue = SendingApplication
+        msh.SetValue("CTRL123", 9); // Element 9 in SetValue = MessageControlID
 
 
         msh.SendingApplication.ShouldBe("TESTAPP");

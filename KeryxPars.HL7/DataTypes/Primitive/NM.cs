@@ -6,10 +6,9 @@ namespace KeryxPars.HL7.DataTypes.Primitive;
 
 /// <summary>
 /// NM - Numeric Data Type
-/// A number represented as a series of ASCII numeric characters.
-/// Maximum length: 16 characters (or as defined in specification).
+/// Represents a numeric value (recommended maximum 16 characters).
 /// </summary>
-public readonly struct NM : IPrimitiveDataType
+public readonly struct NM : IPrimitiveDataType, IEquatable<string>
 {
     private readonly string _value;
 
@@ -40,6 +39,15 @@ public readonly struct NM : IPrimitiveDataType
         _value = value.ToString(CultureInfo.InvariantCulture);
     }
 
+    /// <summary>
+    /// Initializes a new instance of the NM data type from an int.
+    /// </summary>
+    /// <param name="value">The numeric value.</param>
+    public NM(int value)
+    {
+        _value = value.ToString(CultureInfo.InvariantCulture);
+    }
+
     /// <inheritdoc/>
     public string TypeCode => "NM";
 
@@ -60,8 +68,10 @@ public readonly struct NM : IPrimitiveDataType
     public decimal? ToDecimal()
     {
         if (IsEmpty) return null;
-        if (decimal.TryParse(_value, NumberStyles.Number, CultureInfo.InvariantCulture, out var result))
+        
+        if (decimal.TryParse(_value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             return result;
+        
         return null;
     }
 
@@ -72,20 +82,24 @@ public readonly struct NM : IPrimitiveDataType
     public double? ToDouble()
     {
         if (IsEmpty) return null;
-        if (double.TryParse(_value, NumberStyles.Number, CultureInfo.InvariantCulture, out var result))
+        
+        if (double.TryParse(_value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             return result;
+        
         return null;
     }
 
     /// <summary>
-    /// Converts the numeric value to an integer.
+    /// Converts the numeric value to an int (only if it's a whole number).
     /// </summary>
-    /// <returns>The integer value, or null if the value is empty or invalid.</returns>
+    /// <returns>The int value, or null if the value is empty, invalid, or not a whole number.</returns>
     public int? ToInt32()
     {
         if (IsEmpty) return null;
+        
         if (int.TryParse(_value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
             return result;
+        
         return null;
     }
 
@@ -106,16 +120,17 @@ public readonly struct NM : IPrimitiveDataType
         if (IsEmpty)
             return true;
 
-        // Check if it's a valid number
-        if (!decimal.TryParse(_value, NumberStyles.Number, CultureInfo.InvariantCulture, out _))
+        // Verify it's a valid number
+        if (ToDecimal() == null)
         {
             errors.Add($"NM data type contains invalid numeric value: '{_value}'");
             return false;
         }
 
+        // Check recommended maximum length
         if (_value.Length > 16)
         {
-            errors.Add($"NM data type exceeds recommended maximum length of 16 characters (actual: {_value.Length})");
+            errors.Add($"NM data type exceeds recommended maximum length of 16 characters: '{_value.Length}' characters");
         }
 
         return errors.Count == 0;
@@ -141,12 +156,40 @@ public readonly struct NM : IPrimitiveDataType
     /// </summary>
     public static implicit operator NM(double value) => new(value);
 
+    /// <summary>
+    /// Implicit conversion from int to NM.
+    /// </summary>
+    public static implicit operator NM(int value) => new(value);
+
+    /// <summary>
+    /// Determines whether the specified string is equal to the current NM value.
+    /// </summary>
+    public bool Equals(string? other) => _value == other;
+
     /// <inheritdoc/>
     public override string ToString() => _value ?? string.Empty;
 
     /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is NM other && _value == other._value;
+    public override bool Equals(object? obj)
+    {
+        return obj switch
+        {
+            NM other => _value == other._value,
+            string str => _value == str,
+            decimal dec => ToDecimal() == dec,
+            double dbl => ToDouble() == dbl,
+            int i => ToInt32() == i,
+            _ => false
+        };
+    }
 
     /// <inheritdoc/>
     public override int GetHashCode() => _value?.GetHashCode() ?? 0;
+
+    public static bool operator ==(NM left, NM right) => left.Equals(right);
+    public static bool operator !=(NM left, NM right) => !left.Equals(right);
+    public static bool operator ==(NM left, string? right) => left.Equals(right);
+    public static bool operator !=(NM left, string? right) => !left.Equals(right);
+    public static bool operator ==(string? left, NM right) => right.Equals(left);
+    public static bool operator !=(string? left, NM right) => !right.Equals(left);
 }

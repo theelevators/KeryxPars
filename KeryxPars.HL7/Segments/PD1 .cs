@@ -1,10 +1,13 @@
 ﻿using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
+using KeryxPars.HL7.DataTypes.Primitive;
+using KeryxPars.HL7.DataTypes.Composite;
 
 namespace KeryxPars.HL7.Segments
 {
     /// <summary>
     /// HL7 Segment: Additional Demographics
+    /// Refactored to use strongly-typed HL7 datatypes.
     /// </summary>
     public class PD1 : ISegment
     {
@@ -12,236 +15,213 @@ namespace KeryxPars.HL7.Segments
         
         public SegmentType SegmentType { get; private set; }
 
-        // Auto-Implemented Properties
+        /// <summary>
+        /// PD1.1 - Living Dependency (repeating)
+        /// </summary>
+        public IS[] LivingDependency { get; set; }
 
         /// <summary>
-        /// PD1.1
+        /// PD1.2 - Living Arrangement
         /// </summary>
-        public string LivingDependency { get; set; }
+        public IS LivingArrangement { get; set; }
 
         /// <summary>
-        /// PD1.2
+        /// PD1.3 - Patient Primary Facility (repeating)
         /// </summary>
-        public string LivingArrangement { get; set; }
+        public XON[] PatientPrimaryFacility { get; set; }
 
         /// <summary>
-        /// PD1.3
+        /// PD1.4 - Patient Primary Care Provider Name & ID No. (repeating)
         /// </summary>
-        public string PatientPrimaryFacility { get; set; }
+        public XCN[] PatientPrimaryCareProviderNameAndIDNo { get; set; }
 
         /// <summary>
-        /// PD1.4
+        /// PD1.5 - Student Indicator
         /// </summary>
-        public string PatientPrimaryCareProviderNameAndIDNo { get; set; }
+        public IS StudentIndicator { get; set; }
 
         /// <summary>
-        /// PD1.5
+        /// PD1.6 - Handicap
         /// </summary>
-        public string StudentIndicator { get; set; }
+        public IS Handicap { get; set; }
 
         /// <summary>
-        /// PD1.6
+        /// PD1.7 - Living Will Code
         /// </summary>
-        public string Handicap { get; set; }
+        public IS LivingWillCode { get; set; }
 
         /// <summary>
-        /// PD1.7
+        /// PD1.8 - Organ Donor Code
         /// </summary>
-        public string LivingWillCode { get; set; }
+        public IS OrganDonorCode { get; set; }
 
         /// <summary>
-        /// PD1.8
+        /// PD1.9 - Separate Bill
         /// </summary>
-        public string OrganDonorCode { get; set; }
+        public ID SeparateBill { get; set; }
 
         /// <summary>
-        /// PD1.9
+        /// PD1.10 - Duplicate Patient (repeating)
         /// </summary>
-        public string SeparateBill { get; set; }
+        public CX[] DuplicatePatient { get; set; }
 
         /// <summary>
-        /// PD1.10
+        /// PD1.11 - Publicity Code
         /// </summary>
-        public string DuplicatePatient { get; set; }
+        public CE PublicityCode { get; set; }
 
         /// <summary>
-        /// PD1.11
+        /// PD1.12 - Protection Indicator
         /// </summary>
-        public string PublicityCode { get; set; }
+        public ID ProtectionIndicator { get; set; }
 
         /// <summary>
-        /// PD1.12
+        /// PD1.13 - Protection Indicator Effective Date
         /// </summary>
-        public string ProtectionIndicator { get; set; }
+        public DT ProtectionIndicatorEffectiveDate { get; set; }
 
         /// <summary>
-        /// PD1.13
+        /// PD1.14 - Place of Worship (repeating)
         /// </summary>
-        public string ProtectionIndicatorEffectiveDate { get; set; }
+        public XON[] PlaceOfWorship { get; set; }
 
         /// <summary>
-        /// PD1.14
+        /// PD1.15 - Advance Directive Code (repeating)
         /// </summary>
-        public string PlaceOfWorship { get; set; }
+        public CE[] AdvanceDirectiveCode { get; set; }
 
         /// <summary>
-        /// PD1.15
+        /// PD1.16 - Immunization Registry Status
         /// </summary>
-        public string AdvanceDirectiveCode { get; set; }
+        public IS ImmunizationRegistryStatus { get; set; }
 
         /// <summary>
-        /// PD1.16
+        /// PD1.17 - Immunization Registry Status Effective Date
         /// </summary>
-        public string ImmunizationRegistryStatus { get; set; }
+        public DT ImmunizationRegistryStatusEffectiveDate { get; set; }
 
         /// <summary>
-        /// PD1.17
+        /// PD1.18 - Publicity Code Effective Date
         /// </summary>
-        public string ImmunizationRegistryStatusEffectiveDate { get; set; }
+        public DT PublicityCodeEffectiveDate { get; set; }
 
         /// <summary>
-        /// PD1.18
+        /// PD1.19 - Military Branch
         /// </summary>
-        public string PublicityCodeEffectiveDate { get; set; }
+        public IS MilitaryBranch { get; set; }
 
         /// <summary>
-        /// PD1.19
+        /// PD1.20 - Military Rank/Grade
         /// </summary>
-        public string MilitaryBranch { get; set; }
+        public IS MilitaryRankGrade { get; set; }
 
         /// <summary>
-        /// PD1.20
+        /// PD1.21 - Military Status
         /// </summary>
-        public string MilitaryRankGrade { get; set; }
+        public IS MilitaryStatus { get; set; }
 
         /// <summary>
-        /// PD1.21
+        /// PD1.22 - Advance Directive Last Verified Date
         /// </summary>
-        public string MilitaryStatus { get; set; }
+        public DT AdvanceDirectiveLastVerifiedDate { get; set; }
 
-        /// <summary>
-        /// PD1.22
-        /// </summary>
-        public string AdvanceDirectiveLastVerifiedDate { get; set; }
-
-        // Constructors
         public PD1()
         {
             SegmentType = SegmentType.ADT;
-            LivingDependency = string.Empty;
-            LivingArrangement = string.Empty;
-            PatientPrimaryFacility = string.Empty;
-            PatientPrimaryCareProviderNameAndIDNo = string.Empty;
-            StudentIndicator = string.Empty;
-            Handicap = string.Empty;
-            LivingWillCode = string.Empty;
-            OrganDonorCode = string.Empty;
-            SeparateBill = string.Empty;
-            DuplicatePatient = string.Empty;
-            PublicityCode = string.Empty;
-            ProtectionIndicator = string.Empty;
-            ProtectionIndicatorEffectiveDate = string.Empty;
-            PlaceOfWorship = string.Empty;
-            AdvanceDirectiveCode = string.Empty;
-            ImmunizationRegistryStatus = string.Empty;
-            ImmunizationRegistryStatusEffectiveDate = string.Empty;
-            PublicityCodeEffectiveDate = string.Empty;
-            MilitaryBranch = string.Empty;
-            MilitaryRankGrade = string.Empty;
-            MilitaryStatus = string.Empty;
-            AdvanceDirectiveLastVerifiedDate = string.Empty;
+            
+            LivingArrangement = default;
+            StudentIndicator = default;
+            Handicap = default;
+            LivingWillCode = default;
+            OrganDonorCode = default;
+            SeparateBill = default;
+            PublicityCode = default;
+            ProtectionIndicator = default;
+            ProtectionIndicatorEffectiveDate = default;
+            ImmunizationRegistryStatus = default;
+            ImmunizationRegistryStatusEffectiveDate = default;
+            PublicityCodeEffectiveDate = default;
+            MilitaryBranch = default;
+            MilitaryRankGrade = default;
+            MilitaryStatus = default;
+            AdvanceDirectiveLastVerifiedDate = default;
+            
+            LivingDependency = Array.Empty<IS>();
+            PatientPrimaryFacility = Array.Empty<XON>();
+            PatientPrimaryCareProviderNameAndIDNo = Array.Empty<XCN>();
+            DuplicatePatient = Array.Empty<CX>();
+            PlaceOfWorship = Array.Empty<XON>();
+            AdvanceDirectiveCode = Array.Empty<CE>();
         }
 
-        // Methods
         public void SetValue(string value, int element)
         {
+            var delimiters = HL7Delimiters.Default;
+            
             switch (element)
             {
-                case 1: LivingDependency = value; break;
-                case 2: LivingArrangement = value; break;
-                case 3: PatientPrimaryFacility = value; break;
-                case 4: PatientPrimaryCareProviderNameAndIDNo = value; break;
-                case 5: StudentIndicator = value; break;
-                case 6: Handicap = value; break;
-                case 7: LivingWillCode = value; break;
-                case 8: OrganDonorCode = value; break;
-                case 9: SeparateBill = value; break;
-                case 10: DuplicatePatient = value; break;
+                case 1: LivingDependency = SegmentFieldHelper.ParseRepeatingField<IS>(value, delimiters); break;
+                case 2: LivingArrangement = new IS(value); break;
+                case 3: PatientPrimaryFacility = SegmentFieldHelper.ParseRepeatingField<XON>(value, delimiters); break;
+                case 4: PatientPrimaryCareProviderNameAndIDNo = SegmentFieldHelper.ParseRepeatingField<XCN>(value, delimiters); break;
+                case 5: StudentIndicator = new IS(value); break;
+                case 6: Handicap = new IS(value); break;
+                case 7: LivingWillCode = new IS(value); break;
+                case 8: OrganDonorCode = new IS(value); break;
+                case 9: SeparateBill = new ID(value); break;
+                case 10: DuplicatePatient = SegmentFieldHelper.ParseRepeatingField<CX>(value, delimiters); break;
                 case 11: PublicityCode = value; break;
-                case 12: ProtectionIndicator = value; break;
-                case 13: ProtectionIndicatorEffectiveDate = value; break;
-                case 14: PlaceOfWorship = value; break;
-                case 15: AdvanceDirectiveCode = value; break;
-                case 16: ImmunizationRegistryStatus = value; break;
-                case 17: ImmunizationRegistryStatusEffectiveDate = value; break;
-                case 18: PublicityCodeEffectiveDate = value; break;
-                case 19: MilitaryBranch = value; break;
-                case 20: MilitaryRankGrade = value; break;
-                case 21: MilitaryStatus = value; break;
-                case 22: AdvanceDirectiveLastVerifiedDate = value; break;
+                case 12: ProtectionIndicator = new ID(value); break;
+                case 13: ProtectionIndicatorEffectiveDate = new DT(value); break;
+                case 14: PlaceOfWorship = SegmentFieldHelper.ParseRepeatingField<XON>(value, delimiters); break;
+                case 15: AdvanceDirectiveCode = SegmentFieldHelper.ParseRepeatingField<CE>(value, delimiters); break;
+                case 16: ImmunizationRegistryStatus = new IS(value); break;
+                case 17: ImmunizationRegistryStatusEffectiveDate = new DT(value); break;
+                case 18: PublicityCodeEffectiveDate = new DT(value); break;
+                case 19: MilitaryBranch = new IS(value); break;
+                case 20: MilitaryRankGrade = new IS(value); break;
+                case 21: MilitaryStatus = new IS(value); break;
+                case 22: AdvanceDirectiveLastVerifiedDate = new DT(value); break;
                 default: break;
             }
         }
 
         public string[] GetValues()
         {
+            var delimiters = HL7Delimiters.Default;
+            
             return
             [
                 SegmentId,
-                LivingDependency,
-                LivingArrangement,
-                PatientPrimaryFacility,
-                PatientPrimaryCareProviderNameAndIDNo,
-                StudentIndicator,
-                Handicap,
-                LivingWillCode,
-                OrganDonorCode,
-                SeparateBill,
-                DuplicatePatient,
-                PublicityCode,
-                ProtectionIndicator,
-                ProtectionIndicatorEffectiveDate,
-                PlaceOfWorship,
-                AdvanceDirectiveCode,
-                ImmunizationRegistryStatus,
-                ImmunizationRegistryStatusEffectiveDate,
-                PublicityCodeEffectiveDate,
-                MilitaryBranch,
-                MilitaryRankGrade,
-                MilitaryStatus,
-                AdvanceDirectiveLastVerifiedDate
+                SegmentFieldHelper.JoinRepeatingField(LivingDependency, delimiters),
+                LivingArrangement.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(PatientPrimaryFacility, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(PatientPrimaryCareProviderNameAndIDNo, delimiters),
+                StudentIndicator.ToHL7String(delimiters),
+                Handicap.ToHL7String(delimiters),
+                LivingWillCode.ToHL7String(delimiters),
+                OrganDonorCode.ToHL7String(delimiters),
+                SeparateBill.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(DuplicatePatient, delimiters),
+                PublicityCode.ToHL7String(delimiters),
+                ProtectionIndicator.ToHL7String(delimiters),
+                ProtectionIndicatorEffectiveDate.ToHL7String(delimiters),
+                SegmentFieldHelper.JoinRepeatingField(PlaceOfWorship, delimiters),
+                SegmentFieldHelper.JoinRepeatingField(AdvanceDirectiveCode, delimiters),
+                ImmunizationRegistryStatus.ToHL7String(delimiters),
+                ImmunizationRegistryStatusEffectiveDate.ToHL7String(delimiters),
+                PublicityCodeEffectiveDate.ToHL7String(delimiters),
+                MilitaryBranch.ToHL7String(delimiters),
+                MilitaryRankGrade.ToHL7String(delimiters),
+                MilitaryStatus.ToHL7String(delimiters),
+                AdvanceDirectiveLastVerifiedDate.ToHL7String(delimiters)
             ];
         }
 
         public string? GetField(int index)
         {
-            return index switch
-            {
-                0 => SegmentId,
-                1 => LivingDependency,
-                2 => LivingArrangement,
-                3 => PatientPrimaryFacility,
-                4 => PatientPrimaryCareProviderNameAndIDNo,
-                5 => StudentIndicator,
-                6 => Handicap,
-                7 => LivingWillCode,
-                8 => OrganDonorCode,
-                9 => SeparateBill,
-                10 => DuplicatePatient,
-                11 => PublicityCode,
-                12 => ProtectionIndicator,
-                13 => ProtectionIndicatorEffectiveDate,
-                14 => PlaceOfWorship,
-                15 => AdvanceDirectiveCode,
-                16 => ImmunizationRegistryStatus,
-                17 => ImmunizationRegistryStatusEffectiveDate,
-                18 => PublicityCodeEffectiveDate,
-                19 => MilitaryBranch,
-                20 => MilitaryRankGrade,
-                21 => MilitaryStatus,
-                22 => AdvanceDirectiveLastVerifiedDate,
-                _ => null
-            };
+            var values = GetValues();
+            return index >= 0 && index < values.Length ? values[index] : null;
         }
     }
 }
