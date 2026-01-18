@@ -9,7 +9,7 @@ public sealed class SerializerOptions
 {
     public ISegmentRegistry SegmentRegistry { get; set; } = DefaultSegmentRegistry.Instance;
     public bool IgnoreUnknownSegments { get; set; } = true;
-    public ErrorHandlingStrategy ErrorHandling { get; set; } = ErrorHandlingStrategy.CollectAndContinue;
+    public ErrorHandlingStrategy ErrorHandling { get; set; } = ErrorHandlingStrategy.FailFast;
     public IValidationStrategy? ValidationStrategy { get; set; }
 
     // Performance options

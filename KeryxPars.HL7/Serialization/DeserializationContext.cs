@@ -77,7 +77,15 @@ internal sealed class DeserializationContext
                 });
             }
 
-            return _errors.ToArray();
+
+            switch (_options.ErrorHandling)
+            {
+                case ErrorHandlingStrategy.CollectAndContinue:
+                case ErrorHandlingStrategy.Silent:
+                    break;
+                case ErrorHandlingStrategy.FailFast:
+                    return Result<HL7Message, HL7Error[]>.Failure(_errors.ToArray());
+            }
         }
 
         return Message;

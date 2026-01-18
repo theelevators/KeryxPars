@@ -19,7 +19,7 @@ public static class HL7Serializer
         var opts = options ?? SerializerOptions.Default;
         var context = new DeserializationContext(opts);
 
-        if (!message[..3].SequenceEqual("MSH"))
+        if (message.Length < 3 || !message[..3].SequenceEqual("MSH"))
         {
             return new HL7Error[] { new(ErrorSeverity.Error, ErrorCode.SegmentSequenceError, "Invalid message start") };
         }
