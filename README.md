@@ -4,9 +4,10 @@
 [![C#](https://img.shields.io/badge/C%23-12.0-239120)](https://docs.microsoft.com/en-us/dotnet/csharp/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
+
 > **Keryx** (κῆρυξ) - Greek for "herald" or "messenger" | **Pars** - Latin for "part"
 
-A high-performance, modern .NET HL7 v2.x/FHIR parser built for healthcare interoperability. KeryxPars delivers enterprise-grade speed and memory efficiency while maintaining the flexibility and ease-of-use inspired by System.Text.Json.
+A high-performance, modern .NET parser built for healthcare interoperability. KeryxPars delivers enterprise-grade speed and memory efficiency with zero custom converter code needed.
 
 ## 🎯 Why KeryxPars?
 
@@ -290,74 +291,13 @@ var options = new SerializerOptions { SegmentRegistry = registry };
 var result = HL7Serializer.Deserialize(message, options);
 ```
 
-### Configuration Options
-
-```csharp
-// Default configuration
-var options = SerializerOptions.Default;
-
-// Medication order grouping
-var medOptions = SerializerOptions.ForMedicationOrders();
-
-// Lab order grouping
-var labOptions = SerializerOptions.ForLabOrders();
-
-// Imaging order grouping
-var imagingOptions = SerializerOptions.ForImagingOrders();
-
-// Custom configuration
-var customOptions = new SerializerOptions
-{
-    ErrorHandling = ErrorHandlingStrategy.FailFast,
-    IgnoreUnknownSegments = false,
-    InitialBufferSize = 8192,
-    OrderGrouping = OrderGroupingConfiguration.Medication
-};
-```
-
-### Error Handling
-
-```csharp
-var result = HL7Serializer.Deserialize(message);
-
-if (result.IsSuccess)
-{
-    var hl7Message = result.Value;
-    // Process message
-}
-else
-{
-    // Handle errors
-    foreach (var error in result.Error!)
-    {
-        Console.WriteLine($"[{error.Severity}] {error.Code}: {error.Message}");
-    }
-    
-    // Or generate NACK
-    var nack = result.AsNack("SendingFacility", "SendingApplication", "2.5");
-    Console.WriteLine(nack);
-}
-```
-
-## 🗺️ Roadmap
-
-### Short Term ✅
-- ✅ High-performance parsing engine
-- ✅ Generic segment converters (no boilerplate!)
-- ✅ Lazy initialization for memory efficiency
-- ✅ Comprehensive benchmarks vs. popular libraries
-- ✅ Zero-allocation parsing with Span<char>
-- 🔄 Expand segment field support (in progress)
-- 🔄 Additional HL7 v2.x message types
-- 🔄 Comprehensive unit tests
-
-### Medium Term 🎯
-- 🔲 **Source Generators**: Auto-generate converters between `HL7Message` and custom objects (HL7 AutoMapper)
-- 🔲 **All HL7 v2.x Versions**: Complete support for HL7 v2.1 through v2.9
-- 🔲 Validation framework for segment rules and message structure
-- 🔲 Enhanced error messages and diagnostics
-- 🔲 Performance profiling tools and optimization guides
-- 🔲 NuGet package publication
+### Architecture
+All segments follow consistent patterns:
+- Generic converter support
+- Strongly-typed properties
+- HL7 data type compliance
+- Zero-allocation parsing
+- Comprehensive XML documentation
 
 ### Long Term 🚀
 - 🔲 **FHIR Support**: HL7 FHIR parser and converters
