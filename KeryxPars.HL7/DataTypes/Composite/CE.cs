@@ -46,7 +46,7 @@ public readonly struct CE : ICompositeDataType
     public int ComponentCount => 6;
 
     /// <inheritdoc/>
-    public bool IsEmpty => _identifier.IsEmpty && _text.IsEmpty && 
+    public bool IsEmpty => _identifier.IsEmpty && _text.IsEmpty &&
                           _nameOfCodingSystem.IsEmpty && _alternateIdentifier.IsEmpty &&
                           _alternateText.IsEmpty && _nameOfAlternateCodingSystem.IsEmpty;
 
@@ -133,7 +133,7 @@ public readonly struct CE : ICompositeDataType
         AppendComponent(sb, _alternateIdentifier, delimiters);
         AppendComponent(sb, _alternateText, delimiters);
         AppendComponent(sb, _nameOfAlternateCodingSystem, delimiters);
-        
+
         return sb.ToString().TrimEnd(delimiters.ComponentSeparator);
     }
 
@@ -154,7 +154,7 @@ public readonly struct CE : ICompositeDataType
         while (enumerator.MoveNext() && index < ComponentCount)
         {
             var component = enumerator.Current;
-            
+
             switch (index)
             {
                 case 0:
@@ -176,7 +176,7 @@ public readonly struct CE : ICompositeDataType
                     System.Runtime.CompilerServices.Unsafe.AsRef(in _nameOfAlternateCodingSystem) = new ID(component.ToString());
                     break;
             }
-            
+
             index++;
         }
     }
@@ -218,9 +218,10 @@ public readonly struct CE : ICompositeDataType
     {
         if (string.IsNullOrWhiteSpace(value))
             return default;
-        
+
         var ce = new CE();
-        ce.Parse(value.AsSpan(), HL7Delimiters.Default);
+        var delimeters = HL7Delimiters.Default;
+        ce.Parse(value.AsSpan(), delimeters);
         return ce;
     }
 

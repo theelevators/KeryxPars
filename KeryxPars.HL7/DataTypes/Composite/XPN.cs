@@ -379,6 +379,24 @@ public readonly struct XPN : ICompositeDataType
 
     /// <inheritdoc/>
     public override int GetHashCode() => ToHL7String(HL7Delimiters.Default).GetHashCode();
+
+    /// <summary>
+    /// Implicit conversion from string to XPN.
+    /// </summary>
+    public static implicit operator XPN(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return default;
+        
+        var xpn = new XPN();
+        xpn.Parse(value.AsSpan(), HL7Delimiters.Default);
+        return xpn;
+    }
+
+    /// <summary>
+    /// Implicit conversion from XPN to string.
+    /// </summary>
+    public static implicit operator string(XPN xpn) => xpn.ToString();
 }
 
 /// <summary>

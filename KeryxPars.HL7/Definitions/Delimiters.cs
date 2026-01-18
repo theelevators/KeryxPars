@@ -17,7 +17,7 @@ public readonly ref struct HL7Delimiters(
     public readonly char EscapeCharacter = escapeCharacter;
     public readonly char SubComponentSeparator = subComponentSeparator;
 
-    public static HL7Delimiters Default => new();
+    public static HL7Delimiters Default => new('|', '^', '~', '\\', '&');
     public bool AreUninitialized => default(HL7Delimiters) is HL7Delimiters other &&
                                    FieldSeparator == other.FieldSeparator &&
                                    ComponentSeparator == other.ComponentSeparator &&
