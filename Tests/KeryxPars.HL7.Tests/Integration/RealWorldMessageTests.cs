@@ -56,7 +56,7 @@ RXR|PO^Oral^HL70162|||
 TQ1|1|BID||20230101|20230201|||";
 
 
-        var result = HL7Serializer.Deserialize(message.AsSpan(),
+        var result = HL7Serializer.Deserialize<PharmacyMessage>(message.AsSpan(),
             KeryxPars.HL7.Serialization.Configuration.SerializerOptions.ForMedicationOrders());
 
 
@@ -103,7 +103,7 @@ TQ1|1|PRN||20230101|20230131|||
 TQ1|2|Q4H||20230101|20230131|||";
 
 
-        var result = HL7Serializer.Deserialize(message.AsSpan(),
+        var result = HL7Serializer.Deserialize<PharmacyMessage>(message.AsSpan(),
             KeryxPars.HL7.Serialization.Configuration.SerializerOptions.ForMedicationOrders());
 
 
@@ -224,7 +224,7 @@ ORC|NW|ORD002|FIL002||||^^^20230101||20230101101530|||
 RXO|00002^Med2|200||MG|||";
 
 
-        var result = HL7Serializer.Deserialize(message.AsSpan(),
+        var result = HL7Serializer.Deserialize<PharmacyMessage>(message.AsSpan(),
             KeryxPars.HL7.Serialization.Configuration.SerializerOptions.ForMedicationOrders());
 
 
