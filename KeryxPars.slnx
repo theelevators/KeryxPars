@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="KeryxPars.Benchmarks/KeryxPars.Benchmarks.csproj" />
+  <Project Path="KeryxPars.Core/KeryxPars.Core.csproj" />
+  <Project Path="KeryxPars.HL7/KeryxPars.HL7.csproj" />
+  <Project Path="KeryxPars.Sandbox/KeryxPars.Sandbox.csproj" />
+</Solution>

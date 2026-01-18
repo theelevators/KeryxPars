@@ -1,0 +1,23 @@
+# BenchmarkDotNet artifacts
+BenchmarkDotNet.Artifacts/
+*.etl
+
+# Build results
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userprefs
+
+# Rider
+.idea/
+*.sln.iml
+
+# Results exports
+*.html
+*.json
+*.md
+!README.md
