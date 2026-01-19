@@ -51,11 +51,16 @@ public class HL7ComprehensiveMessage : HL7DefaultMessage
     public List<SPM> Specimens { get; set; } = [];
     public List<SAC> Containers { get; set; } = [];
     
+    // Orders (Common Order segment for medication/lab orders)
+    public List<ORC> CommonOrders { get; set; } = [];
+    
     // Pharmacy
     public List<RXA> PharmacyAdministrations { get; set; } = [];
     public List<RXC> PharmacyComponents { get; set; } = [];
     public List<RXD> PharmacyDispenses { get; set; } = [];
     public List<RXG> PharmacyGives { get; set; } = [];
+
+
     
     // Financial
     public List<FT1> Transactions { get; set; } = [];

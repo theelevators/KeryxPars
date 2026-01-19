@@ -259,6 +259,47 @@ internal static class MessageSegmentAssignmentExtensions
     }
 
     /// <summary>
+    /// Assigns an ORC (common order) segment to the appropriate message type.
+    /// </summary>
+    internal static void AssignSegment(this IHL7Message message, ORC commonOrder)
+    {
+        switch (message)
+        {
+            case HL7ComprehensiveMessage msg:
+                msg.CommonOrders.Add(commonOrder);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Assigns an OBR (observation request) segment to the appropriate message type.
+    /// </summary>
+    internal static void AssignSegment(this IHL7Message message, OBR observationRequest)
+    {
+        switch (message)
+        {
+            case HL7ComprehensiveMessage msg:
+                msg.ObservationRequests.Add(observationRequest);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Assigns an OBX (observation result) segment to the appropriate message type.
+    /// </summary>
+    internal static void AssignSegment(this IHL7Message message, OBX observationResult)
+    {
+        switch (message)
+        {
+            case HL7ComprehensiveMessage msg:
+                msg.ObservationResults.Add(observationResult);
+                break;
+        }
+    }
+
+
+
+    /// <summary>
     /// Adds an order group to the appropriate message type.
     /// </summary>
     internal static void AddOrderGroup(this IHL7Message message, OrderGroup orderGroup)
