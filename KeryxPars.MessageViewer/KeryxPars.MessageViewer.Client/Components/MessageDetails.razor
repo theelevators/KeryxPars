@@ -1,0 +1,387 @@
+@using KeryxPars.MessageViewer.Core.Models
+@using KeryxPars.HL7.Contracts
+@using KeryxPars.MessageViewer.Client.Extensions
+
+<div class="message-details">
+    @if (Result.Message != null)
+    {
+        <div class="details-toolbar">
+            <div class="search-box">
+                <span class="bi bi-search"></span>
+                <input type="text" 
+                       @bind="searchTerm" 
+                       @bind:event="oninput" 
+                       placeholder="Search fields..." 
+                       class="search-input" />
+            </div>
+            <div class="view-options">
+                <button class="btn-icon @(showEmptyFields ? "active" : "")" 
+                        @onclick="() => showEmptyFields = !showEmptyFields"
+                        title="Toggle empty fields">
+                    <span class="bi bi-eye@(showEmptyFields ? "" : "-slash")"></span>
+                </button>
+                <button class="btn-icon @(expandAll ? "active" : "")"
+                        @onclick="ToggleExpandAll"
+                        title="@(expandAll ? "Collapse all" : "Expand all")">
+                    <span class="bi bi-arrows-@(expandAll ? "collapse" : "expand")"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="details-tree">
+            @foreach (var segment in GetFilteredSegments())
+            {
+                var segmentId = segment.SegmentId;
+                var isExpanded = expandedNodes.Contains(segmentId) || expandAll;
+                var fields = segment.GetValues();
+                var fieldCount = GetFieldCount(fields);
+
+                <div class="tree-node segment-node">
+                    <div class="node-header" @onclick="() => ToggleNode(segmentId)">
+                        <span class="bi bi-@(isExpanded ? "chevron-down" : "chevron-right")"></span>
+                        <span class="node-icon bi bi-folder@(isExpanded ? "-open" : "")"></span>
+                        <span class="node-label">@segmentId</span>
+                        <span class="node-badge">@fieldCount fields</span>
+                    </div>
+
+                    @if (isExpanded)
+                    {
+                        <div class="node-children">
+                            @for (int i = 0; i < fields.Length; i++)
+                            {
+                                var field = fields[i];
+                                if (i == 0) continue;
+                                
+                                if (!showEmptyFields && string.IsNullOrWhiteSpace(field))
+                                    continue;
+
+                                if (!string.IsNullOrWhiteSpace(searchTerm) && 
+                                    !field.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                                    continue;
+
+                                var fieldDescription = GetFieldDescription(segmentId, i);
+                                var isEmpty = string.IsNullOrWhiteSpace(field);
+
+                                <div class="tree-node field-node">
+                                    <div class="node-content">
+                                        <div class="field-info">
+                                            <span class="field-index">@segmentId.@i</span>
+                                            <span class="field-name">@fieldDescription</span>
+                                        </div>
+                                        <div class="field-value @(isEmpty ? "empty" : "")">
+                                            @(isEmpty ? "(empty)" : field)
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public ParsedMessageResult Result { get; set; } = null!;
+
+    private string searchTerm = string.Empty;
+    private bool showEmptyFields = false;
+    private bool expandAll = false;
+    private HashSet<string> expandedNodes = new();
+
+    private void ToggleNode(string nodeName)
+    {
+        if (expandedNodes.Contains(nodeName))
+            expandedNodes.Remove(nodeName);
+        else
+            expandedNodes.Add(nodeName);
+    }
+
+    private void ToggleExpandAll()
+    {
+        expandAll = !expandAll;
+    }
+
+    private IEnumerable<ISegment> GetFilteredSegments()
+    {
+        if (Result.Message == null)
+            return Enumerable.Empty<ISegment>();
+
+        return Result.Message.GetAllSegments();
+    }
+
+    private int GetFieldCount(string[] fields)
+    {
+        if (showEmptyFields)
+            return fields.Length - 1;
+
+        return fields.Skip(1).Count(f => !string.IsNullOrWhiteSpace(f));
+    }
+
+    private string GetFieldDescription(string segmentId, int fieldIndex)
+    {
+        return segmentId switch
+        {
+            "MSH" => fieldIndex switch
+            {
+                1 => "Field Separator",
+                2 => "Encoding Characters",
+                3 => "Sending Application",
+                4 => "Sending Facility",
+                5 => "Receiving Application",
+                6 => "Receiving Facility",
+                7 => "Date/Time of Message",
+                8 => "Security",
+                9 => "Message Type",
+                10 => "Message Control ID",
+                11 => "Processing ID",
+                12 => "Version ID",
+                13 => "Sequence Number",
+                _ => $"Field {fieldIndex}"
+            },
+            "EVN" => fieldIndex switch
+            {
+                1 => "Event Type Code",
+                2 => "Recorded Date/Time",
+                3 => "Date/Time Planned Event",
+                4 => "Event Reason Code",
+                5 => "Operator ID",
+                6 => "Event Occurred",
+                7 => "Event Facility",
+                _ => $"Field {fieldIndex}"
+            },
+            "PID" => fieldIndex switch
+            {
+                1 => "Set ID",
+                2 => "Patient ID (External)",
+                3 => "Patient Identifier List",
+                4 => "Alternate Patient ID",
+                5 => "Patient Name",
+                6 => "Mother's Maiden Name",
+                7 => "Date/Time of Birth",
+                8 => "Administrative Sex",
+                9 => "Patient Alias",
+                10 => "Race",
+                11 => "Patient Address",
+                12 => "County Code",
+                13 => "Phone Number - Home",
+                14 => "Phone Number - Business",
+                15 => "Primary Language",
+                16 => "Marital Status",
+                17 => "Religion",
+                18 => "Patient Account Number",
+                19 => "SSN Number",
+                20 => "Driver's License Number",
+                21 => "Mother's Identifier",
+                22 => "Ethnic Group",
+                23 => "Birth Place",
+                24 => "Multiple Birth Indicator",
+                25 => "Birth Order",
+                26 => "Citizenship",
+                27 => "Veterans Military Status",
+                28 => "Nationality",
+                29 => "Patient Death Date/Time",
+                30 => "Patient Death Indicator",
+                _ => $"Field {fieldIndex}"
+            },
+            "PV1" => fieldIndex switch
+            {
+                1 => "Set ID",
+                2 => "Patient Class",
+                3 => "Assigned Patient Location",
+                4 => "Admission Type",
+                5 => "Preadmit Number",
+                6 => "Prior Patient Location",
+                7 => "Attending Doctor",
+                8 => "Referring Doctor",
+                9 => "Consulting Doctor",
+                10 => "Hospital Service",
+                11 => "Temporary Location",
+                12 => "Preadmit Test Indicator",
+                13 => "Re-admission Indicator",
+                14 => "Admit Source",
+                15 => "Ambulatory Status",
+                16 => "VIP Indicator",
+                17 => "Admitting Doctor",
+                18 => "Patient Type",
+                19 => "Visit Number",
+                20 => "Financial Class",
+                _ => $"Field {fieldIndex}"
+            },
+            "NK1" => fieldIndex switch
+            {
+                1 => "Set ID",
+                2 => "Name",
+                3 => "Relationship",
+                4 => "Address",
+                5 => "Phone Number",
+                6 => "Business Phone Number",
+                7 => "Contact Role",
+                8 => "Start Date",
+                9 => "End Date",
+                10 => "Next of Kin / Associated Parties Job Title",
+                _ => $"Field {fieldIndex}"
+            },
+            "ORC" => fieldIndex switch
+            {
+                1 => "Order Control",
+                2 => "Placer Order Number",
+                3 => "Filler Order Number",
+                4 => "Placer Group Number",
+                5 => "Order Status",
+                6 => "Response Flag",
+                7 => "Quantity/Timing",
+                8 => "Parent Order",
+                9 => "Date/Time of Transaction",
+                10 => "Entered By",
+                11 => "Verified By",
+                12 => "Ordering Provider",
+                13 => "Enterer's Location",
+                14 => "Call Back Phone Number",
+                15 => "Order Effective Date/Time",
+                _ => $"Field {fieldIndex}"
+            },
+            "OBR" => fieldIndex switch
+            {
+                1 => "Set ID",
+                2 => "Placer Order Number",
+                3 => "Filler Order Number",
+                4 => "Universal Service ID",
+                5 => "Priority",
+                6 => "Requested Date/Time",
+                7 => "Observation Date/Time",
+                8 => "Observation End Date/Time",
+                9 => "Collection Volume",
+                10 => "Collector Identifier",
+                11 => "Specimen Action Code",
+                12 => "Danger Code",
+                13 => "Relevant Clinical Info",
+                14 => "Specimen Received Date/Time",
+                15 => "Specimen Source",
+                _ => $"Field {fieldIndex}"
+            },
+            "OBX" => fieldIndex switch
+            {
+                1 => "Set ID",
+                2 => "Value Type",
+                3 => "Observation Identifier",
+                4 => "Observation Sub-ID",
+                5 => "Observation Value",
+                6 => "Units",
+                7 => "References Range",
+                8 => "Abnormal Flags",
+                9 => "Probability",
+                10 => "Nature of Abnormal Test",
+                11 => "Observation Result Status",
+                12 => "Effective Date",
+                13 => "User Defined Access Checks",
+                14 => "Date/Time of Observation",
+                _ => $"Field {fieldIndex}"
+            },
+            "AL1" => fieldIndex switch
+            {
+                1 => "Set ID",
+                2 => "Allergen Type Code",
+                3 => "Allergen Code/Mnemonic/Description",
+                4 => "Allergy Severity Code",
+                5 => "Allergy Reaction Code",
+                6 => "Identification Date",
+                _ => $"Field {fieldIndex}"
+            },
+            "DG1" => fieldIndex switch
+            {
+                1 => "Set ID",
+                2 => "Diagnosis Coding Method",
+                3 => "Diagnosis Code",
+                4 => "Diagnosis Description",
+                5 => "Diagnosis Date/Time",
+                6 => "Diagnosis Type",
+                7 => "Major Diagnostic Category",
+                8 => "Diagnostic Related Group",
+                9 => "DRG Approval Indicator",
+                10 => "DRG Grouper Review Code",
+                _ => $"Field {fieldIndex}"
+            },
+            "RXE" => fieldIndex switch
+            {
+                1 => "Quantity/Timing",
+                2 => "Give Code",
+                3 => "Give Amount - Minimum",
+                4 => "Give Amount - Maximum",
+                5 => "Give Units",
+                6 => "Give Dosage Form",
+                7 => "Provider's Administration Instructions",
+                _ => $"Field {fieldIndex}"
+            },
+            "RXR" => fieldIndex switch
+            {
+                1 => "Route",
+                2 => "Administration Site",
+                3 => "Administration Device",
+                4 => "Administration Method",
+                _ => $"Field {fieldIndex}"
+            },
+            "NTE" => fieldIndex switch
+            {
+                1 => "Set ID",
+                2 => "Source of Comment",
+                3 => "Comment",
+                4 => "Comment Type",
+                _ => $"Field {fieldIndex}"
+            },
+            "GT1" => fieldIndex switch
+            {
+                1 => "Set ID",
+                2 => "Guarantor Number",
+                3 => "Guarantor Name",
+                4 => "Guarantor Spouse Name",
+                5 => "Guarantor Address",
+                6 => "Guarantor Phone Number - Home",
+                7 => "Guarantor Phone Number - Business",
+                8 => "Guarantor Date/Time Of Birth",
+                9 => "Guarantor Administrative Sex",
+                10 => "Guarantor Type",
+                _ => $"Field {fieldIndex}"
+            },
+            "IN1" => fieldIndex switch
+            {
+                1 => "Set ID",
+                2 => "Insurance Plan ID",
+                3 => "Insurance Company ID",
+                4 => "Insurance Company Name",
+                5 => "Insurance Company Address",
+                6 => "Insurance Co Contact Person",
+                7 => "Insurance Co Phone Number",
+                8 => "Group Number",
+                9 => "Group Name",
+                10 => "Insured's Group Emp ID",
+                _ => $"Field {fieldIndex}"
+            },
+            "MSA" => fieldIndex switch
+            {
+                1 => "Acknowledgment Code",
+                2 => "Message Control ID",
+                3 => "Text Message",
+                4 => "Expected Sequence Number",
+                5 => "Delayed Acknowledgment Type",
+                6 => "Error Condition",
+                _ => $"Field {fieldIndex}"
+            },
+            "ERR" => fieldIndex switch
+            {
+                1 => "Error Code and Location",
+                2 => "Error Location",
+                3 => "HL7 Error Code",
+                4 => "Severity",
+                5 => "Application Error Code",
+                6 => "Application Error Parameter",
+                7 => "Diagnostic Information",
+                8 => "User Message",
+                _ => $"Field {fieldIndex}"
+            },
+            _ => $"Field {fieldIndex}"
+        };
+    }
+}

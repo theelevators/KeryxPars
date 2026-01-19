@@ -1,0 +1,304 @@
+@using KeryxPars.MessageViewer.Core.Models
+@using KeryxPars.MessageViewer.Client.Extensions
+
+<div class="patient-summary">
+    @if (Result.Message != null)
+    {
+        @if (Result.Message.Pid != null)
+        {
+            var pidFields = Result.Message.Pid.GetValues();
+            
+            <div class="patient-header">
+                <div class="patient-identity">
+                    <h3>
+                        <span class="bi bi-person-circle me-2"></span>
+                        @GetFieldValue(pidFields, 5, "Unknown Patient")
+                    </h3>
+                    <div class="patient-demographics">
+                        <span class="demographic-item">
+                            <strong>DOB:</strong> @FormatDate(GetFieldValue(pidFields, 7))
+                        </span>
+                        <span class="demographic-item">
+                            <strong>Sex:</strong> @GetFieldValue(pidFields, 8, "Unknown")
+                        </span>
+                        <span class="demographic-item">
+                            <strong>MRN:</strong> @GetFieldValue(pidFields, 3, "N/A")
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="patient-contact">
+                <h4><span class="bi bi-telephone me-2"></span>Contact Information</h4>
+                <div class="contact-details">
+                    @{
+                        var address = GetFieldValue(pidFields, 11);
+                        if (!string.IsNullOrWhiteSpace(address))
+                        {
+                            <div class="detail-row">
+                                <span class="detail-label">Address:</span>
+                                <span class="detail-value">@address.Replace("^", " ")</span>
+                            </div>
+                        }
+                        
+                        var homePhone = GetFieldValue(pidFields, 13);
+                        if (!string.IsNullOrWhiteSpace(homePhone))
+                        {
+                            <div class="detail-row">
+                                <span class="detail-label">Home Phone:</span>
+                                <span class="detail-value">@homePhone</span>
+                            </div>
+                        }
+                        
+                        var businessPhone = GetFieldValue(pidFields, 14);
+                        if (!string.IsNullOrWhiteSpace(businessPhone))
+                        {
+                            <div class="detail-row">
+                                <span class="detail-label">Business Phone:</span>
+                                <span class="detail-value">@businessPhone</span>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Result.Message.Pv1 != null && !IsEmpty(Result.Message.Pv1))
+        {
+            var pv1Fields = Result.Message.Pv1.GetValues();
+            
+            <div class="visit-info">
+                <h4><span class="bi bi-building me-2"></span>Visit Information</h4>
+                <div class="visit-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Patient Class:</span>
+                        <span class="detail-value">@GetFieldValue(pv1Fields, 2, "Unknown")</span>
+                    </div>
+                    @{
+                        var location = GetFieldValue(pv1Fields, 3);
+                        if (!string.IsNullOrWhiteSpace(location))
+                        {
+                            <div class="detail-row">
+                                <span class="detail-label">Location:</span>
+                                <span class="detail-value">@location</span>
+                            </div>
+                        }
+                        
+                        var visitNumber = GetFieldValue(pv1Fields, 19);
+                        if (!string.IsNullOrWhiteSpace(visitNumber))
+                        {
+                            <div class="detail-row">
+                                <span class="detail-label">Visit Number:</span>
+                                <span class="detail-value">@visitNumber</span>
+                            </div>
+                        }
+                        
+                        var admissionType = GetFieldValue(pv1Fields, 4);
+                        if (!string.IsNullOrWhiteSpace(admissionType))
+                        {
+                            <div class="detail-row">
+                                <span class="detail-label">Admission Type:</span>
+                                <span class="detail-value">@admissionType</span>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Result.Message.Allergies.Any(a => !IsEmpty(a)))
+        {
+            <div class="allergies-section alert-section">
+                <h4><span class="bi bi-exclamation-triangle me-2"></span>Allergies</h4>
+                <div class="allergies-list">
+                    @foreach (var allergy in Result.Message.Allergies.Where(a => !IsEmpty(a)))
+                    {
+                        var allergyFields = allergy.GetValues();
+                        <div class="allergy-item alert-item">
+                            <span class="allergy-icon bi bi-circle-fill"></span>
+                            <div class="allergy-details">
+                                <strong>@GetFieldValue(allergyFields, 3, "Unknown Allergen")</strong>
+                                @{
+                                    var allergyType = GetFieldValue(allergyFields, 2);
+                                    if (!string.IsNullOrWhiteSpace(allergyType))
+                                    {
+                                        <span class="allergy-type">Type: @allergyType</span>
+                                    }
+                                    
+                                    var severity = GetFieldValue(allergyFields, 4);
+                                    if (!string.IsNullOrWhiteSpace(severity))
+                                    {
+                                        <span class="allergy-severity">Severity: @severity</span>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Result.Message.Diagnoses.Any(d => !IsEmpty(d)))
+        {
+            <div class="diagnoses-section">
+                <h4><span class="bi bi-clipboard-pulse me-2"></span>Diagnoses</h4>
+                <div class="diagnoses-list">
+                    @foreach (var diagnosis in Result.Message.Diagnoses.Where(d => !IsEmpty(d)))
+                    {
+                        var diagFields = diagnosis.GetValues();
+                        <div class="diagnosis-item">
+                            <div class="diagnosis-header">
+                                <span class="diagnosis-code">@GetFieldValue(diagFields, 3)</span>
+                            </div>
+                            @{
+                                var description = GetFieldValue(diagFields, 4);
+                                if (!string.IsNullOrWhiteSpace(description))
+                                {
+                                    <div class="diagnosis-description">@description</div>
+                                }
+                                
+                                var codingMethod = GetFieldValue(diagFields, 2);
+                                if (!string.IsNullOrWhiteSpace(codingMethod))
+                                {
+                                    <div class="diagnosis-meta">
+                                        <span>Coding Method: @codingMethod</span>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Result.Message.Orders.Any())
+        {
+            <div class="orders-section">
+                <h4><span class="bi bi-prescription2 me-2"></span>Orders</h4>
+                <div class="orders-list">
+                    @foreach (var order in Result.Message.Orders)
+                    {
+                        <div class="order-item">
+                            <div class="order-header">
+                                <span class="order-type-badge">@order.OrderType</span>
+                                @if (order.PrimarySegment != null)
+                                {
+                                    var primaryFields = order.PrimarySegment.GetValues();
+                                    var orderControl = GetFieldValue(primaryFields, 1);
+                                    if (!string.IsNullOrWhiteSpace(orderControl))
+                                    {
+                                        <span class="order-control">@orderControl</span>
+                                    }
+                                }
+                            </div>
+                            <div class="order-details">
+                                @foreach (var detail in order.DetailSegments)
+                                {
+                                    var detailFields = detail.Value.GetValues();
+                                    var nonEmptyFields = detailFields.Skip(1).Where(f => !string.IsNullOrWhiteSpace(f));
+                                    if (nonEmptyFields.Any())
+                                    {
+                                        <div class="order-detail-row">
+                                            <strong>@detail.Key:</strong> @string.Join(" | ", nonEmptyFields)
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Result.Message.Insurance.Any(i => !IsEmpty(i)))
+        {
+            <div class="insurance-section">
+                <h4><span class="bi bi-credit-card me-2"></span>Insurance Information</h4>
+                <div class="insurance-list">
+                    @foreach (var insurance in Result.Message.Insurance.Where(i => !IsEmpty(i)))
+                    {
+                        var insFields = insurance.GetValues();
+                        <div class="insurance-item">
+                            @{
+                                var setId = GetFieldValue(insFields, 1);
+                                if (!string.IsNullOrWhiteSpace(setId))
+                                {
+                                    <div class="insurance-header">Set ID: @setId</div>
+                                }
+                            }
+                            <div class="insurance-details">
+                                @for (int i = 2; i < Math.Min(insFields.Length, 10); i++)
+                                {
+                                    var field = GetFieldValue(insFields, i);
+                                    if (!string.IsNullOrWhiteSpace(field))
+                                    {
+                                        <div>Field @i: @field</div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="no-data">
+            <span class="bi bi-info-circle"></span>
+            <p>No message data available</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public ParsedMessageResult Result { get; set; } = null!;
+
+    private string GetFieldValue(string[] fields, int index, string defaultValue = "")
+    {
+        if (index < 0 || index >= fields.Length)
+            return defaultValue;
+        
+        var value = fields[index];
+        return string.IsNullOrWhiteSpace(value) ? defaultValue : value;
+    }
+
+    private string FormatDate(string? date)
+    {
+        if (string.IsNullOrWhiteSpace(date))
+            return "Unknown";
+
+        if (date.Length >= 8)
+        {
+            try
+            {
+                var year = date.Substring(0, 4);
+                var month = date.Substring(4, 2);
+                var day = date.Substring(6, 2);
+                return $"{month}/{day}/{year}";
+            }
+            catch
+            {
+                return date;
+            }
+        }
+
+        return date;
+    }
+
+    private bool IsEmpty(KeryxPars.HL7.Contracts.ISegment? segment)
+    {
+        if (segment == null)
+            return true;
+
+        var values = segment.GetValues();
+        for (int i = 1; i < values.Length; i++)
+        {
+            if (!string.IsNullOrWhiteSpace(values[i]))
+                return false;
+        }
+        return true;
+    }
+}
+

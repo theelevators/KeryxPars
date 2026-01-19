@@ -1,0 +1,49 @@
+﻿<nav class="top-navbar">
+    <div class="navbar-container">
+        <div class="navbar-brand">
+            <span class="bi bi-clipboard-pulse"></span>
+            <span class="brand-text">KeryxPars</span>
+            <span class="brand-subtext">Message Viewer</span>
+        </div>
+
+        <button class="hamburger-btn @(collapseNavMenu ? "" : "active")" @onclick="ToggleNavMenu">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+
+        <div class="navbar-links @(collapseNavMenu ? "collapsed" : "")">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="CloseNavMenu">
+                <span class="bi bi-house-door"></span>
+                <span>Home</span>
+            </NavLink>
+            <NavLink class="nav-link" href="viewer" @onclick="CloseNavMenu">
+                <span class="bi bi-eye"></span>
+                <span>Viewer</span>
+            </NavLink>
+            <NavLink class="nav-link" href="library" @onclick="CloseNavMenu">
+                <span class="bi bi-folder"></span>
+                <span>Library</span>
+            </NavLink>
+            <a class="nav-link" href="https://github.com/theelevators/KeryxPars" target="_blank">
+                <span class="bi bi-github"></span>
+                <span>GitHub</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private void CloseNavMenu()
+    {
+        collapseNavMenu = true;
+    }
+}
+
