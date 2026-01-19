@@ -29,9 +29,10 @@
     font-size: 1.125rem;
 }
 
-.navbar-brand .bi {
-    font-size: 1.5rem;
-    color: #0d6efd;
+.brand-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
 }
 
 .brand-text {
