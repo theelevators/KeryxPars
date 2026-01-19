@@ -1,0 +1,64 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      
+      - name: Restore dependencies
+        run: dotnet restore KeryxPars.MessageViewer/KeryxPars.MessageViewer.sln
+      
+      - name: Build
+        run: dotnet build KeryxPars.MessageViewer/KeryxPars.MessageViewer.sln --configuration Release --no-restore
+      
+      - name: Publish
+        run: dotnet publish KeryxPars.MessageViewer/KeryxPars.MessageViewer.Client/KeryxPars.MessageViewer.Client.csproj -c Release -o publish
+      
+      # Change base-tag in index.html from '/' to 'KeryxPars' to match GitHub Pages repository subdirectory
+      - name: Update base tag
+        run: sed -i 's/<base href="\/" \/>/<base href="\/KeryxPars\/" \/>/g' publish/wwwroot/index.html
+      
+      # Copy index.html to 404.html to serve the same base page for deep links
+      - name: Copy index.html to 404.html
+        run: cp publish/wwwroot/index.html publish/wwwroot/404.html
+      
+      # Add .nojekyll file to tell GitHub pages to not treat this as a Jekyll project
+      - name: Add .nojekyll file
+        run: touch publish/wwwroot/.nojekyll
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: publish/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
