@@ -1,16 +1,19 @@
 .home-container {
     max-width: 1400px;
     margin: 0 auto;
+    overflow-x: hidden;
 }
 
 .hero-section {
     padding: 4rem 2rem;
     text-align: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
     color: white;
     border-radius: 16px;
-    margin: 2rem 0;
+    margin: 2rem 1rem;
+    box-shadow: 0 4px 20px rgba(13, 110, 253, 0.2);
 }
+
 
 .hero-content {
     max-width: 900px;
@@ -84,7 +87,7 @@
 
 .btn-primary {
     background: white;
-    color: #667eea;
+    color: #0d6efd;
     border: none;
     border-radius: 8px;
     font-weight: 600;
@@ -98,6 +101,7 @@
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    background: #f8f9fa;
 }
 
 .btn-secondary {
@@ -151,7 +155,7 @@
 .feature-icon {
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -201,15 +205,88 @@
     background: white;
     padding: 1rem 1.5rem;
     border-radius: 8px;
-    border-left: 4px solid #667eea;
-    font-weight: 600;
+    border-left: 4px solid #0d6efd;
+    font-weight: 500;
     color: #1a1a1a;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.message-type-badge .bi {
+    color: #0d6efd;
+    font-size: 1.25rem;
+}
+
+/* Use Cases Section */
+.use-cases-section {
+    padding: 4rem 2rem;
+}
+
+.use-cases-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: #1a1a1a;
+}
+
+.use-cases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.use-case-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 2px solid #dee2e6;
+    transition: all 0.3s;
+}
+
+.use-case-card:hover {
+    transform: translateY(-4px);
+    border-color: #0d6efd;
+    box-shadow: 0 8px 24px rgba(13, 110, 253, 0.15);
+}
+
+.use-case-icon {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #0d6efd;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.use-case-card h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1a1a1a;
+}
+
+.use-case-card p {
+    color: #495057;
+    line-height: 1.6;
+    margin: 0;
 }
 
 .cta-section {
     padding: 4rem 2rem;
     text-align: center;
+    background: linear-gradient(135deg, #e7f3ff 0%, #f8f9fa 100%);
+    border-radius: 16px;
+    margin: 2rem 0;
 }
 
 .cta-section h2 {
@@ -226,6 +303,12 @@
 }
 
 @media (max-width: 768px) {
+    .hero-section {
+        margin: 1rem 0.5rem;
+        padding: 3rem 1.5rem;
+        border-radius: 12px;
+    }
+
     .hero-section h1 {
         font-size: 2rem;
     }
@@ -234,11 +317,103 @@
         font-size: 1.1rem;
     }
 
+    .hero-logo img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .features-section,
+    .use-cases-section {
+        padding: 3rem 1rem;
+    }
+
+    .features-section h2,
+    .use-cases-section h2 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
     .features-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .use-cases-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
 
     .message-types-grid {
         grid-template-columns: 1fr;
     }
+
+    .supported-messages {
+        margin: 1rem 0.5rem;
+        padding: 3rem 1rem;
+        border-radius: 12px;
+    }
+
+    .cta-section {
+        margin: 1rem 0.5rem;
+        padding: 3rem 1.5rem;
+        border-radius: 12px;
+    }
+
+    .cta-section h2 {
+        font-size: 2rem;
+    }
+
+    .hero-stats {
+        gap: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-large {
+        width: 100%;
+        justify-content: center;
+    }
 }
+
+@media (max-width: 480px) {
+    .hero-section {
+        padding: 2rem 1rem;
+    }
+
+    .hero-section h1 {
+        font-size: 1.75rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .stat-number {
+        font-size: 1.75rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .feature-card,
+    .use-case-card {
+        padding: 1.5rem;
+    }
+
+    .features-section h2,
+    .use-cases-section h2,
+    .supported-messages h2,
+    .cta-section h2 {
+        font-size: 1.75rem;
+    }
+}
+
+

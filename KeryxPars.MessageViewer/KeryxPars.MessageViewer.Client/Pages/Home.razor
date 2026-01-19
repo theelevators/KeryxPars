@@ -1,118 +1,188 @@
 ﻿@page "/"
+@inject NavigationManager Navigation
 
-<PageTitle>KeryxPars Message Viewer</PageTitle>
+<PageTitle>KeryxPars Message Viewer - Professional HL7 Message Analysis Tool</PageTitle>
 
 <div class="home-container">
-<div class="hero-section">
-    <div class="hero-content">
-        <div class="hero-logo">
-            <img src="logo.svg" alt="KeryxPars Logo" />
-        </div>
-        <h1>KeryxPars Message Viewer</h1>
-        <p class="hero-subtitle">
-            The most advanced, intelligent HL7 message viewer with 400+ field tooltips
-        </p>
-        <div class="hero-stats">
-            <div class="hero-stat">
-                <span class="stat-number">400+</span>
-                <span class="stat-label">Field Descriptions</span>
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-logo">
+                <img src="logo.svg" alt="KeryxPars Logo" />
             </div>
-            <div class="hero-stat">
-                <span class="stat-number">150+</span>
-                <span class="stat-label">Component Tooltips</span>
+            <h1>KeryxPars Message Viewer</h1>
+            <p class="hero-subtitle">
+                Professional HL7 message analysis for healthcare IT teams
+            </p>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="stat-number">400+</span>
+                    <span class="stat-label">Field Descriptions</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="stat-number">Zero</span>
+                    <span class="stat-label">Installation Required</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="stat-number">7</span>
+                    <span class="stat-label">Viewing Modes</span>
+                </div>
             </div>
-            <div class="hero-stat">
-                <span class="stat-number">7</span>
-                <span class="stat-label">View Modes</span>
+            <div class="hero-actions">
+                <button @onclick="NavigateToViewer" class="btn btn-primary btn-large">
+                    <span class="bi bi-play-fill me-2"></span>
+                    Start Viewing Messages
+                </button>
+                <a href="https://github.com/theelevators/KeryxPars" target="_blank" class="btn btn-secondary btn-large">
+                    <span class="bi bi-github me-2"></span>
+                    View on GitHub
+                </a>
             </div>
-        </div>
-        <div class="hero-actions">
-            <a href="/viewer" class="btn btn-primary btn-large">
-                <span class="bi bi-play-fill me-2"></span>
-                Start Viewing Messages
-            </a>
-            <a href="https://github.com/theelevators/KeryxPars" target="_blank" class="btn btn-secondary btn-large">
-                <span class="bi bi-github me-2"></span>
-                View on GitHub
-            </a>
         </div>
     </div>
-</div>
 
     <div class="features-section">
-        <h2>Features</h2>
+        <h2>Built for Healthcare IT Professionals</h2>
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon">
-                    <span class="bi bi-speedometer2"></span>
+                    <span class="bi bi-hospital"></span>
                 </div>
-                <h3>High Performance</h3>
-                <p>Zero-allocation parsing using Span&lt;char&gt; and ref struct for maximum speed</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <span class="bi bi-shield-check"></span>
-                </div>
-                <h3>Type Safe</h3>
-                <p>Strongly-typed segments with compile-time safety and full IntelliSense support</p>
+                <h3>Clinical Data Insights</h3>
+                <p>Instantly understand patient demographics, visit details, diagnoses, and allergies in a clean, organized view</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">
                     <span class="bi bi-eye"></span>
                 </div>
-                <h3>Visual Inspection</h3>
-                <p>Beautiful UI for viewing message structure, segments, and field details</p>
+                <h3>Intelligent Tooltips</h3>
+                <p>Hover over any field to see detailed descriptions - no manual lookup required, learn HL7 as you work</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">
-                    <span class="bi bi-check-circle"></span>
+                    <span class="bi bi-diagram-3"></span>
                 </div>
-                <h3>Validation</h3>
-                <p>Real-time validation with detailed error messages and suggestions</p>
+                <h3>Tree View Explorer</h3>
+                <p>Navigate message hierarchy from segments to fields to components with inline metadata explanations</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">
-                    <span class="bi bi-collection"></span>
+                    <span class="bi bi-shield-check"></span>
+                </div>
+                <h3>Message Validation</h3>
+                <p>Real-time error detection and warnings help identify issues before messages go into production</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="bi bi-folder"></span>
                 </div>
                 <h3>Message Library</h3>
-                <p>Store and organize your HL7 messages for quick access and comparison</p>
+                <p>Save and organize test messages for interface development, troubleshooting, and training</p>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">
-                    <span class="bi bi-code-square"></span>
+                    <span class="bi bi-lock"></span>
                 </div>
-                <h3>Developer Friendly</h3>
-                <p>Clean API, extensive documentation, and zero boilerplate code</p>
+                <h3>Privacy First</h3>
+                <p>All processing happens in your browser - no data sent to servers, completely safe for PHI</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="use-cases-section">
+        <h2>Perfect for Your Workflow</h2>
+        <div class="use-cases-grid">
+            <div class="use-case-card">
+                <div class="use-case-icon">
+                    <span class="bi bi-bug"></span>
+                </div>
+                <h3>Interface Troubleshooting</h3>
+                <p>Quickly identify malformed messages, missing fields, or incorrect values during integration testing</p>
+            </div>
+
+            <div class="use-case-card">
+                <div class="use-case-icon">
+                    <span class="bi bi-tools"></span>
+                </div>
+                <h3>Interface Development</h3>
+                <p>Validate message structure and content during development with instant visual feedback</p>
+            </div>
+
+            <div class="use-case-card">
+                <div class="use-case-icon">
+                    <span class="bi bi-mortarboard"></span>
+                </div>
+                <h3>Staff Training</h3>
+                <p>Teach team members HL7 structure with interactive tooltips and clear field descriptions</p>
+            </div>
+
+            <div class="use-case-card">
+                <div class="use-case-icon">
+                    <span class="bi bi-clipboard-data"></span>
+                </div>
+                <h3>Data Analysis</h3>
+                <p>Extract and review clinical data from HL7 feeds for reporting and quality initiatives</p>
             </div>
         </div>
     </div>
 
     <div class="supported-messages">
-        <h2>Supported Message Types</h2>
+        <h2>Comprehensive Message Support</h2>
         <div class="message-types-grid">
-            <div class="message-type-badge">ADT - Admission/Discharge/Transfer</div>
-            <div class="message-type-badge">ORM - Pharmacy Orders</div>
-            <div class="message-type-badge">ORU - Observation Results</div>
-            <div class="message-type-badge">SIU - Scheduling</div>
-            <div class="message-type-badge">DFT - Financial Transactions</div>
-            <div class="message-type-badge">QRY - Query Messages</div>
-            <div class="message-type-badge">RDE - Pharmacy Encoded Orders</div>
-            <div class="message-type-badge">BAR - Billing Account</div>
+            <div class="message-type-badge">
+                <span class="bi bi-person-badge"></span>
+                ADT - Patient Administration
+            </div>
+            <div class="message-type-badge">
+                <span class="bi bi-prescription2"></span>
+                ORM/RDE - Pharmacy Orders
+            </div>
+            <div class="message-type-badge">
+                <span class="bi bi-clipboard-pulse"></span>
+                ORU - Lab Results
+            </div>
+            <div class="message-type-badge">
+                <span class="bi bi-calendar-check"></span>
+                SIU - Scheduling
+            </div>
+            <div class="message-type-badge">
+                <span class="bi bi-currency-dollar"></span>
+                DFT - Financial Transactions
+            </div>
+            <div class="message-type-badge">
+                <span class="bi bi-search"></span>
+                QRY - Query Messages
+            </div>
+            <div class="message-type-badge">
+                <span class="bi bi-activity"></span>
+                MDM - Medical Documents
+            </div>
+            <div class="message-type-badge">
+                <span class="bi bi-plus-circle"></span>
+                40+ More Segment Types
+            </div>
         </div>
     </div>
 
     <div class="cta-section">
-        <h2>Ready to get started?</h2>
-        <p>Parse your first HL7 message in seconds</p>
-        <a href="/viewer" class="btn btn-primary btn-large">
+        <h2>Start Analyzing Messages Today</h2>
+        <p>No installation, no signup, no cost - just paste and view</p>
+        <button @onclick="NavigateToViewer" class="btn btn-primary btn-large">
             <span class="bi bi-rocket-takeoff me-2"></span>
             Launch Message Viewer
-        </a>
+        </button>
     </div>
 </div>
+
+@code {
+    private void NavigateToViewer()
+    {
+        Navigation.NavigateTo("viewer");
+    }
+}
+
 
