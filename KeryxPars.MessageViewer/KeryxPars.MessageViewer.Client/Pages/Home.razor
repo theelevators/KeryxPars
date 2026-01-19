@@ -1,0 +1,118 @@
+﻿@page "/"
+
+<PageTitle>KeryxPars Message Viewer</PageTitle>
+
+<div class="home-container">
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-icon">
+                <span class="bi bi-lightning-charge-fill"></span>
+            </div>
+            <h1>KeryxPars Message Viewer</h1>
+            <p class="hero-subtitle">
+                High-performance HL7 message parsing and visualization
+            </p>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="stat-number">5-10x</span>
+                    <span class="stat-label">Faster Parsing</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="stat-number">&lt;10μs</span>
+                    <span class="stat-label">Parse Time</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="stat-number">50+</span>
+                    <span class="stat-label">Segments</span>
+                </div>
+            </div>
+            <div class="hero-actions">
+                <a href="/viewer" class="btn btn-primary btn-large">
+                    <span class="bi bi-play-fill me-2"></span>
+                    Start Parsing Messages
+                </a>
+                <a href="https://github.com/theelevators/KeryxPars" target="_blank" class="btn btn-secondary btn-large">
+                    <span class="bi bi-github me-2"></span>
+                    View on GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="features-section">
+        <h2>Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="bi bi-speedometer2"></span>
+                </div>
+                <h3>High Performance</h3>
+                <p>Zero-allocation parsing using Span&lt;char&gt; and ref struct for maximum speed</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="bi bi-shield-check"></span>
+                </div>
+                <h3>Type Safe</h3>
+                <p>Strongly-typed segments with compile-time safety and full IntelliSense support</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="bi bi-eye"></span>
+                </div>
+                <h3>Visual Inspection</h3>
+                <p>Beautiful UI for viewing message structure, segments, and field details</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="bi bi-check-circle"></span>
+                </div>
+                <h3>Validation</h3>
+                <p>Real-time validation with detailed error messages and suggestions</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="bi bi-collection"></span>
+                </div>
+                <h3>Message Library</h3>
+                <p>Store and organize your HL7 messages for quick access and comparison</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="bi bi-code-square"></span>
+                </div>
+                <h3>Developer Friendly</h3>
+                <p>Clean API, extensive documentation, and zero boilerplate code</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="supported-messages">
+        <h2>Supported Message Types</h2>
+        <div class="message-types-grid">
+            <div class="message-type-badge">ADT - Admission/Discharge/Transfer</div>
+            <div class="message-type-badge">ORM - Pharmacy Orders</div>
+            <div class="message-type-badge">ORU - Observation Results</div>
+            <div class="message-type-badge">SIU - Scheduling</div>
+            <div class="message-type-badge">DFT - Financial Transactions</div>
+            <div class="message-type-badge">QRY - Query Messages</div>
+            <div class="message-type-badge">RDE - Pharmacy Encoded Orders</div>
+            <div class="message-type-badge">BAR - Billing Account</div>
+        </div>
+    </div>
+
+    <div class="cta-section">
+        <h2>Ready to get started?</h2>
+        <p>Parse your first HL7 message in seconds</p>
+        <a href="/viewer" class="btn btn-primary btn-large">
+            <span class="bi bi-rocket-takeoff me-2"></span>
+            Launch Message Viewer
+        </a>
+    </div>
+</div>
+

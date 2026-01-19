@@ -145,6 +145,9 @@ internal static class MessageSegmentAssignmentExtensions
     {
         switch (message)
         {
+            case HL7ComprehensiveMessage msg:
+                msg.InsuranceAdditional.Add(insuranceAdditional);
+                break;
             case HospiceMessage msg:
                 msg.InsuranceAdditional.Add(insuranceAdditional);
                 break;
@@ -161,6 +164,9 @@ internal static class MessageSegmentAssignmentExtensions
     {
         switch (message)
         {
+            case HL7ComprehensiveMessage msg:
+                msg.Procedures.Add(procedure);
+                break;
             case HospiceMessage msg:
                 msg.Procedures.Add(procedure);
                 break;
@@ -177,6 +183,9 @@ internal static class MessageSegmentAssignmentExtensions
     {
         switch (message)
         {
+            case HL7ComprehensiveMessage msg:
+                msg.Guarantors.Add(guarantor);
+                break;
             case HospiceMessage msg:
                 msg.Guarantors.Add(guarantor);
                 break;
@@ -193,6 +202,9 @@ internal static class MessageSegmentAssignmentExtensions
     {
         switch (message)
         {
+            case HL7ComprehensiveMessage msg:
+                msg.DiagnosisRelatedGroup = drg;
+                break;
             case HospiceMessage msg:
                 msg.DiagnosisRelatedGroup = drg;
                 break;
@@ -209,6 +221,9 @@ internal static class MessageSegmentAssignmentExtensions
     {
         switch (message)
         {
+            case HL7ComprehensiveMessage msg:
+                msg.Accident = accident;
+                break;
             case HospiceMessage msg:
                 msg.Accident = accident;
                 break;
@@ -225,6 +240,9 @@ internal static class MessageSegmentAssignmentExtensions
     {
         switch (message)
         {
+            case HL7ComprehensiveMessage msg:
+                msg.Notes.Add(note);
+                break;
             case PharmacyMessage msg:
                 msg.Notes.Add(note);
                 break;

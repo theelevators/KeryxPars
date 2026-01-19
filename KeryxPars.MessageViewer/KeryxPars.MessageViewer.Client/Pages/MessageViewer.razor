@@ -1,0 +1,257 @@
+@page "/viewer"
+@using KeryxPars.MessageViewer.Core.Interfaces
+@using KeryxPars.MessageViewer.Core.Models
+@inject IMessageParserService ParserService
+@inject IMessageRepository Repository
+@inject NavigationManager Navigation
+
+<PageTitle>HL7 Message Viewer</PageTitle>
+
+<div class="message-viewer-container">
+    @if (parseResult != null && parseResult.IsSuccess)
+    {
+        <div class="header">
+            <h1>
+                <span class="bi bi-clipboard-pulse"></span>
+                Message Viewer
+            </h1>
+            <div class="subtitle">
+                <span class="bi bi-check-circle text-success"></span>
+                Parsed in @parseResult.ParseDuration.TotalMilliseconds.ToString("F1")ms
+            </div>
+        </div>
+    }
+    else if (parseResult != null && !parseResult.IsSuccess)
+    {
+        <div class="header">
+            <h1>
+                <span class="bi bi-clipboard-pulse"></span>
+                Message Viewer
+            </h1>
+            <div class="subtitle text-danger">
+                <span class="bi bi-x-circle"></span>
+                Parse failed
+            </div>
+        </div>
+    }
+
+    <div class="viewer-layout">
+        <div class="input-section">
+            <div class="section-header">
+                <h3>
+                    <span class="bi bi-file-earmark-text"></span>
+                    Input Message
+                </h3>
+                <div class="actions">
+                    <button class="btn btn-secondary" @onclick="LoadSampleMessage">
+                        <span class="bi bi-file-earmark-code"></span>
+                        Sample
+                    </button>
+                    <button class="btn btn-secondary" @onclick="ClearMessage">
+                        <span class="bi bi-x-circle"></span>
+                        Clear
+                    </button>
+                    <button class="btn btn-primary" @onclick="ParseMessage" disabled="@isProcessing">
+                        @if (isProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm"></span>
+                            <span>Parsing...</span>
+                        }
+                        else
+                        {
+                            <span class="bi bi-play-fill"></span>
+                            <span>Parse</span>
+                        }
+                    </button>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <textarea 
+                    @bind="rawMessage" 
+                    @bind:event="oninput"
+                    class="message-input" 
+                    placeholder="Paste your HL7 message here..."
+                    spellcheck="false"></textarea>
+                <div class="input-info">
+                    <span>Lines: @GetLineCount()</span>
+                    <span>Characters: @(rawMessage?.Length ?? 0)</span>
+                </div>
+            </div>
+        </div>
+
+        @if (parseResult != null)
+        {
+            <div class="results-section">
+                @if (parseResult.IsSuccess)
+                {
+                    <div class="section-header success">
+                        <h3>
+                            <span class="bi bi-check-circle-fill"></span>
+                            Results
+                        </h3>
+                        <span class="parse-time">
+                            <span class="bi bi-clock"></span>
+                            @parseResult.ParseDuration.TotalMilliseconds.ToString("F1")ms
+                        </span>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab @(activeTab == "patient" ? "active" : "")" 
+                                @onclick="@(() => SetActiveTab("patient"))">
+                            <span class="bi bi-person-vcard"></span>Patient
+                        </button>
+                        <button class="tab @(activeTab == "overview" ? "active" : "")" 
+                                @onclick="@(() => SetActiveTab("overview"))">
+                            <span class="bi bi-info-circle"></span>Overview
+                        </button>
+                        <button class="tab @(activeTab == "segments" ? "active" : "")" 
+                                @onclick="@(() => SetActiveTab("segments"))">
+                            <span class="bi bi-list-ul"></span>Segments
+                        </button>
+                        <button class="tab @(activeTab == "details" ? "active" : "")" 
+                                @onclick="@(() => SetActiveTab("details"))">
+                            <span class="bi bi-table"></span>Details
+                        </button>
+                        <button class="tab @(activeTab == "validation" ? "active" : "")" 
+                                @onclick="@(() => SetActiveTab("validation"))">
+                            <span class="bi bi-shield-check"></span>Validation
+                        </button>
+                    </div>
+
+                    <div class="tab-content">
+                        @if (activeTab == "patient")
+                        {
+                            <PatientSummary Result="@parseResult" />
+                        }
+                        else if (activeTab == "overview")
+                        {
+                            <MessageOverview Result="@parseResult" />
+                        }
+                        else if (activeTab == "segments")
+                        {
+                            <SegmentList Result="@parseResult" />
+                        }
+                        else if (activeTab == "details")
+                        {
+                            <MessageDetails Result="@parseResult" />
+                        }
+                        else if (activeTab == "validation")
+                        {
+                            <ValidationResults Errors="@validationErrors" />
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="section-header error">
+                        <h3>
+                            <span class="bi bi-exclamation-triangle-fill me-2"></span>
+                            Parse Failed
+                        </h3>
+                    </div>
+                    <div class="error-details">
+                        @foreach (var error in parseResult.Errors ?? Array.Empty<string>())
+                        {
+                            <div class="error-item">
+                                <span class="bi bi-x-circle me-2"></span>
+                                @error
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "messageId")]
+    public string? MessageId { get; set; }
+
+    private string? rawMessage;
+    private ParsedMessageResult? parseResult;
+    private IEnumerable<MessageValidationError>? validationErrors;
+    private bool isProcessing = false;
+    private string activeTab = "patient";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if we need to load a message from the library
+        if (!string.IsNullOrEmpty(MessageId) && Guid.TryParse(MessageId, out var messageGuid))
+        {
+            await LoadMessageFromLibrary(messageGuid);
+        }
+    }
+
+    private async Task LoadMessageFromLibrary(Guid messageId)
+    {
+        isProcessing = true;
+        try
+        {
+            var storedMessage = await Repository.GetMessageByIdAsync(messageId);
+            if (storedMessage != null)
+            {
+                rawMessage = storedMessage.RawMessage;
+                await ParseMessage();
+            }
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    private async Task ParseMessage()
+    {
+        if (string.IsNullOrWhiteSpace(rawMessage))
+            return;
+
+        isProcessing = true;
+        try
+        {
+            parseResult = await ParserService.ParseAsync(rawMessage);
+            
+            if (parseResult.IsSuccess && parseResult.Message != null)
+            {
+                validationErrors = await ParserService.ValidateAsync(parseResult.Message);
+            }
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    private void ClearMessage()
+    {
+        rawMessage = string.Empty;
+        parseResult = null;
+        validationErrors = null;
+        activeTab = "patient";
+        
+        // Clear the query parameter
+        Navigation.NavigateTo("/viewer", false);
+    }
+
+    private void LoadSampleMessage()
+    {
+        rawMessage = @"MSH|^~\&|SENDING_APP|SENDING_FAC|RECEIVING_APP|RECEIVING_FAC|20230101120000||ADT^A01|MSG001|P|2.5||
+EVN|A01|20230101120000||
+PID|1||123456||DOE^JOHN^A||19800101|M|||123 MAIN ST^^CITY^ST^12345|||||||
+PV1|1|I|WARD^ROOM^BED||||ATTEND_DOC^ATTENDING^A|||||||||||V12345|||||||||||||||||||||||||20230101120000|";
+    }
+
+    private void SetActiveTab(string tab)
+    {
+        activeTab = tab;
+    }
+
+    private int GetLineCount()
+    {
+        if (string.IsNullOrEmpty(rawMessage))
+            return 0;
+        return rawMessage.Count(c => c == '\n') + 1;
+    }
+}
+
