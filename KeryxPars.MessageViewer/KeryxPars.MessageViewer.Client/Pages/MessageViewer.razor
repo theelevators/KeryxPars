@@ -109,6 +109,14 @@
                                 @onclick="@(() => SetActiveTab("segments"))">
                             <span class="bi bi-list-ul"></span>Segments
                         </button>
+                        <button class="tab @(activeTab == "tree" ? "active" : "")" 
+                                @onclick="@(() => SetActiveTab("tree"))">
+                            <span class="bi bi-diagram-3"></span>Tree
+                        </button>
+                        <button class="tab @(activeTab == "raw" ? "active" : "")" 
+                                @onclick="@(() => SetActiveTab("raw"))">
+                            <span class="bi bi-code-square"></span>Raw
+                        </button>
                         <button class="tab @(activeTab == "details" ? "active" : "")" 
                                 @onclick="@(() => SetActiveTab("details"))">
                             <span class="bi bi-table"></span>Details
@@ -131,6 +139,14 @@
                         else if (activeTab == "segments")
                         {
                             <SegmentList Result="@parseResult" />
+                        }
+                        else if (activeTab == "tree")
+                        {
+                            <MessageTreeView Result="@parseResult" />
+                        }
+                        else if (activeTab == "raw")
+                        {
+                            <MessageRawView Result="@parseResult" RawMessage="@rawMessage" />
                         }
                         else if (activeTab == "details")
                         {
