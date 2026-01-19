@@ -1,0 +1,264 @@
+.patient-summary {
+    padding: 1.5rem;
+}
+
+.patient-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.patient-identity h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.patient-demographics {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.demographic-item {
+    font-size: 1rem;
+}
+
+.demographic-item strong {
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.patient-contact,
+.visit-info,
+.allergies-section,
+.diagnoses-section,
+.orders-section,
+.insurance-section {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.patient-contact h4,
+.visit-info h4,
+.allergies-section h4,
+.diagnoses-section h4,
+.orders-section h4,
+.insurance-section h4 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.contact-details,
+.visit-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.detail-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #4a5568;
+    min-width: 150px;
+}
+
+.detail-value {
+    color: #2d3748;
+}
+
+.allergies-section {
+    border-left: 4px solid #f59e0b;
+    background: #fffbeb;
+}
+
+.allergies-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.allergy-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #fbbf24;
+}
+
+.allergy-icon {
+    color: #f59e0b;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.allergy-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.allergy-type,
+.allergy-severity {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.diagnoses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.diagnosis-item {
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 6px;
+    border-left: 3px solid #3b82f6;
+}
+
+.diagnosis-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.diagnosis-code {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #1e40af;
+    background: #dbeafe;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.diagnosis-description {
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.diagnosis-meta {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.order-item {
+    padding: 1rem;
+    background: #f0fdf4;
+    border-radius: 6px;
+    border-left: 3px solid #10b981;
+}
+
+.order-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.order-type-badge {
+    background: #10b981;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.order-control {
+    color: #047857;
+    font-weight: 600;
+}
+
+.order-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.order-detail-row {
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.order-detail-row strong {
+    color: #047857;
+}
+
+.insurance-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.insurance-item {
+    padding: 1rem;
+    background: #f0f9ff;
+    border-radius: 6px;
+    border-left: 3px solid #0284c7;
+}
+
+.insurance-header {
+    font-weight: 600;
+    color: #0369a1;
+    margin-bottom: 0.75rem;
+}
+
+.insurance-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem;
+    color: #9ca3af;
+}
+
+.no-data .bi {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .patient-demographics {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .detail-label {
+        min-width: auto;
+    }
+}

@@ -1,0 +1,116 @@
+@using KeryxPars.MessageViewer.Core.Interfaces
+
+<div class="validation-results">
+    @if (Errors != null && Errors.Any())
+    {
+        <div class="validation-summary">
+            <div class="summary-stats">
+                <div class="stat critical">
+                    <span class="bi bi-x-circle-fill"></span>
+                    <span>@Errors.Count(e => e.Severity == ValidationSeverity.Critical) Critical</span>
+                </div>
+                <div class="stat error">
+                    <span class="bi bi-exclamation-circle-fill"></span>
+                    <span>@Errors.Count(e => e.Severity == ValidationSeverity.Error) Errors</span>
+                </div>
+                <div class="stat warning">
+                    <span class="bi bi-exclamation-triangle-fill"></span>
+                    <span>@Errors.Count(e => e.Severity == ValidationSeverity.Warning) Warnings</span>
+                </div>
+                <div class="stat info">
+                    <span class="bi bi-info-circle-fill"></span>
+                    <span>@Errors.Count(e => e.Severity == ValidationSeverity.Info) Info</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="validation-filters">
+            <button class="filter-btn @(selectedSeverity == null ? "active" : "")" 
+                    @onclick="() => selectedSeverity = null">
+                All (@Errors.Count())
+            </button>
+            <button class="filter-btn critical @(selectedSeverity == ValidationSeverity.Critical ? "active" : "")" 
+                    @onclick="() => selectedSeverity = ValidationSeverity.Critical">
+                Critical (@Errors.Count(e => e.Severity == ValidationSeverity.Critical))
+            </button>
+            <button class="filter-btn error @(selectedSeverity == ValidationSeverity.Error ? "active" : "")" 
+                    @onclick="() => selectedSeverity = ValidationSeverity.Error">
+                Errors (@Errors.Count(e => e.Severity == ValidationSeverity.Error))
+            </button>
+            <button class="filter-btn warning @(selectedSeverity == ValidationSeverity.Warning ? "active" : "")" 
+                    @onclick="() => selectedSeverity = ValidationSeverity.Warning">
+                Warnings (@Errors.Count(e => e.Severity == ValidationSeverity.Warning))
+            </button>
+            <button class="filter-btn info @(selectedSeverity == ValidationSeverity.Info ? "active" : "")" 
+                    @onclick="() => selectedSeverity = ValidationSeverity.Info">
+                Info (@Errors.Count(e => e.Severity == ValidationSeverity.Info))
+            </button>
+        </div>
+
+        <div class="validation-list">
+            @foreach (var error in GetFilteredErrors())
+            {
+                <div class="validation-item @error.Severity.ToString().ToLower()">
+                    <div class="validation-header">
+                        <div class="severity-badge @error.Severity.ToString().ToLower()">
+                            <span class="bi @GetSeverityIcon(error.Severity)"></span>
+                            <span>@error.Severity</span>
+                        </div>
+                        <div class="location">
+                            <span class="bi bi-pin-map"></span>
+                            <span>@error.SegmentId[@error.FieldIndex]</span>
+                        </div>
+                    </div>
+                    <div class="validation-message">@error.Message</div>
+                    @if (!string.IsNullOrWhiteSpace(error.Suggestion))
+                    {
+                        <div class="validation-suggestion">
+                            <span class="bi bi-lightbulb"></span>
+                            <span>@error.Suggestion</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-validation-issues">
+            <div class="success-icon">
+                <span class="bi bi-check-circle-fill"></span>
+            </div>
+            <h4>No Validation Issues</h4>
+            <p>The message passed all validation checks successfully.</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public IEnumerable<MessageValidationError>? Errors { get; set; }
+
+    private ValidationSeverity? selectedSeverity = null;
+
+    private IEnumerable<MessageValidationError> GetFilteredErrors()
+    {
+        if (Errors == null)
+            return Enumerable.Empty<MessageValidationError>();
+
+        if (selectedSeverity.HasValue)
+            return Errors.Where(e => e.Severity == selectedSeverity.Value);
+
+        return Errors;
+    }
+
+    private string GetSeverityIcon(ValidationSeverity severity)
+    {
+        return severity switch
+        {
+            ValidationSeverity.Critical => "bi-x-circle-fill",
+            ValidationSeverity.Error => "bi-exclamation-circle-fill",
+            ValidationSeverity.Warning => "bi-exclamation-triangle-fill",
+            ValidationSeverity.Info => "bi-info-circle-fill",
+            _ => "bi-info-circle"
+        };
+    }
+}

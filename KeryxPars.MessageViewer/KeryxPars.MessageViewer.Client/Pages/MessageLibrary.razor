@@ -1,0 +1,222 @@
+@page "/library"
+@using KeryxPars.MessageViewer.Core.Interfaces
+@using KeryxPars.MessageViewer.Core.Models
+@inject IMessageRepository Repository
+@inject IMessageParserService ParserService
+@inject NavigationManager Navigation
+
+<PageTitle>Message Library</PageTitle>
+
+<div class="library-container">
+    <div class="library-header">
+        <div>
+            <h1>Message Library</h1>
+            <p class="subtitle">Your saved HL7 messages</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" @onclick="() => showImportDialog = true">
+                <span class="bi bi-plus-circle me-2"></span>
+                Import Message
+            </button>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner-large"></div>
+            <p>Loading messages...</p>
+        </div>
+    }
+    else if (messages == null || !messages.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">
+                <span class="bi bi-inbox"></span>
+            </div>
+            <h3>No messages yet</h3>
+            <p>Import your first HL7 message to get started</p>
+            <button class="btn btn-primary" @onclick="() => showImportDialog = true">
+                <span class="bi bi-upload me-2"></span>
+                Import Message
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="library-toolbar">
+            <div class="search-box">
+                <span class="bi bi-search"></span>
+                <input type="text" 
+                       @bind="searchQuery" 
+                       @bind:event="oninput"
+                       placeholder="Search by patient name, message type, or control ID..." 
+                       class="search-input" />
+            </div>
+            <div class="view-toggle">
+                <button class="view-btn @(viewMode == "grid" ? "active" : "")" 
+                        @onclick="@(() => SetViewMode("grid"))">
+                    <span class="bi bi-grid-3x3-gap"></span>
+                </button>
+                <button class="view-btn @(viewMode == "list" ? "active" : "")" 
+                        @onclick="@(() => SetViewMode("list"))">
+                    <span class="bi bi-list-ul"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="messages-container @viewMode">
+            @foreach (var message in GetFilteredMessages())
+            {
+                <div class="message-card" @onclick="() => ViewMessage(message)">
+                    <div class="message-card-header">
+                        <div class="message-type-badge">@message.MessageType</div>
+                        <button class="btn-icon-small" @onclick:stopPropagation="true" 
+                                @onclick="() => DeleteMessage(message.Id)">
+                            <span class="bi bi-trash"></span>
+                        </button>
+                    </div>
+                    <div class="message-card-body">
+                        <div class="message-info">
+                            <span class="bi bi-person me-2"></span>
+                            <span>@(string.IsNullOrEmpty(message.PatientName) ? "Unknown Patient" : message.PatientName)</span>
+                        </div>
+                        <div class="message-info">
+                            <span class="bi bi-hash me-2"></span>
+                            <span>@message.MessageControlId</span>
+                        </div>
+                        <div class="message-info">
+                            <span class="bi bi-calendar me-2"></span>
+                            <span>@message.ImportedDate.ToString("MMM dd, yyyy HH:mm")</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (showImportDialog)
+{
+    <div class="modal-overlay" @onclick="CloseImportDialog">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h3>Import HL7 Message</h3>
+                <button class="btn-close" @onclick="CloseImportDialog">
+                    <span class="bi bi-x"></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <textarea 
+                    @bind="importMessage" 
+                    class="import-textarea" 
+                    placeholder="Paste your HL7 message here..."
+                    spellcheck="false"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CloseImportDialog">Cancel</button>
+                <button class="btn btn-primary" @onclick="ImportMessage" disabled="@isImporting">
+                    @if (isImporting)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        <span>Importing...</span>
+                    }
+                    else
+                    {
+                        <span class="bi bi-check-circle me-2"></span>
+                        <span>Import</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<StoredMessage>? messages;
+    private bool isLoading = true;
+    private bool showImportDialog = false;
+    private bool isImporting = false;
+    private string importMessage = string.Empty;
+    private string searchQuery = string.Empty;
+    private string viewMode = "grid";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMessages();
+    }
+
+    private async Task LoadMessages()
+    {
+        isLoading = true;
+        try
+        {
+            messages = (await Repository.GetRecentMessagesAsync(100)).ToList();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ImportMessage()
+    {
+        if (string.IsNullOrWhiteSpace(importMessage))
+            return;
+
+        isImporting = true;
+        try
+        {
+            var parseResult = await ParserService.ParseAsync(importMessage);
+            if (parseResult.IsSuccess && parseResult.Message != null)
+            {
+                await Repository.SaveMessageAsync(importMessage, parseResult.Message);
+                await LoadMessages();
+                CloseImportDialog();
+            }
+        }
+        finally
+        {
+            isImporting = false;
+        }
+    }
+
+    private async Task DeleteMessage(Guid id)
+    {
+        await Repository.DeleteMessageAsync(id);
+        await LoadMessages();
+    }
+
+    private void ViewMessage(StoredMessage message)
+    {
+        Navigation.NavigateTo($"/viewer?messageId={message.Id}");
+    }
+
+    private void CloseImportDialog()
+    {
+        showImportDialog = false;
+        importMessage = string.Empty;
+    }
+
+    private void SetViewMode(string mode)
+    {
+        viewMode = mode;
+    }
+
+    private IEnumerable<StoredMessage> GetFilteredMessages()
+    {
+        if (messages == null)
+            return Enumerable.Empty<StoredMessage>();
+
+        if (string.IsNullOrWhiteSpace(searchQuery))
+            return messages.OrderByDescending(m => m.ImportedDate);
+
+        var query = searchQuery.ToLowerInvariant();
+        return messages
+            .Where(m => 
+                m.PatientName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                m.MessageType.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                m.MessageControlId.Contains(query, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(m => m.ImportedDate);
+    }
+}

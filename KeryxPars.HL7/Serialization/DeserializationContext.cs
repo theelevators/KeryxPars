@@ -25,6 +25,7 @@ internal sealed class DeserializationContext
         // Default to HL7DefaultMessage if no specific type is provided
         Message = options.MessageType switch
         {
+            var t when t == typeof(HL7ComprehensiveMessage) => new HL7ComprehensiveMessage(),
             var t when t == typeof(PharmacyMessage) => new PharmacyMessage(),
             var t when t == typeof(LabMessage) => new LabMessage(),
             var t when t == typeof(HospiceMessage) => new HospiceMessage(),

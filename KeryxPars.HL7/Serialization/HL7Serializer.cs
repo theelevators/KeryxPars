@@ -245,9 +245,17 @@ public static class HL7Serializer
             case PD1 pd1 when context.Message is HospiceMessage hospice:
                 hospice.Pd1 = pd1;
                 break;
+            
+            case PD1 pd1 when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.Pd1 = pd1;
+                break;
 
             case NK1 nk1 when context.Message is HospiceMessage hospice:
                 hospice.NextOfKin.Add(nk1);
+                break;
+            
+            case NK1 nk1 when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.NextOfKin.Add(nk1);
                 break;
 
             case AL1 al1:
@@ -285,41 +293,81 @@ public static class HL7Serializer
             case ROL rol when context.Message is HospiceMessage hospice:
                 hospice.Roles.Add(rol);
                 break;
+            
+            case ROL rol when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.Roles.Add(rol);
+                break;
 
             case MRG mrg when context.Message is HospiceMessage hospice:
                 hospice.MergeInfo = mrg;
+                break;
+            
+            case MRG mrg when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.MergeInfo = mrg;
                 break;
 
             case FT1 ft1 when context.Message is FinancialMessage financial:
                 financial.Transactions.Add(ft1);
                 break;
+            
+            case FT1 ft1 when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.Transactions.Add(ft1);
+                break;
 
             case SPM spm when context.Message is LabMessage lab:
                 lab.Specimens.Add(spm);
+                break;
+            
+            case SPM spm when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.Specimens.Add(spm);
                 break;
 
             case SAC sac when context.Message is LabMessage lab:
                 lab.Containers.Add(sac);
                 break;
+            
+            case SAC sac when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.Containers.Add(sac);
+                break;
 
             case CTI cti when context.Message is LabMessage lab:
                 lab.ClinicalTrials.Add(cti);
+                break;
+            
+            case CTI cti when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.ClinicalTrials.Add(cti);
                 break;
 
             case SCH sch when context.Message is SchedulingMessage scheduling:
                 scheduling.Schedule = sch;
                 break;
+            
+            case SCH sch when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.Schedule = sch;
+                break;
 
             case AIL ail when context.Message is SchedulingMessage scheduling:
                 scheduling.LocationResources.Add(ail);
+                break;
+            
+            case AIL ail when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.LocationResources.Add(ail);
                 break;
 
             case AIP aip when context.Message is SchedulingMessage scheduling:
                 scheduling.PersonnelResources.Add(aip);
                 break;
+            
+            case AIP aip when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.PersonnelResources.Add(aip);
+                break;
 
             case AIS ais when context.Message is SchedulingMessage scheduling:
                 scheduling.ServiceResources.Add(ais);
+                break;
+            
+            case AIS ais when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.ServiceResources.Add(ais);
                 break;
 
             case NTE nte:
@@ -329,13 +377,74 @@ public static class HL7Serializer
             case ODS ods when context.Message is DietaryMessage dietary:
                 dietary.DietaryOrders.Add(ods);
                 break;
+            
+            case ODS ods when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.DietaryOrders.Add(ods);
+                break;
 
             case ODT odt when context.Message is DietaryMessage dietary:
                 dietary.TrayInstructions.Add(odt);
                 break;
+            
+            case ODT odt when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.TrayInstructions.Add(odt);
+                break;
 
             case ORC orc when context.Message is DietaryMessage dietary:
                 dietary.Orders.Add(orc);
+                break;
+            
+            // Additional comprehensive message segments
+            case OBR obr when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.ObservationRequests.Add(obr);
+                break;
+            
+            case OBX obx when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.ObservationResults.Add(obx);
+                break;
+            
+            case RXA rxa when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.PharmacyAdministrations.Add(rxa);
+                break;
+            
+            case RXC rxc when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.PharmacyComponents.Add(rxc);
+                break;
+            
+            case RXD rxd when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.PharmacyDispenses.Add(rxd);
+                break;
+            
+            case RXG rxg when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.PharmacyGives.Add(rxg);
+                break;
+            
+            case QRD qrd when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.QueryDefinition = qrd;
+                break;
+            
+            case QRF qrf when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.QueryFilter = qrf;
+                break;
+            
+            case QPD qpd when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.QueryParameterDefinition = qpd;
+                break;
+            
+            case RCP rcp when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.ResponseControlParameter = rcp;
+                break;
+            
+            case DSC dsc when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.ContinuationPointer = dsc;
+                break;
+            
+            case CTD ctd when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.ContactData.Add(ctd);
+                break;
+            
+            case MSA msa when context.Message is HL7ComprehensiveMessage comprehensive:
+                comprehensive.MessageAcknowledgment = msa;
                 break;
         }
     }
