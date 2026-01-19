@@ -1,0 +1,161 @@
+@using KeryxPars.MessageViewer.Core.Models
+@using KeryxPars.HL7.Contracts
+@using KeryxPars.MessageViewer.Client.Extensions
+@using KeryxPars.MessageViewer.Client.Services
+
+<div class="tree-view">
+    @if (Result?.Message != null)
+    {
+        <div class="tree-controls">
+            <button class="btn-tree-control" @onclick="ExpandAll">
+                <span class="bi bi-arrows-expand"></span>
+                Expand All
+            </button>
+            <button class="btn-tree-control" @onclick="CollapseAll">
+                <span class="bi bi-arrows-collapse"></span>
+                Collapse All
+            </button>
+        </div>
+
+        <div class="tree-container">
+            @foreach (var segment in Result.Message.GetAllSegments())
+            {
+                var segmentId = segment.SegmentId;
+                var isExpanded = expandedNodes.Contains(segmentId);
+                var values = segment.GetValues();
+
+                <div class="tree-node segment-node">
+                    <div class="tree-node-header" @onclick="() => ToggleNode(segmentId)">
+                        <span class="tree-toggle @(isExpanded ? "expanded" : "")">
+                            <span class="bi bi-chevron-right"></span>
+                        </span>
+                        <span class="tree-icon segment-icon">
+                            <span class="bi bi-file-earmark-code"></span>
+                        </span>
+                        <span class="tree-label">@segmentId</span>
+                        <span class="tree-count">@(values.Length - 1) fields</span>
+                    </div>
+
+                    @if (isExpanded)
+                    {
+                        <div class="tree-metadata">
+                            <span class="bi bi-info-circle"></span>
+                            @HL7MetadataService.GetSegmentDescription(segmentId)
+                        </div>
+
+                        <div class="tree-children">
+                            @for (int i = 1; i < values.Length; i++)
+                            {
+                                var fieldValue = values[i];
+                                if (string.IsNullOrWhiteSpace(fieldValue)) continue;
+
+                                var fieldKey = $"{segmentId}-{i}";
+                                var isFieldExpanded = expandedNodes.Contains(fieldKey);
+                                var hasComponents = fieldValue.Contains('^');
+                                var fieldDescription = HL7MetadataService.GetFieldDescription(segmentId, i);
+
+                                <div class="tree-node field-node">
+                                    <div class="tree-node-header" @onclick="() => ToggleNode(fieldKey)">
+                                        @if (hasComponents)
+                                        {
+                                            <span class="tree-toggle @(isFieldExpanded ? "expanded" : "")">
+                                                <span class="bi bi-chevron-right"></span>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="tree-toggle-spacer"></span>
+                                        }
+                                        <span class="tree-icon field-icon">
+                                            <span class="bi bi-dash-circle"></span>
+                                        </span>
+                                        <span class="tree-label">@segmentId.@i</span>
+                                        <span class="tree-value">@(hasComponents ? fieldValue.Substring(0, Math.Min(50, fieldValue.Length)) + "..." : fieldValue)</span>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(fieldDescription))
+                                    {
+                                        <div class="tree-field-metadata">
+                                            @fieldDescription
+                                        </div>
+                                    }
+
+                                    @if (isFieldExpanded && hasComponents)
+                                    {
+                                        var components = fieldValue.Split('^');
+                                        <div class="tree-children">
+                                            @for (int c = 0; c < components.Length; c++)
+                                            {
+                                                if (string.IsNullOrWhiteSpace(components[c])) continue;
+
+                                                var componentDescription = HL7MetadataService.GetComponentDescription(segmentId, i, c + 1);
+
+                                                <div class="tree-node component-node">
+                                                    <div class="tree-node-header">
+                                                        <span class="tree-toggle-spacer"></span>
+                                                        <span class="tree-icon component-icon">
+                                                            <span class="bi bi-dot"></span>
+                                                        </span>
+                                                        <span class="tree-label">Component @(c + 1)</span>
+                                                        <span class="tree-value">@components[c]</span>
+                                                    </div>
+                                                    @if (!string.IsNullOrEmpty(componentDescription))
+                                                    {
+                                                        <div class="tree-component-metadata">
+                                                            @componentDescription
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public ParsedMessageResult? Result { get; set; }
+
+    private HashSet<string> expandedNodes = new();
+
+    private void ToggleNode(string nodeId)
+    {
+        if (expandedNodes.Contains(nodeId))
+            expandedNodes.Remove(nodeId);
+        else
+            expandedNodes.Add(nodeId);
+    }
+
+    private void ExpandAll()
+    {
+        if (Result?.Message == null) return;
+
+        foreach (var segment in Result.Message.GetAllSegments())
+        {
+            var segmentId = segment.SegmentId;
+            expandedNodes.Add(segmentId);
+
+            var values = segment.GetValues();
+            for (int i = 1; i < values.Length; i++)
+            {
+                if (values[i]?.Contains('^') == true)
+                {
+                    expandedNodes.Add($"{segmentId}-{i}");
+                }
+            }
+        }
+    }
+
+    private void CollapseAll()
+    {
+        expandedNodes.Clear();
+    }
+}
+

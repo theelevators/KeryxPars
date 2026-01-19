@@ -1,0 +1,285 @@
+@using KeryxPars.MessageViewer.Core.Models
+@using KeryxPars.HL7.Contracts
+@using KeryxPars.MessageViewer.Client.Services
+
+<div class="raw-view">
+    @if (Result?.Message != null && !string.IsNullOrEmpty(RawMessage))
+    {
+        <div class="raw-controls">
+            <button class="btn-raw-control" @onclick="CopyToClipboard">
+                <span class="bi bi-clipboard"></span>
+                Copy
+            </button>
+            <button class="btn-raw-control" @onclick="ToggleLineNumbers">
+                <span class="bi bi-list-ol"></span>
+                @(showLineNumbers ? "Hide" : "Show") Line Numbers
+            </button>
+            <button class="btn-raw-control" @onclick="ToggleMetadata">
+                <span class="bi bi-info-circle"></span>
+                @(showMetadata ? "Hide" : "Show") Tooltips
+            </button>
+        </div>
+
+        <div class="raw-container @(showLineNumbers ? "with-line-numbers" : "")">
+            @{
+                var lines = RawMessage.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                for (int lineNum = 0; lineNum < lines.Length; lineNum++)
+                {
+                    var line = lines[lineNum];
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+
+                    <div class="raw-line" @key="lineNum">
+                        @if (showLineNumbers)
+                        {
+                            <span class="line-number">@(lineNum + 1)</span>
+                        }
+                        <span class="line-content">
+                            @RenderLine(line, lineNum)
+                        </span>
+                    </div>
+                }
+            }
+        </div>
+
+        @if (hoveredField != null && showMetadata)
+        {
+            <div class="metadata-tooltip" style="@GetTooltipStyle()">
+                <div class="tooltip-header">
+                    <span class="tooltip-icon">
+                        @if (hoveredField.IsComponent)
+                        {
+                            <span class="bi bi-dot"></span>
+                        }
+                        else
+                        {
+                            <span class="bi bi-hash"></span>
+                        }
+                    </span>
+                    <strong>@hoveredField.Label</strong>
+                </div>
+                <div class="tooltip-body">
+                    <div class="tooltip-section">
+                        <div class="tooltip-field">
+                            <span class="tooltip-label">Value:</span>
+                            <span class="tooltip-value">@hoveredField.Value</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(hoveredField.Description))
+                        {
+                            <div class="tooltip-field description">
+                                <span class="tooltip-label">
+                                    <span class="bi bi-info-circle-fill"></span>
+                                    Info:
+                                </span>
+                                <span class="tooltip-value">@hoveredField.Description</span>
+                            </div>
+                        }
+                        <div class="tooltip-field meta">
+                            <span class="tooltip-label">
+                                <span class="bi bi-geo-alt-fill"></span>
+                                Position:
+                            </span>
+                            <span class="tooltip-value">Line @hoveredField.LineNumber, Field @hoveredField.FieldIndex</span>
+                        </div>
+                        @if (hoveredField.IsComponent)
+                        {
+                            <div class="tooltip-field meta">
+                                <span class="tooltip-label">
+                                    <span class="bi bi-diagram-3"></span>
+                                    Type:
+                                </span>
+                                <span class="tooltip-value">Component @hoveredField.ComponentIndex</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public ParsedMessageResult? Result { get; set; }
+
+    [Parameter]
+    public string? RawMessage { get; set; }
+
+    private bool showLineNumbers = true;
+    private bool showMetadata = true;
+    private FieldMetadata? hoveredField;
+    private int mouseX;
+    private int mouseY;
+
+    private class FieldMetadata
+    {
+        public string Label { get; set; } = "";
+        public string Value { get; set; } = "";
+        public string? Description { get; set; }
+        public int LineNumber { get; set; }
+        public int FieldIndex { get; set; }
+        public bool IsComponent { get; set; }
+        public int ComponentIndex { get; set; }
+    }
+
+    private RenderFragment RenderLine(string line, int lineNum)
+    {
+        return builder =>
+        {
+            if (line.Length < 3) return;
+
+            var segmentId = line.Substring(0, Math.Min(3, line.Length));
+            var fields = line.Split('|');
+
+            // Segment ID
+            builder.OpenElement(0, "span");
+            builder.AddAttribute(1, "class", "hl-segment");
+            if (showMetadata)
+            {
+                builder.AddAttribute(2, "onmouseenter", EventCallback.Factory.Create<MouseEventArgs>(this,
+                    e => OnSegmentHover(segmentId, lineNum + 1, (int)e.ClientX, (int)e.ClientY)));
+                builder.AddAttribute(3, "onmouseleave", EventCallback.Factory.Create(this, () => hoveredField = null));
+            }
+            builder.AddContent(4, segmentId);
+            builder.CloseElement();
+
+            // Field separator
+            if (fields.Length > 1)
+            {
+                builder.OpenElement(5, "span");
+                builder.AddAttribute(6, "class", "hl-separator");
+                builder.AddContent(7, "|");
+                builder.CloseElement();
+            }
+
+            // Fields
+            for (int i = 1; i < fields.Length; i++)
+            {
+                var field = fields[i];
+                var fieldIndex = i;
+
+                builder.OpenElement(8 + i * 20, "span");
+                builder.AddAttribute(9 + i * 20, "class", "hl-field");
+                
+                if (showMetadata)
+                {
+                    builder.AddAttribute(10 + i * 20, "onmouseenter", EventCallback.Factory.Create<MouseEventArgs>(this, 
+                        e => OnFieldHover(segmentId, fieldIndex, field, lineNum + 1, (int)e.ClientX, (int)e.ClientY)));
+                    builder.AddAttribute(11 + i * 20, "onmouseleave", EventCallback.Factory.Create(this, () => hoveredField = null));
+                }
+
+                // Check for components
+                if (field.Contains('^'))
+                {
+                    var components = field.Split('^');
+                    for (int c = 0; c < components.Length; c++)
+                    {
+                        builder.OpenElement(12 + i * 20 + c * 5, "span");
+                        builder.AddAttribute(13 + i * 20 + c * 5, "class", "hl-component");
+                        
+                        if (showMetadata)
+                        {
+                            var componentIndex = c + 1;
+                            builder.AddAttribute(14 + i * 20 + c * 5, "onmouseenter", EventCallback.Factory.Create<MouseEventArgs>(this,
+                                e => OnComponentHover(segmentId, fieldIndex, componentIndex, components[c], lineNum + 1, (int)e.ClientX, (int)e.ClientY)));
+                            builder.AddAttribute(15 + i * 20 + c * 5, "onmouseleave", EventCallback.Factory.Create(this, () => hoveredField = null));
+                        }
+                        
+                        builder.AddContent(16 + i * 20 + c * 5, components[c]);
+                        builder.CloseElement();
+
+                        if (c < components.Length - 1)
+                        {
+                            builder.OpenElement(17 + i * 20 + c * 5, "span");
+                            builder.AddAttribute(18 + i * 20 + c * 5, "class", "hl-component-sep");
+                            builder.AddContent(19 + i * 20 + c * 5, "^");
+                            builder.CloseElement();
+                        }
+                    }
+                }
+                else
+                {
+                    builder.AddContent(20 + i * 20, field);
+                }
+
+                builder.CloseElement();
+
+                // Field separator
+                if (i < fields.Length - 1)
+                {
+                    builder.OpenElement(21 + i * 20, "span");
+                    builder.AddAttribute(22 + i * 20, "class", "hl-separator");
+                    builder.AddContent(23 + i * 20, "|");
+                    builder.CloseElement();
+                }
+            }
+        };
+    }
+
+    private void OnSegmentHover(string segmentId, int lineNumber, int x, int y)
+    {
+        mouseX = x;
+        mouseY = y;
+        hoveredField = new FieldMetadata
+        {
+            Label = segmentId,
+            Value = segmentId,
+            Description = HL7MetadataService.GetSegmentDescription(segmentId),
+            LineNumber = lineNumber,
+            FieldIndex = 0,
+            IsComponent = false
+        };
+    }
+
+    private void OnFieldHover(string segmentId, int fieldIndex, string value, int lineNumber, int x, int y)
+    {
+        mouseX = x;
+        mouseY = y;
+        hoveredField = new FieldMetadata
+        {
+            Label = $"{segmentId}.{fieldIndex}",
+            Value = value,
+            Description = HL7MetadataService.GetFieldDescription(segmentId, fieldIndex),
+            LineNumber = lineNumber,
+            FieldIndex = fieldIndex,
+            IsComponent = false
+        };
+    }
+
+    private void OnComponentHover(string segmentId, int fieldIndex, int componentIndex, string value, int lineNumber, int x, int y)
+    {
+        mouseX = x;
+        mouseY = y;
+        hoveredField = new FieldMetadata
+        {
+            Label = $"{segmentId}.{fieldIndex}.{componentIndex}",
+            Value = value,
+            Description = HL7MetadataService.GetComponentDescription(segmentId, fieldIndex, componentIndex),
+            LineNumber = lineNumber,
+            FieldIndex = fieldIndex,
+            IsComponent = true,
+            ComponentIndex = componentIndex
+        };
+    }
+
+    private string GetTooltipStyle()
+    {
+        return $"left: {mouseX + 10}px; top: {mouseY + 10}px;";
+    }
+
+    private void ToggleLineNumbers()
+    {
+        showLineNumbers = !showLineNumbers;
+    }
+
+    private void ToggleMetadata()
+    {
+        showMetadata = !showMetadata;
+    }
+
+    private async Task CopyToClipboard()
+    {
+        // Note: Clipboard API would need JS interop
+        // This is a placeholder
+    }
+}
+
