@@ -27,10 +27,10 @@ jobs:
           dotnet-version: '8.0.x'
       
       - name: Restore dependencies
-        run: dotnet restore KeryxPars.MessageViewer/KeryxPars.MessageViewer.sln
+        run: dotnet restore
       
       - name: Build
-        run: dotnet build KeryxPars.MessageViewer/KeryxPars.MessageViewer.sln --configuration Release --no-restore
+        run: dotnet build --configuration Release --no-restore
       
       - name: Publish
         run: dotnet publish KeryxPars.MessageViewer/KeryxPars.MessageViewer.Client/KeryxPars.MessageViewer.Client.csproj -c Release -o publish
@@ -62,3 +62,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+

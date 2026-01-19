@@ -148,14 +148,15 @@ Then serve the `publish/wwwroot` folder with any web server.
 ```mermaid
 graph LR
     A[Push to GitHub] --> B[GitHub Actions Trigger]
-    B --> C[Build .NET Solution]
-    C --> D[Publish Blazor WASM]
-    D --> E[Update Base Path]
-    E --> F[Create 404.html]
-    F --> G[Add .nojekyll]
-    G --> H[Upload Artifact]
-    H --> I[Deploy to GitHub Pages]
-    I --> J[Live on GitHub.io! ??]
+    B --> C[Restore KeryxPars Solution]
+    C --> D[Build Solution]
+    D --> E[Publish MessageViewer.Client]
+    E --> F[Update Base Path]
+    F --> G[Create 404.html]
+    G --> H[Add .nojekyll]
+    H --> I[Upload Artifact]
+    I --> J[Deploy to GitHub Pages]
+    J --> K[Live on GitHub.io! ??]
 ```
 
 ---

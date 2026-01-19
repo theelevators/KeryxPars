@@ -6,7 +6,7 @@
 echo "?? Publishing KeryxPars Message Viewer for GitHub Pages..."
 echo ""
 
-# Navigate to the solution directory
+# Navigate to the repository root
 cd "$(dirname "$0")"
 
 # Clean previous publish
@@ -15,11 +15,11 @@ rm -rf publish
 
 # Restore dependencies
 echo "?? Restoring dependencies..."
-dotnet restore KeryxPars.MessageViewer/KeryxPars.MessageViewer.sln
+dotnet restore
 
 # Build the solution
 echo "?? Building solution..."
-dotnet build KeryxPars.MessageViewer/KeryxPars.MessageViewer.sln --configuration Release --no-restore
+dotnet build --configuration Release --no-restore
 
 # Publish the client project
 echo "?? Publishing Blazor WASM client..."
@@ -53,3 +53,4 @@ echo "   1. Copy contents of ./publish/wwwroot to your web server"
 echo "   2. Or commit and push to trigger GitHub Actions"
 echo ""
 echo "?? Your app is ready for deployment!"
+

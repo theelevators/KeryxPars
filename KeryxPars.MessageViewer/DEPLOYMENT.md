@@ -38,11 +38,13 @@ The repository is now configured with:
 
 Every time you push to the `master` or `main` branch, the GitHub Actions workflow will:
 
-1. ? Build the Blazor WASM application
-2. ? Publish to the `publish/wwwroot` directory
-3. ? Update the base path to `/KeryxPars/`
-4. ? Copy `index.html` to `404.html` for deep linking support
-5. ? Deploy to GitHub Pages
+1. ? Checkout the KeryxPars monolith repository
+2. ? Restore dependencies for the entire solution
+3. ? Build the solution in Release mode
+4. ? Publish the MessageViewer.Client Blazor WASM project
+5. ? Update the base path to `/KeryxPars/`
+6. ? Copy `index.html` to `404.html` for deep linking support
+7. ? Deploy to GitHub Pages
 
 ### Manual Deployment
 
@@ -71,10 +73,9 @@ To test locally with the GitHub Pages base path:
    <base href="/KeryxPars/" />
    ```
 
-2. Run the app:
+2. Run the app from the repository root:
    ```bash
-   cd KeryxPars.MessageViewer/KeryxPars.MessageViewer.Client
-   dotnet watch
+   dotnet watch --project KeryxPars.MessageViewer/KeryxPars.MessageViewer.Client
    ```
 
 3. Access via: `http://localhost:5000/KeryxPars/`

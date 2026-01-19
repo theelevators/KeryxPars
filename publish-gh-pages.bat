@@ -6,7 +6,7 @@ echo.
 echo ?? Publishing KeryxPars Message Viewer for GitHub Pages...
 echo.
 
-REM Navigate to the solution directory
+REM Navigate to the repository root
 cd /d "%~dp0"
 
 REM Clean previous publish
@@ -15,11 +15,11 @@ if exist publish rmdir /s /q publish
 
 REM Restore dependencies
 echo ?? Restoring dependencies...
-dotnet restore KeryxPars.MessageViewer\KeryxPars.MessageViewer.sln
+dotnet restore
 
 REM Build the solution
 echo ?? Building solution...
-dotnet build KeryxPars.MessageViewer\KeryxPars.MessageViewer.sln --configuration Release --no-restore
+dotnet build --configuration Release --no-restore
 
 REM Publish the client project
 echo ?? Publishing Blazor WASM client...
@@ -49,3 +49,4 @@ echo.
 echo ?? Your app is ready for deployment!
 echo.
 pause
+
