@@ -1,0 +1,143 @@
+@using KeryxPars.MessageViewer.Core.Models
+@using KeryxPars.MessageViewer.Core.Services
+
+<!-- Render modal at body level to escape parent containers -->
+<div class="modal-backdrop" @onclick="Cancel">
+    <div class="modal-dialog modal-xl template-selector" @onclick:stopPropagation>
+        <div class="modal-content">
+            <div class="modal-header">
+            <h4>
+                <span class="bi bi-grid"></span>
+                Validation Templates
+            </h4>
+            <button class="btn-close" @onclick="Cancel">
+                <span class="bi bi-x-lg"></span>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="template-categories">
+                <!-- Message Type Templates -->
+                <div class="template-category">
+                    <h5>Message Types</h5>
+                    <div class="template-grid">
+                        @foreach (var template in GetBuiltInTemplates().Where(t => IsMessageTypeTemplate(t)))
+                        {
+                            <div class="template-card" @onclick="() => SelectTemplate(template)">
+                                <div class="template-icon">
+                                    <span class="bi bi-@GetTemplateIcon(template.Name)"></span>
+                                </div>
+                                <h6>@template.Name</h6>
+                                <p>@template.Description</p>
+                                <div class="template-stats">
+                                    <span>@template.Rules.Count rules</span>
+                                    @if (template.IsBuiltIn)
+                                    {
+                                        <span class="bi bi-star-fill"></span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <!-- Segment Templates -->
+                <div class="template-category">
+                    <h5>Common Segments</h5>
+                    <div class="template-list">
+                        @foreach (var template in GetBuiltInTemplates().Where(t => IsSegmentTemplate(t)))
+                        {
+                            <div class="template-item" @onclick="() => SelectTemplate(template)">
+                                <span class="segment-badge">@GetSegmentFromName(template.Name)</span>
+                                <div class="template-info">
+                                    <strong>@template.Name</strong>
+                                    <small>@template.Description</small>
+                                </div>
+                                <span class="rule-count">@template.Rules.Count rules</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                <!-- User Templates -->
+                @if (userTemplates.Any())
+                {
+                    <div class="template-category">
+                        <h5>My Templates</h5>
+                        <div class="template-list">
+                            @foreach (var template in userTemplates)
+                            {
+                                <div class="template-item" @onclick="() => SelectTemplate(template)">
+                                    <span class="bi bi-person-circle"></span>
+                                    <div class="template-info">
+                                        <strong>@template.Name</strong>
+                                        <small>@template.Description</small>
+                                    </div>
+                                    <span class="rule-count">@template.Rules.Count rules</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        </div>
+    </div>
+</div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<ValidationProfile> OnSelect { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    
+    private List<ValidationProfile> userTemplates = [];
+
+    protected override void OnInitialized()
+    {
+        userTemplates = []; // TODO: Load from service
+    }
+
+    private List<ValidationProfile> GetBuiltInTemplates()
+    {
+        return RuleTemplateService.GetBuiltInProfiles();
+    }
+
+    private bool IsMessageTypeTemplate(ValidationProfile template)
+    {
+        return template.Name.Contains("Messages") || 
+               template.Name.Contains("Orders") || 
+               template.Name.Contains("Results") ||
+               template.Name.Contains("Billing");
+    }
+
+    private bool IsSegmentTemplate(ValidationProfile template)
+    {
+        return !IsMessageTypeTemplate(template);
+    }
+
+    private string GetTemplateIcon(string name) => name switch
+    {
+        "ADT Messages" => "person-badge",
+        "Pharmacy Orders" => "capsule",
+        "Lab Results" => "clipboard2-pulse",
+        "Scheduling Messages" => "calendar-event",
+        "Financial/Billing" => "currency-dollar",
+        _ => "file-earmark-text"
+    };
+
+    private string GetSegmentFromName(string name)
+    {
+        var parts = name.Split(' ', '-');
+        return parts.Length > 0 ? parts[0] : name.Substring(0, Math.Min(3, name.Length));
+    }
+    
+    private async Task SelectTemplate(ValidationProfile template)
+    {
+        await OnSelect.InvokeAsync(template);
+    }
+    
+    private async Task Cancel() => await OnCancel.InvokeAsync();
+}

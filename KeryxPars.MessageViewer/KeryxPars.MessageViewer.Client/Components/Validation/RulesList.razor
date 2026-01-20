@@ -1,0 +1,30 @@
+@using KeryxPars.MessageViewer.Core.Models
+@using KeryxPars.HL7.Contracts
+
+<div class="rules-list">
+    @if (!Rules.Any())
+    {
+        <div class="empty-state">
+            <span class="bi bi-inbox"></span>
+            <h5>No rules yet</h5>
+            <p>Click "New Rule" to add your first validation rule</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var rule in Rules.OrderBy(r => r.SegmentId).ThenBy(r => r.FieldIndex ?? 0))
+        {
+            <RuleCard Rule="@rule" 
+                     OnEdit="() => OnEdit.InvokeAsync(rule)"
+                     OnDelete="() => OnDelete.InvokeAsync(rule)"
+                     OnToggle="() => OnToggle.InvokeAsync(rule)" />
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public List<RuleDefinition> Rules { get; set; } = [];
+    [Parameter] public EventCallback<RuleDefinition> OnEdit { get; set; }
+    [Parameter] public EventCallback<RuleDefinition> OnDelete { get; set; }
+    [Parameter] public EventCallback<RuleDefinition> OnToggle { get; set; }
+}
