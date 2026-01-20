@@ -2,8 +2,10 @@
 @using KeryxPars.HL7.Contracts
 @using KeryxPars.MessageViewer.Client.Services
 @using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Rendering
 @inject IJSRuntime JS
 @implements IAsyncDisposable
+
 
 
 
@@ -177,9 +179,9 @@ private class ViewportSize
             var segmentId = line.Substring(0, Math.Min(3, line.Length));
             var fields = line.Split('|');
 
-            // Segment ID
+            // Segment ID with color coding based on segment type
             builder.OpenElement(0, "span");
-            builder.AddAttribute(1, "class", "hl-segment");
+            builder.AddAttribute(1, "class", $"hl-segment hl-segment-{GetSegmentCategory(segmentId)}");
             if (showMetadata)
             {
                 builder.AddAttribute(2, "onmouseenter", EventCallback.Factory.Create<MouseEventArgs>(this,
@@ -193,7 +195,7 @@ private class ViewportSize
             if (fields.Length > 1)
             {
                 builder.OpenElement(5, "span");
-                builder.AddAttribute(6, "class", "hl-separator");
+                builder.AddAttribute(6, "class", "hl-separator hl-separator-field");
                 builder.AddContent(7, "|");
                 builder.CloseElement();
             }
@@ -215,42 +217,8 @@ private class ViewportSize
                     builder.AddAttribute(11 + i * 20, "onmouseleave", EventCallback.Factory.Create(this, () => hoveredField = null));
                 }
 
-                // Check for components
-                if (field.Contains('^'))
-                {
-                    var components = field.Split('^');
-                    for (int c = 0; c < components.Length; c++)
-                    {
-                        // Capture loop variables to avoid closure issues
-                        var componentValue = components[c];
-                        var componentIndex = c + 1;
-                        
-                        builder.OpenElement(12 + i * 20 + c * 5, "span");
-                        builder.AddAttribute(13 + i * 20 + c * 5, "class", "hl-component");
-                        
-                        if (showMetadata)
-                        {
-                            builder.AddAttribute(14 + i * 20 + c * 5, "onmouseenter", EventCallback.Factory.Create<MouseEventArgs>(this,
-                                e => OnComponentHover(segmentId, fieldIndex, componentIndex, componentValue, lineNum + 1, (int)e.ClientX, (int)e.ClientY)));
-                            builder.AddAttribute(15 + i * 20 + c * 5, "onmouseleave", EventCallback.Factory.Create(this, () => hoveredField = null));
-                        }
-                        
-                        builder.AddContent(16 + i * 20 + c * 5, componentValue);
-                        builder.CloseElement();
-
-                        if (c < components.Length - 1)
-                        {
-                            builder.OpenElement(17 + i * 20 + c * 5, "span");
-                            builder.AddAttribute(18 + i * 20 + c * 5, "class", "hl-component-sep");
-                            builder.AddContent(19 + i * 20 + c * 5, "^");
-                            builder.CloseElement();
-                        }
-                    }
-                }
-                else
-                {
-                    builder.AddContent(20 + i * 20, field);
-                }
+                // Check for various delimiters
+                RenderFieldContent(builder, field, segmentId, fieldIndex, lineNum, i);
 
                 builder.CloseElement();
 
@@ -258,7 +226,7 @@ private class ViewportSize
                 if (i < fields.Length - 1)
                 {
                     builder.OpenElement(21 + i * 20, "span");
-                    builder.AddAttribute(22 + i * 20, "class", "hl-separator");
+                    builder.AddAttribute(22 + i * 20, "class", "hl-separator hl-separator-field");
                     builder.AddContent(23 + i * 20, "|");
                     builder.CloseElement();
                 }
@@ -266,6 +234,177 @@ private class ViewportSize
 
         };
     }
+
+    private void RenderFieldContent(RenderTreeBuilder builder, string field, string segmentId, int fieldIndex, int lineNum, int i)
+    {
+        // Handle repetitions (~)
+        if (field.Contains('~'))
+        {
+            var repetitions = field.Split('~');
+            for (int r = 0; r < repetitions.Length; r++)
+            {
+                RenderComponentOrValue(builder, repetitions[r], segmentId, fieldIndex, lineNum, i * 100 + r * 10);
+                
+                if (r < repetitions.Length - 1)
+                {
+                    builder.OpenElement(i * 100 + r * 10 + 5, "span");
+                    builder.AddAttribute(i * 100 + r * 10 + 6, "class", "hl-separator hl-separator-repetition");
+                    builder.AddContent(i * 100 + r * 10 + 7, "~");
+                    builder.CloseElement();
+                }
+            }
+        }
+        else
+        {
+            RenderComponentOrValue(builder, field, segmentId, fieldIndex, lineNum, i * 100);
+        }
+    }
+
+    private void RenderComponentOrValue(RenderTreeBuilder builder, string value, string segmentId, int fieldIndex, int lineNum, int baseIndex)
+    {
+        // Check for components (^)
+        if (value.Contains('^'))
+        {
+            var components = value.Split('^');
+            for (int c = 0; c < components.Length; c++)
+            {
+                // Check for subcomponents (&)
+                if (components[c].Contains('&'))
+                {
+                    var subcomponents = components[c].Split('&');
+                    for (int s = 0; s < subcomponents.Length; s++)
+                    {
+                        RenderValue(builder, subcomponents[s], segmentId, fieldIndex, c + 1, lineNum, baseIndex + c * 5 + s);
+                        
+                        if (s < subcomponents.Length - 1)
+                        {
+                            builder.OpenElement(baseIndex + c * 5 + s + 1, "span");
+                            builder.AddAttribute(baseIndex + c * 5 + s + 2, "class", "hl-separator hl-separator-subcomponent");
+                            builder.AddContent(baseIndex + c * 5 + s + 3, "&");
+                            builder.CloseElement();
+                        }
+                    }
+                }
+                else
+                {
+                    RenderValue(builder, components[c], segmentId, fieldIndex, c + 1, lineNum, baseIndex + c * 5);
+                }
+                
+                if (c < components.Length - 1)
+                {
+                    builder.OpenElement(baseIndex + c * 5 + 4, "span");
+                    builder.AddAttribute(baseIndex + c * 5 + 5, "class", "hl-separator hl-separator-component");
+                    builder.AddContent(baseIndex + c * 5 + 6, "^");
+                    builder.CloseElement();
+                }
+            }
+        }
+        else
+        {
+            RenderValue(builder, value, segmentId, fieldIndex, 0, lineNum, baseIndex);
+        }
+    }
+
+    private void RenderValue(RenderTreeBuilder builder, string value, string segmentId, int fieldIndex, int componentIndex, int lineNum, int baseIndex)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            // Just render empty space, don't show "(empty)"
+            return;
+        }
+
+        // Check for escape sequences
+        if (value.Contains('\\'))
+        {
+            var parts = value.Split('\\');
+            for (int p = 0; p < parts.Length; p++)
+            {
+                if (p > 0)
+                {
+                    builder.OpenElement(baseIndex + p * 3, "span");
+                    builder.AddAttribute(baseIndex + p * 3 + 1, "class", "hl-escape");
+                    builder.AddContent(baseIndex + p * 3 + 2, "\\");
+                    builder.CloseElement();
+                }
+                
+                if (!string.IsNullOrEmpty(parts[p]))
+                {
+                    builder.OpenElement(baseIndex + p * 3 + 3, "span");
+                    builder.AddAttribute(baseIndex + p * 3 + 4, "class", GetValueClass(value, segmentId, fieldIndex));
+                    
+                    if (showMetadata && componentIndex > 0)
+                    {
+                        builder.AddAttribute(baseIndex + p * 3 + 5, "onmouseenter", EventCallback.Factory.Create<MouseEventArgs>(this,
+                            e => OnComponentHover(segmentId, fieldIndex, componentIndex, value, lineNum, (int)e.ClientX, (int)e.ClientY)));
+                        builder.AddAttribute(baseIndex + p * 3 + 6, "onmouseleave", EventCallback.Factory.Create(this, () => hoveredField = null));
+                    }
+                    
+                    builder.AddContent(baseIndex + p * 3 + 7, parts[p]);
+                    builder.CloseElement();
+                }
+            }
+        }
+        else
+        {
+            builder.OpenElement(baseIndex, "span");
+            builder.AddAttribute(baseIndex + 1, "class", GetValueClass(value, segmentId, fieldIndex));
+            
+            if (showMetadata && componentIndex > 0)
+            {
+                builder.AddAttribute(baseIndex + 2, "onmouseenter", EventCallback.Factory.Create<MouseEventArgs>(this,
+                    e => OnComponentHover(segmentId, fieldIndex, componentIndex, value, lineNum, (int)e.ClientX, (int)e.ClientY)));
+                builder.AddAttribute(baseIndex + 3, "onmouseleave", EventCallback.Factory.Create(this, () => hoveredField = null));
+            }
+            
+            builder.AddContent(baseIndex + 4, value);
+            builder.CloseElement();
+        }
+    }
+
+
+    private string GetValueClass(string value, string segmentId, int fieldIndex)
+    {
+        // Detect different value types for syntax highlighting
+        
+        // Date/Time patterns (YYYYMMDD or YYYYMMDDHHMMSS)
+        if (value.Length >= 8 && value.Length <= 14 && value.All(char.IsDigit))
+            return "hl-value hl-value-datetime";
+        
+        // Numeric values
+        if (decimal.TryParse(value, out _))
+            return "hl-value hl-value-number";
+        
+        // IDs (contains numbers and uppercase)
+        if (value.Length > 0 && value.Any(char.IsDigit) && value.Any(char.IsUpper))
+            return "hl-value hl-value-id";
+        
+        // Codes (all uppercase, 1-5 chars)
+        if (value.Length > 0 && value.Length <= 5 && value.All(c => char.IsUpper(c) || char.IsDigit(c)))
+            return "hl-value hl-value-code";
+        
+        // Default text
+        return "hl-value hl-value-text";
+    }
+
+    private string GetSegmentCategory(string segmentId)
+    {
+        return segmentId switch
+        {
+            "MSH" => "header",
+            "EVN" => "event",
+            "PID" or "PD1" => "patient",
+            "PV1" or "PV2" => "visit",
+            "ORC" or "OBR" or "OBX" => "order",
+            "RXE" or "RXO" or "RXA" or "RXD" or "RXR" or "RXC" or "RXG" => "pharmacy",
+            "AL1" => "allergy",
+            "DG1" => "diagnosis",
+            "IN1" or "IN2" => "insurance",
+            "NK1" => "contact",
+            "NTE" => "note",
+            _ => "other"
+        };
+    }
+
 
     private void OnSegmentHover(string segmentId, int lineNumber, int x, int y)
     {

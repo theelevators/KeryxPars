@@ -376,6 +376,28 @@
 }
 
 
+/* Insurance Section */
+.insurance-section {
+    border-left: 4px solid #0284c7;
+}
+
+.insurance-section h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.insurance-count-badge {
+    background: #0284c7;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+}
+
 .insurance-list {
     display: flex;
     flex-direction: column;
@@ -383,21 +405,306 @@
 }
 
 .insurance-item {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-left: 4px solid #0284c7;
+    border-radius: 8px;
     padding: 1rem;
-    background: #f0f9ff;
-    border-radius: 6px;
-    border-left: 3px solid #0284c7;
 }
 
 .insurance-header {
-    font-weight: 600;
-    color: #0369a1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #bae6fd;
 }
 
-.insurance-details {
+.insurance-number {
+    background: #0369a1;
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.insurance-type-badge {
+    background: #0284c7;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.insurance-body {
     display: flex;
     flex-direction: column;
+    gap: 0.75rem;
+}
+
+.insurance-company {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    color: #075985;
+}
+
+.company-icon {
+    color: #0284c7;
+}
+
+.insurance-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+    background: white;
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+.detail-item {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.policy-number {
+    font-family: monospace;
+    font-weight: 600;
+}
+
+.insurance-address {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #475569;
+    background: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.address-icon {
+    color: #0284c7;
+}
+
+/* Allergies Enhanced Styles */
+.allergies-section.alert-section {
+    border-left: 4px solid #ef4444;
+}
+
+.allergy-count-badge {
+    background: #ef4444;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+}
+
+.allergies-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.allergy-item {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 1px solid #fecaca;
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: transform 0.2s;
+}
+
+.allergy-item:hover {
+    transform: translateX(4px);
+}
+
+.allergy-item.severity-severe {
+    border-left-color: #991b1b;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+}
+
+.allergy-item.severity-moderate {
+    border-left-color: #ea580c;
+}
+
+.allergy-item.severity-mild {
+    border-left-color: #f59e0b;
+}
+
+.allergy-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.allergy-icon {
+    color: #ef4444;
+    font-size: 1.25rem;
+}
+
+.allergy-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.allergy-title strong {
+    color: #991b1b;
+    font-size: 1rem;
+}
+
+.allergy-type-badge {
+    background: #dc2626;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.severity-badge {
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.severity-severe,
+.severity-sv {
+    background: #991b1b;
+    color: white;
+}
+
+.severity-moderate,
+.severity-mo {
+    background: #ea580c;
+    color: white;
+}
+
+.severity-mild,
+.severity-mi {
+    background: #f59e0b;
+    color: white;
+}
+
+.allergy-details {
+    margin-left: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+/* Diagnoses Enhanced Styles */
+.diagnoses-section {
+    border-left: 4px solid #8b5cf6;
+}
+
+.diagnosis-count-badge {
+    background: #8b5cf6;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+}
+
+.diagnoses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.diagnosis-item {
+    background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+    border: 1px solid #ddd6fe;
+    border-left: 4px solid #8b5cf6;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.diagnosis-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.diagnosis-number {
+    background: #6d28d9;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.diagnosis-code {
+    background: #8b5cf6;
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: monospace;
+}
+
+.diagnosis-type-badge {
+    background: #a78bfa;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.diagnosis-description {
+    font-size: 1rem;
+    color: #4c1d95;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.diagnosis-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.875rem;
+}
+
+.meta-item {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.meta-label {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.meta-value {
+    color: #374151;
+    font-weight: 400;
+}
+
     gap: 0.5rem;
     font-size: 0.875rem;
     color: #374151;

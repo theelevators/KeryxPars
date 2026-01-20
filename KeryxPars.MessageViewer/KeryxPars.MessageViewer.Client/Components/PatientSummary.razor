@@ -109,27 +109,49 @@
         @if (Result.Message.Allergies.Any(a => !IsEmpty(a)))
         {
             <div class="allergies-section alert-section">
-                <h4><span class="bi bi-exclamation-triangle me-2"></span>Allergies</h4>
+                <h4>
+                    <span class="bi bi-exclamation-triangle me-2"></span>Allergies
+                    <span class="allergy-count-badge">@Result.Message.Allergies.Count(a => !IsEmpty(a))</span>
+                </h4>
                 <div class="allergies-list">
                     @foreach (var allergy in Result.Message.Allergies.Where(a => !IsEmpty(a)))
                     {
                         var allergyFields = allergy.GetValues();
-                        <div class="allergy-item alert-item">
-                            <span class="allergy-icon bi bi-circle-fill"></span>
+                        var allergyType = GetFieldValue(allergyFields, 2);
+                        var allergen = GetFieldValue(allergyFields, 3, "Unknown Allergen");
+                        var severity = GetFieldValue(allergyFields, 4);
+                        var reaction = GetFieldValue(allergyFields, 5);
+                        var identificationDate = GetFieldValue(allergyFields, 6);
+                        
+                        <div class="allergy-item @GetSeverityClass(severity)">
+                            <div class="allergy-header">
+                                <span class="allergy-icon bi bi-exclamation-circle-fill"></span>
+                                <div class="allergy-title">
+                                    <strong>@allergen</strong>
+                                    @if (!string.IsNullOrWhiteSpace(allergyType))
+                                    {
+                                        <span class="allergy-type-badge">@allergyType</span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(severity))
+                                {
+                                    <span class="severity-badge severity-@severity.ToLower()">@severity</span>
+                                }
+                            </div>
                             <div class="allergy-details">
-                                <strong>@GetFieldValue(allergyFields, 3, "Unknown Allergen")</strong>
-                                @{
-                                    var allergyType = GetFieldValue(allergyFields, 2);
-                                    if (!string.IsNullOrWhiteSpace(allergyType))
-                                    {
-                                        <span class="allergy-type">Type: @allergyType</span>
-                                    }
-                                    
-                                    var severity = GetFieldValue(allergyFields, 4);
-                                    if (!string.IsNullOrWhiteSpace(severity))
-                                    {
-                                        <span class="allergy-severity">Severity: @severity</span>
-                                    }
+                                @if (!string.IsNullOrWhiteSpace(reaction))
+                                {
+                                    <div class="detail-row">
+                                        <span class="detail-label">Reaction:</span>
+                                        <span class="detail-value">@reaction</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(identificationDate))
+                                {
+                                    <div class="detail-row">
+                                        <span class="detail-label">Identified:</span>
+                                        <span class="detail-value">@FormatDate(identificationDate)</span>
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -141,33 +163,67 @@
         @if (Result.Message.Diagnoses.Any(d => !IsEmpty(d)))
         {
             <div class="diagnoses-section">
-                <h4><span class="bi bi-clipboard-pulse me-2"></span>Diagnoses</h4>
+                <h4>
+                    <span class="bi bi-clipboard-pulse me-2"></span>Diagnoses
+                    <span class="diagnosis-count-badge">@Result.Message.Diagnoses.Count(d => !IsEmpty(d))</span>
+                </h4>
                 <div class="diagnoses-list">
-                    @foreach (var diagnosis in Result.Message.Diagnoses.Where(d => !IsEmpty(d)))
+                    @foreach (var diagnosis in Result.Message.Diagnoses.Where(d => !IsEmpty(d)).Select((d, i) => new { Diagnosis = d, Index = i + 1 }))
                     {
-                        var diagFields = diagnosis.GetValues();
+                        var diagFields = diagnosis.Diagnosis.GetValues();
+                        var setId = GetFieldValue(diagFields, 1);
+                        var codingMethod = GetFieldValue(diagFields, 2);
+                        var diagnosisCode = GetFieldValue(diagFields, 3);
+                        var description = GetFieldValue(diagFields, 4);
+                        var diagnosisDateTime = GetFieldValue(diagFields, 5);
+                        var diagnosisType = GetFieldValue(diagFields, 6);
+                        var majorDiagnosticCategory = GetFieldValue(diagFields, 7);
+                        
                         <div class="diagnosis-item">
                             <div class="diagnosis-header">
-                                <span class="diagnosis-code">@GetFieldValue(diagFields, 3)</span>
-                            </div>
-                            @{
-                                var description = GetFieldValue(diagFields, 4);
-                                if (!string.IsNullOrWhiteSpace(description))
+                                <span class="diagnosis-number">#@diagnosis.Index</span>
+                                @if (!string.IsNullOrWhiteSpace(diagnosisCode))
                                 {
-                                    <div class="diagnosis-description">@description</div>
+                                    <span class="diagnosis-code">@diagnosisCode</span>
                                 }
-                                
-                                var codingMethod = GetFieldValue(diagFields, 2);
-                                if (!string.IsNullOrWhiteSpace(codingMethod))
+                                @if (!string.IsNullOrWhiteSpace(diagnosisType))
                                 {
-                                    <div class="diagnosis-meta">
-                                        <span>Coding Method: @codingMethod</span>
+                                    <span class="diagnosis-type-badge">@diagnosisType</span>
+                                }
+                            </div>
+                            
+                            @if (!string.IsNullOrWhiteSpace(description))
+                            {
+                                <div class="diagnosis-description">@description</div>
+                            }
+                            
+                            <div class="diagnosis-meta">
+                                @if (!string.IsNullOrWhiteSpace(codingMethod))
+                                {
+                                    <div class="meta-item">
+                                        <span class="meta-label">Coding Method:</span>
+                                        <span class="meta-value">@codingMethod</span>
                                     </div>
                                 }
-                            }
+                                @if (!string.IsNullOrWhiteSpace(diagnosisDateTime))
+                                {
+                                    <div class="meta-item">
+                                        <span class="meta-label">Date/Time:</span>
+                                        <span class="meta-value">@FormatDate(diagnosisDateTime)</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(majorDiagnosticCategory))
+                                {
+                                    <div class="meta-item">
+                                        <span class="meta-label">MDC:</span>
+                                        <span class="meta-value">@majorDiagnosticCategory</span>
+                                    </div>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
+
             </div>
         }
 
@@ -284,33 +340,93 @@
         @if (Result.Message.Insurance.Any(i => !IsEmpty(i)))
         {
             <div class="insurance-section">
-                <h4><span class="bi bi-credit-card me-2"></span>Insurance Information</h4>
+                <h4>
+                    <span class="bi bi-credit-card me-2"></span>Insurance Information
+                    <span class="insurance-count-badge">@Result.Message.Insurance.Count(i => !IsEmpty(i))</span>
+                </h4>
                 <div class="insurance-list">
-                    @foreach (var insurance in Result.Message.Insurance.Where(i => !IsEmpty(i)))
+                    @foreach (var insurance in Result.Message.Insurance.Where(i => !IsEmpty(i)).Select((ins, idx) => new { Insurance = ins, Index = idx + 1 }))
                     {
-                        var insFields = insurance.GetValues();
+                        var insFields = insurance.Insurance.GetValues();
+                        var setId = GetFieldValue(insFields, 1);
+                        var planId = GetFieldValue(insFields, 2);
+                        var companyId = GetFieldValue(insFields, 3);
+                        var companyName = GetFieldValue(insFields, 4);
+                        var companyAddress = GetFieldValue(insFields, 5);
+                        var planType = GetFieldValue(insFields, 15);
+                        var policyNumber = GetFieldValue(insFields, 36);
+                        var groupName = GetFieldValue(insFields, 8);
+                        var groupNumber = GetFieldValue(insFields, 9);
+                        
                         <div class="insurance-item">
-                            @{
-                                var setId = GetFieldValue(insFields, 1);
-                                if (!string.IsNullOrWhiteSpace(setId))
+                            <div class="insurance-header">
+                                <span class="insurance-number">@(insurance.Index == 1 ? "Primary" : insurance.Index == 2 ? "Secondary" : $"Plan {insurance.Index}")</span>
+                                @if (!string.IsNullOrWhiteSpace(planType))
                                 {
-                                    <div class="insurance-header">Set ID: @setId</div>
+                                    <span class="insurance-type-badge">@planType</span>
                                 }
-                            }
-                            <div class="insurance-details">
-                                @for (int i = 2; i < Math.Min(insFields.Length, 10); i++)
+                            </div>
+                            
+                            <div class="insurance-body">
+                                @if (!string.IsNullOrWhiteSpace(companyName))
                                 {
-                                    var field = GetFieldValue(insFields, i);
-                                    if (!string.IsNullOrWhiteSpace(field))
+                                    <div class="insurance-company">
+                                        <span class="company-icon bi bi-building"></span>
+                                        <strong>@companyName</strong>
+                                    </div>
+                                }
+                                
+                                <div class="insurance-details-grid">
+                                    @if (!string.IsNullOrWhiteSpace(planId))
                                     {
-                                        <div>Field @i: @field</div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Plan ID:</span>
+                                            <span class="detail-value">@planId</span>
+                                        </div>
                                     }
+                                    @if (!string.IsNullOrWhiteSpace(companyId))
+                                    {
+                                        <div class="detail-item">
+                                            <span class="detail-label">Company ID:</span>
+                                            <span class="detail-value">@companyId</span>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(policyNumber))
+                                    {
+                                        <div class="detail-item">
+                                            <span class="detail-label">Policy #:</span>
+                                            <span class="detail-value policy-number">@policyNumber</span>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(groupNumber))
+                                    {
+                                        <div class="detail-item">
+                                            <span class="detail-label">Group #:</span>
+                                            <span class="detail-value">@groupNumber</span>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(groupName))
+                                    {
+                                        <div class="detail-item">
+                                            <span class="detail-label">Group Name:</span>
+                                            <span class="detail-value">@groupName</span>
+                                        </div>
+                                    }
+                                </div>
+                                
+                                @if (!string.IsNullOrWhiteSpace(companyAddress))
+                                {
+                                    <div class="insurance-address">
+                                        <span class="address-icon bi bi-geo-alt"></span>
+                                        <span>@companyAddress.Replace("^", " ")</span>
+                                    </div>
                                 }
                             </div>
                         </div>
                     }
                 </div>
             </div>
+
         }
     }
     else
@@ -472,6 +588,21 @@
             list.Add(new FieldDisplay(label, value));
         }
     }
+
+    private string GetSeverityClass(string? severity)
+    {
+        if (string.IsNullOrWhiteSpace(severity))
+            return "";
+        
+        return severity.ToUpper() switch
+        {
+            "SEVERE" or "SV" => "severity-severe",
+            "MODERATE" or "MO" => "severity-moderate",
+            "MILD" or "MI" => "severity-mild",
+            _ => ""
+        };
+    }
 }
+
 
 

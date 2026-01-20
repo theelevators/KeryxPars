@@ -1,0 +1,400 @@
+@using KeryxPars.MessageViewer.Core.Models
+@using KeryxPars.HL7.Contracts
+@using KeryxPars.MessageViewer.Client.Extensions
+
+<div class="message-explorer">
+    <div class="explorer-toolbar">
+        <div class="toolbar-section">
+            <div class="search-box">
+                <span class="bi bi-search"></span>
+                <input type="text" 
+                       @bind="searchTerm" 
+                       @bind:event="oninput" 
+                       placeholder="Search segments, fields, or values..." 
+                       class="search-input" />
+                @if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    <button class="clear-search" @onclick="ClearSearch" title="Clear search">
+                        <span class="bi bi-x-circle"></span>
+                    </button>
+                }
+            </div>
+        </div>
+        
+        <div class="toolbar-section">
+            <div class="results-info" style="display: @(string.IsNullOrWhiteSpace(searchTerm) ? "none" : "flex")">
+                <span class="bi bi-info-circle me-1"></span>
+                <span>@filteredCount results</span>
+            </div>
+            
+            <div class="view-options">
+                <button class="btn-option @(showEmptyFields ? "active" : "")" 
+                        @onclick="ToggleEmptyFields"
+                        title="@(showEmptyFields ? "Hide" : "Show") empty fields">
+                    <span class="bi bi-eye@(showEmptyFields ? "" : "-slash")"></span>
+                    <span>Empty</span>
+                </button>
+                
+                <button class="btn-option @(compactView ? "active" : "")"
+                        @onclick="ToggleCompactView"
+                        title="@(compactView ? "Normal" : "Compact") view">
+                    <span class="bi bi-layout-@(compactView ? "text-sidebar" : "text-window")"></span>
+                    <span>@(compactView ? "Compact" : "Normal")</span>
+                </button>
+                
+                <button class="btn-option"
+                        @onclick="ToggleExpandAll"
+                        title="@(expandAll ? "Collapse" : "Expand") all">
+                    <span class="bi bi-arrows-@(expandAll ? "collapse" : "expand")"></span>
+                    <span>@(expandAll ? "Collapse" : "Expand") All</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (Result.Message != null)
+    {
+        var segments = GetFilteredSegments();
+        
+        @if (segments.Any())
+        {
+            <div class="segments-explorer @(compactView ? "compact" : "normal")">
+                @{
+                    int globalIndex = 0;
+                    foreach (var segment in segments)
+                    {
+                        var segmentIndex = globalIndex++;
+                        var segmentId = segment.SegmentId;
+                        var isExpanded = expandedSegments.Contains(segmentIndex) || expandAll;
+                        var fields = segment.GetValues();
+                        var visibleFields = GetVisibleFields(fields, segmentId);
+                        var matchCount = GetSegmentMatchCount(fields, segmentId);
+                        var hasMatch = matchCount > 0;
+
+                        <div class="segment-explorer-card @(isExpanded ? "expanded" : "") @(hasMatch && !string.IsNullOrWhiteSpace(searchTerm) ? "highlighted" : "")">
+                            <div class="segment-header" @onclick="() => ToggleSegment(segmentIndex)">
+                                <div class="segment-main-info">
+                                    <div class="segment-title">
+                                        <span class="expand-icon bi bi-chevron-@(isExpanded ? "down" : "right")"></span>
+                                        <span class="segment-badge">@segmentId</span>
+                                        <span class="segment-name">@GetSegmentDescription(segmentId)</span>
+                                    </div>
+                                    <div class="segment-meta">
+                                        <span class="segment-index">#@(segmentIndex + 1)</span>
+                                        @if (hasMatch && !string.IsNullOrWhiteSpace(searchTerm))
+                                        {
+                                            <span class="match-badge">
+                                                <span class="bi bi-search me-1"></span>@matchCount match@(matchCount > 1 ? "es" : "")
+                                            </span>
+                                        }
+                                        <span class="field-count">@visibleFields fields</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (isExpanded)
+                            {
+                                <div class="segment-content">
+                                    @if (!compactView)
+                                    {
+                                        <div class="segment-raw">
+                                            <div class="raw-label">
+                                                <span class="bi bi-code-square me-1"></span>Raw Data
+                                            </div>
+                                            <code>@string.Join("|", fields)</code>
+                                        </div>
+                                    }
+
+                                    <div class="fields-container">
+                                        @for (int i = 1; i < fields.Length; i++)
+                                        {
+                                            var field = fields[i];
+                                            var isEmpty = string.IsNullOrWhiteSpace(field);
+                                            
+                                            if (!showEmptyFields && isEmpty)
+                                                continue;
+
+                                            var matchesSearch = string.IsNullOrWhiteSpace(searchTerm) || 
+                                                              FieldMatchesSearch(segmentId, i, field);
+
+                                            if (!string.IsNullOrWhiteSpace(searchTerm) && !matchesSearch)
+                                                continue;
+
+                                            var fieldDescription = GetFieldDescription(segmentId, i);
+
+                                            <div class="field-row @(isEmpty ? "empty" : "") @(matchesSearch && !string.IsNullOrWhiteSpace(searchTerm) ? "search-match" : "")">
+                                                <div class="field-header">
+                                                    <div class="field-identifier">
+                                                        <span class="field-index">@segmentId.@i</span>
+                                                        @if (!compactView)
+                                                        {
+                                                            <span class="field-name">@fieldDescription</span>
+                                                        }
+                                                    </div>
+                                                    @if (isEmpty)
+                                                    {
+                                                        <span class="empty-indicator">(empty)</span>
+                                                    }
+                                                </div>
+                                                @if (!isEmpty)
+                                                {
+                                                    <div class="field-value">
+                                                        @if (IsComponentField(field))
+                                                        {
+                                                            <div class="component-value">
+                                                                @foreach (var component in field.Split('^'))
+                                                                {
+                                                                    <span class="component-part">@component</span>
+                                                                    if (component != field.Split('^').Last())
+                                                                    {
+                                                                        <span class="component-separator">^</span>
+                                                                    }
+                                                                }
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            @HighlightSearchTerm(field)
+                                                        }
+                                                    </div>
+                                                }
+                                                @if (compactView)
+                                                {
+                                                    <div class="field-description-compact">@fieldDescription</div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no-results">
+                <span class="bi bi-search"></span>
+                <p>No segments match your search</p>
+                <button class="btn-link" @onclick="ClearSearch">Clear search</button>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="no-data">
+            <span class="bi bi-inbox"></span>
+            <p>No message data available</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public ParsedMessageResult Result { get; set; } = null!;
+
+    private string searchTerm = string.Empty;
+    private bool showEmptyFields = false;
+    private bool compactView = false;
+    private bool expandAll = false;
+    private HashSet<int> expandedSegments = new();
+    private int filteredCount = 0;
+
+    private void ToggleSegment(int index)
+    {
+        if (expandedSegments.Contains(index))
+            expandedSegments.Remove(index);
+        else
+            expandedSegments.Add(index);
+    }
+
+    private void ToggleEmptyFields()
+    {
+        showEmptyFields = !showEmptyFields;
+    }
+
+    private void ToggleCompactView()
+    {
+        compactView = !compactView;
+    }
+
+    private void ToggleExpandAll()
+    {
+        expandAll = !expandAll;
+        if (expandAll)
+            expandedSegments.Clear();
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+    }
+
+    private List<ISegment> GetFilteredSegments()
+    {
+        var allSegments = Result.Message.GetAllSegments().ToList();
+        
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredCount = allSegments.Count;
+            return allSegments;
+        }
+
+        var filtered = allSegments.Where(seg =>
+        {
+            var segmentId = seg.SegmentId;
+            var fields = seg.GetValues();
+            
+            // Match segment ID
+            if (segmentId.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                return true;
+            
+            // Match segment description
+            if (GetSegmentDescription(segmentId).Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                return true;
+            
+            // Match any field value or description
+            for (int i = 1; i < fields.Length; i++)
+            {
+                if (FieldMatchesSearch(segmentId, i, fields[i]))
+                    return true;
+            }
+            
+            return false;
+        }).ToList();
+
+        filteredCount = filtered.Count;
+        return filtered;
+    }
+
+    private bool FieldMatchesSearch(string segmentId, int fieldIndex, string fieldValue)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return true;
+
+        // Match field value
+        if (fieldValue?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true)
+            return true;
+
+        // Match field description
+        var description = GetFieldDescription(segmentId, fieldIndex);
+        if (description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
+
+    private int GetSegmentMatchCount(string[] fields, string segmentId)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return 0;
+
+        int count = 0;
+
+        // Check segment ID
+        if (segmentId.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            count++;
+
+        // Check segment description
+        if (GetSegmentDescription(segmentId).Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            count++;
+
+        // Check fields
+        for (int i = 1; i < fields.Length; i++)
+        {
+            if (FieldMatchesSearch(segmentId, i, fields[i]))
+                count++;
+        }
+
+        return count;
+    }
+
+    private int GetVisibleFields(string[] fields, string segmentId)
+    {
+        int count = 0;
+        for (int i = 1; i < fields.Length; i++)
+        {
+            if (showEmptyFields || !string.IsNullOrWhiteSpace(fields[i]))
+            {
+                if (string.IsNullOrWhiteSpace(searchTerm) || FieldMatchesSearch(segmentId, i, fields[i]))
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    private bool IsComponentField(string field)
+    {
+        return field?.Contains('^') == true;
+    }
+
+    private RenderFragment HighlightSearchTerm(string text)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm) || string.IsNullOrWhiteSpace(text))
+        {
+            return @<text>@text</text>;
+        }
+
+        var index = text.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase);
+        if (index == -1)
+        {
+            return @<text>@text</text>;
+        }
+
+        var before = text.Substring(0, index);
+        var match = text.Substring(index, searchTerm.Length);
+        var after = text.Substring(index + searchTerm.Length);
+
+        return @<text>@before<mark class="search-highlight">@match</mark>@after</text>;
+    }
+
+    private string GetSegmentDescription(string segmentId)
+    {
+        return segmentId switch
+        {
+            "MSH" => "Message Header",
+            "EVN" => "Event Type",
+            "PID" => "Patient Identification",
+            "PV1" => "Patient Visit",
+            "PV2" => "Patient Visit - Additional Info",
+            "ORC" => "Common Order",
+            "OBR" => "Observation Request",
+            "OBX" => "Observation/Result",
+            "AL1" => "Patient Allergy Information",
+            "DG1" => "Diagnosis",
+            "IN1" => "Insurance",
+            "NK1" => "Next of Kin / Associated Parties",
+            "NTE" => "Notes and Comments",
+            "RXE" => "Pharmacy/Treatment Encoded Order",
+            "RXO" => "Pharmacy/Treatment Order",
+            "RXA" => "Pharmacy/Treatment Administration",
+            "RXD" => "Pharmacy/Treatment Dispense",
+            "RXR" => "Pharmacy/Treatment Route",
+            "GT1" => "Guarantor",
+            "PR1" => "Procedures",
+            "FT1" => "Financial Transaction",
+            "PD1" => "Patient Additional Demographic",
+            "ROL" => "Role",
+            "SCH" => "Scheduling Activity Information",
+            "AIL" => "Appointment Information - Location Resource",
+            "AIP" => "Appointment Information - Personnel Resource",
+            "AIS" => "Appointment Information - Service",
+            "SPM" => "Specimen",
+            "SAC" => "Specimen Container Detail",
+            "TQ1" => "Timing/Quantity",
+            "ODS" => "Dietary Orders, Supplements, and Preferences",
+            "ODT" => "Diet Tray Instructions",
+            _ => segmentId
+        };
+    }
+
+    private string GetFieldDescription(string segmentId, int fieldIndex)
+    {
+        // TODO: Implement comprehensive field descriptions
+        // For now, return basic description
+        return $"Field {fieldIndex}";
+    }
+}

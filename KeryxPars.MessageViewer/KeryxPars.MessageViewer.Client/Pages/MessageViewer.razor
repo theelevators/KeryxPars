@@ -105,9 +105,9 @@
                                 @onclick="@(() => SetActiveTab("overview"))">
                             <span class="bi bi-info-circle"></span>Overview
                         </button>
-                        <button class="tab @(activeTab == "segments" ? "active" : "")" 
-                                @onclick="@(() => SetActiveTab("segments"))">
-                            <span class="bi bi-list-ul"></span>Segments
+                        <button class="tab @(activeTab == "explorer" ? "active" : "")" 
+                                @onclick="@(() => SetActiveTab("explorer"))">
+                            <span class="bi bi-search"></span>Explorer
                         </button>
                         <button class="tab @(activeTab == "tree" ? "active" : "")" 
                                 @onclick="@(() => SetActiveTab("tree"))">
@@ -116,10 +116,6 @@
                         <button class="tab @(activeTab == "raw" ? "active" : "")" 
                                 @onclick="@(() => SetActiveTab("raw"))">
                             <span class="bi bi-code-square"></span>Raw
-                        </button>
-                        <button class="tab @(activeTab == "details" ? "active" : "")" 
-                                @onclick="@(() => SetActiveTab("details"))">
-                            <span class="bi bi-table"></span>Details
                         </button>
                         <button class="tab @(activeTab == "validation" ? "active" : "")" 
                                 @onclick="@(() => SetActiveTab("validation"))">
@@ -136,9 +132,9 @@
                         {
                             <MessageOverview Result="@parseResult" />
                         }
-                        else if (activeTab == "segments")
+                        else if (activeTab == "explorer")
                         {
-                            <SegmentList Result="@parseResult" />
+                            <MessageExplorer Result="@parseResult" />
                         }
                         else if (activeTab == "tree")
                         {
@@ -148,15 +144,12 @@
                         {
                             <MessageRawView Result="@parseResult" RawMessage="@rawMessage" />
                         }
-                        else if (activeTab == "details")
-                        {
-                            <MessageDetails Result="@parseResult" />
-                        }
                         else if (activeTab == "validation")
                         {
                             <ValidationResults Errors="@validationErrors" />
                         }
                     </div>
+
                 }
                 else
                 {
