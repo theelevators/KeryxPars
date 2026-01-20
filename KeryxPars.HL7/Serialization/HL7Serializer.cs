@@ -265,11 +265,12 @@ public static class HL7Serializer
                 context.Message.AddOrderGroup(currentOrder);
             }
 
-            // Start new order group
+            // Start new order group with configuration
             currentOrder = new OrderGroup
             {
                 OrderType = config.OrderType,
-                PrimarySegment = segment
+                PrimarySegment = segment,
+                Configuration = config
             };
             currentOrder.SegmentStatus[segmentId.ToString()] = true;
         }
@@ -279,6 +280,7 @@ public static class HL7Serializer
             currentOrder.AddSegment(segment);
         }
     }
+
 
     private static void HandleMSH(MSH msh, DeserializationContext context, ref bool mshProcessed, in HL7Delimiters delimiters)
     {

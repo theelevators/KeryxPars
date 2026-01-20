@@ -1,58 +1,69 @@
 @using KeryxPars.MessageViewer.Core.Models
 
 <div class="message-overview">
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon message-type">
-                <span class="bi bi-envelope"></span>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Message Type</div>
-                <div class="stat-value">@Result.Metadata.MessageType</div>
-                <div class="stat-subtext">@Result.Metadata.EventType</div>
-            </div>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon message-type">
+            <span class="bi bi-envelope"></span>
         </div>
-
-        <div class="stat-card">
-            <div class="stat-icon version">
-                <span class="bi bi-tag"></span>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">HL7 Version</div>
-                <div class="stat-value">@Result.Metadata.HL7Version</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon segments">
-                <span class="bi bi-list-nested"></span>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Segments</div>
-                <div class="stat-value">@Result.Metadata.SegmentCount</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon fields">
-                <span class="bi bi-table"></span>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Total Fields</div>
-                <div class="stat-value">@Result.Metadata.FieldCount</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon performance">
-                <span class="bi bi-speedometer2"></span>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Parse Time</div>
-                <div class="stat-value">@Result.ParseDuration.TotalMilliseconds.ToString("F2")ms</div>
-            </div>
+        <div class="stat-content">
+            <div class="stat-label">Message Type</div>
+            <div class="stat-value">@Result.Metadata.MessageType</div>
+            <div class="stat-subtext">@Result.Metadata.EventType</div>
         </div>
     </div>
+
+        <div class="stat-card">
+            <div class="stat-icon message-category">
+                <span class="bi bi-box-seam"></span>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Message Category</div>
+                <div class="stat-value">@Result.Metadata.MessageClassDescription</div>
+                <div class="stat-subtext">@Result.Metadata.DetectedMessageClass</div>
+            </div>
+        </div>
+
+    <div class="stat-card">
+        <div class="stat-icon version">
+            <span class="bi bi-tag"></span>
+        </div>
+        <div class="stat-content">
+            <div class="stat-label">HL7 Version</div>
+            <div class="stat-value">@Result.Metadata.HL7Version</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon segments">
+            <span class="bi bi-list-nested"></span>
+        </div>
+        <div class="stat-content">
+            <div class="stat-label">Segments</div>
+            <div class="stat-value">@Result.Metadata.SegmentCount</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon fields">
+            <span class="bi bi-table"></span>
+        </div>
+        <div class="stat-content">
+            <div class="stat-label">Total Fields</div>
+            <div class="stat-value">@Result.Metadata.FieldCount</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon performance">
+            <span class="bi bi-speedometer2"></span>
+        </div>
+        <div class="stat-content">
+            <div class="stat-label">Parse Time</div>
+            <div class="stat-value">@Result.ParseDuration.TotalMilliseconds.ToString("F2")ms</div>
+        </div>
+    </div>
+</div>
 
     @if (Result.Message?.Msh != null)
     {

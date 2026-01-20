@@ -4,38 +4,45 @@
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
     margin-bottom: 2rem;
 }
 
 .stat-card {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    padding: 1.5rem;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transition: transform 0.2s;
-}
-
-.stat-card:hover {
-    transform: translateY(-4px);
-}
-
-.stat-icon {
-    width: 50px;
-    height: 50px;
+    padding: 1rem;
     border-radius: 10px;
     display: flex;
     align-items: center;
+    gap: 0.875rem;
+    transition: transform 0.2s;
+    min-height: 80px;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: white;
 }
 
 .stat-icon.message-type {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-icon.message-category {
+    background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
 }
 
 .stat-icon.version {
@@ -56,24 +63,41 @@
 
 .stat-content {
     flex: 1;
+    min-width: 0; /* Allow text to shrink */
+    overflow: hidden;
 }
 
 .stat-label {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: #666;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: #1a1a1a;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .stat-subtext {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: #888;
+    margin-top: 0.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
 
 .message-header-section,
 .patient-section,
