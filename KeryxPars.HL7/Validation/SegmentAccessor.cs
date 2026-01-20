@@ -21,6 +21,9 @@ public sealed class SegmentAccessor
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ISegment? GetSegment(object message, string segmentId)
     {
+        if (string.IsNullOrWhiteSpace(segmentId))
+            return null;
+
         var messageType = message.GetType();
         var key = (messageType, segmentId);
 

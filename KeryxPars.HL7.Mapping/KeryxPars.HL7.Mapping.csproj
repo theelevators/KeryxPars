@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    
+    <PackageId>KeryxPars.HL7.Mapping</PackageId>
+    <Description>Ultra-fast HL7 to domain model mapping with source generators and zero-reflection performance</Description>
+    <PackageTags>hl7;mapping;source-generator;healthcare;medical</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KeryxPars.HL7\KeryxPars.HL7.csproj" />
+    
+    <!-- Reference the source generator project -->
+    <ProjectReference Include="..\KeryxPars.HL7.Mapping.SourceGenerators\KeryxPars.HL7.Mapping.SourceGenerators.csproj" 
+                      OutputItemType="Analyzer" 
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>
+
