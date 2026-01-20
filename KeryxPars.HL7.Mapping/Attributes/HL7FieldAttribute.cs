@@ -42,9 +42,22 @@ public sealed class HL7FieldAttribute : Attribute
 
     /// <summary>
     /// Condition for mapping (simple expression).
-    /// Example: "PV1.2 = I" (only map if patient class is Inpatient)
+    /// Example: "PV1.2 == I" (only map if patient class is Inpatient)
+    /// Supports: ==, !=, field path references
     /// </summary>
     public string? When { get; set; }
+
+    /// <summary>
+    /// Alternative condition syntax. Field is mapped only if condition evaluates to true.
+    /// Example: "PID.8 == M && PV1.2 == I"
+    /// </summary>
+    public string? Condition { get; set; }
+
+    /// <summary>
+    /// Skip mapping if the source field value is null or empty.
+    /// Useful for optional fields.
+    /// </summary>
+    public bool SkipIfEmpty { get; set; }
 
     /// <summary>
     /// Maps a property to an HL7 field.

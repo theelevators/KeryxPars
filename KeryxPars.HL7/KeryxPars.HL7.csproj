@@ -4,7 +4,27 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    
+    <!-- NuGet Package Information -->
+    <PackageId>KeryxPars.HL7</PackageId>
+    <Version>0.2.0-beta2</Version>
+    <Authors>KeryxPars Contributors</Authors>
+    <Company>KeryxPars</Company>
+    <Description>Ultra-fast HL7 v2.x message parser and serializer with zero-allocation span-based processing. Includes source-generated validation and fluent API. 50-100x faster than traditional parsers.</Description>
+    <PackageProjectUrl>https://github.com/theelevators/KeryxPars</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/theelevators/KeryxPars</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>hl7;healthcare;parser;medical;fast;performance;healthcare-integration;hl7v2</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\KeryxPars.Core\KeryxPars.Core.csproj" />
@@ -14,4 +34,5 @@
   </ItemGroup>
 
 </Project>
+
 

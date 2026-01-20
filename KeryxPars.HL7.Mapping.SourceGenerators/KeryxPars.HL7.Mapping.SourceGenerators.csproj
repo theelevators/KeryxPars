@@ -6,12 +6,21 @@
     <Nullable>enable</Nullable>
     <IsRoslynComponent>true</IsRoslynComponent>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
+    
+    <!-- NuGet Package Information -->
+    <PackageId>KeryxPars.HL7.Mapping.SourceGenerators</PackageId>
+    <Version>0.2.0-beta2</Version>
+    <Authors>KeryxPars Contributors</Authors>
+    <Company>KeryxPars</Company>
+    <Description>Source generators for KeryxPars.HL7.Mapping providing compile-time HL7-to-domain mapper generation. Creates optimized, zero-reflection mapping code at compile time. Supports DateTime, Enum, collections, and nested objects.</Description>
+    <PackageProjectUrl>https://github.com/theelevators/KeryxPars</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/theelevators/KeryxPars</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>hl7;source-generator;roslyn;analyzer;mapper;mapping;code-generation</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <DevelopmentDependency>true</DevelopmentDependency>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,4 +35,5 @@
   </ItemGroup>
 
 </Project>
+
 

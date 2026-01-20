@@ -14,6 +14,17 @@ public sealed class HL7ComplexAttribute : Attribute
     /// If not specified, properties must use full paths.
     /// </summary>
     public string? BaseFieldPath { get; set; }
+
+    /// <summary>
+    /// Conditional mapping. Complex object is only mapped if condition is true.
+    /// Example: "PID.8 == F" (only map pregnancy status for females)
+    /// </summary>
+    public string? Condition { get; set; }
+
+    /// <summary>
+    /// Skip mapping if the base field is empty.
+    /// </summary>
+    public bool SkipIfEmpty { get; set; }
 }
 
 /// <summary>
