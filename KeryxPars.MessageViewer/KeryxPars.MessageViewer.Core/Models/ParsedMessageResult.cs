@@ -11,6 +11,8 @@ public class ParsedMessageResult
     public TimeSpan ParseDuration { get; set; }
 }
 
+
+
 public class ParseMetadata
 {
     public int SegmentCount { get; set; }
@@ -19,4 +21,15 @@ public class ParseMetadata
     public string HL7Version { get; set; } = string.Empty;
     public string MessageType { get; set; } = string.Empty;
     public string EventType { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// The detected specialized message class name (e.g., "PharmacyMessage", "LabMessage")
+    /// </summary>
+    public string DetectedMessageClass { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Human-readable description of the detected message class
+    /// </summary>
+    public string MessageClassDescription { get; set; } = string.Empty;
 }
+

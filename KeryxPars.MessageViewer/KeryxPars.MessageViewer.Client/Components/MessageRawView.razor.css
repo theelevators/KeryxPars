@@ -49,6 +49,10 @@
     padding-left: 4rem;
 }
 
+/* Note: Syntax highlighting styles moved to wwwroot/css/app.css (global) */
+/* This allows them to work with dynamically rendered content */
+
+
 .raw-line {
     display: flex;
     position: relative;
@@ -77,52 +81,8 @@
     color: #d4d4d4;
 }
 
-/* Syntax Highlighting */
-.hl-segment {
-    color: #4ec9b0;
-    font-weight: 700;
-    cursor: help;
-    transition: background 0.15s;
-}
-
-.hl-segment:hover {
-    background: rgba(78, 201, 176, 0.15);
-    border-radius: 2px;
-}
-
-.hl-separator {
-    color: #808080;
-    font-weight: 700;
-}
-
-.hl-field {
-    color: #ce9178;
-    cursor: help;
-    transition: background 0.15s;
-}
-
-.hl-field:hover {
-    background: rgba(206, 145, 120, 0.2);
-    border-radius: 2px;
-}
-
-.hl-component {
-    color: #9cdcfe;
-    cursor: help;
-    transition: background 0.15s;
-}
-
-.hl-component:hover {
-    background: rgba(156, 220, 254, 0.15);
-    border-radius: 2px;
-}
-
-.hl-component-sep {
-    color: #569cd6;
-    font-weight: 700;
-}
-
 /* Metadata Tooltip */
+
 .metadata-tooltip {
     position: fixed;
     z-index: 10000;

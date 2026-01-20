@@ -1,5 +1,6 @@
 using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Segments;
+using KeryxPars.HL7.Serialization.Configuration;
 using System.Diagnostics.CodeAnalysis;
 
 namespace KeryxPars.HL7.Definitions;
@@ -15,9 +16,15 @@ public class OrderGroup
     /// </summary>
     public string OrderType { get; set; } = "Medication";
 
+    /// <summary>
+    /// Configuration that defines which segments are repeatable vs detail
+    /// </summary>
+    internal OrderGroupingConfiguration? Configuration { get; set; }
+
     private Dictionary<string, bool>? _segmentStatus;
     private Dictionary<string, ISegment>? _detailSegments;
     private Dictionary<string, List<ISegment>>? _repeatableSegments;
+
 
     /// <summary>
     /// Indicates if specific segments have been processed
@@ -59,16 +66,32 @@ public class OrderGroup
         var segmentId = segment.SegmentId.ToString();
         SegmentStatus[segmentId] = true;
 
-        // Check if it's a known repeatable segment
-        if (RepeatableSegments.TryGetValue(segmentId, out List<ISegment>? value))
+        // Determine if this segment is repeatable based on configuration
+        bool isRepeatable = Configuration?.RepeatableSegmentIds.Contains(segmentId) ?? false;
+        bool isDetail = Configuration?.DetailSegmentIds.Contains(segmentId) ?? false;
+
+        if (isRepeatable)
         {
-            value.Add(segment);
+            // Add to repeatable segments list
+            if (!RepeatableSegments.TryGetValue(segmentId, out var list))
+            {
+                list = [];
+                RepeatableSegments[segmentId] = list;
+            }
+            list.Add(segment);
+        }
+        else if (isDetail)
+        {
+            // Add as single detail segment (will overwrite if multiple exist)
+            DetailSegments[segmentId] = segment;
         }
         else
         {
+            // Unknown segment type - treat as detail
             DetailSegments[segmentId] = segment;
         }
     }
+
 
     /// <summary>
     /// Gets all segments of a specific type
