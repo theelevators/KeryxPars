@@ -10,6 +10,8 @@ public interface IMessageParserService
     Task<IEnumerable<MessageValidationError>> ValidateAsync(HL7DefaultMessage message);
 }
 
+
+
 public class MessageValidationError
 {
     public ValidationSeverity Severity { get; set; }

@@ -154,3 +154,163 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* ====================================================================== */
+/* HL7 SYNTAX HIGHLIGHTING - Global Styles for Raw View */
+/* ====================================================================== */
+
+/* Segments by Category */
+.hl-segment {
+    font-weight: 700;
+    cursor: help;
+    padding: 0.125rem 0.25rem;
+    border-radius: 3px;
+    transition: all 0.15s;
+}
+
+.hl-segment:hover {
+    transform: scale(1.05);
+}
+
+.hl-segment-header {
+    color: #c586c0 !important;
+    background: rgba(197, 134, 192, 0.15);
+}
+
+.hl-segment-event {
+    color: #dcdcaa !important;
+    background: rgba(220, 220, 170, 0.15);
+}
+
+.hl-segment-patient {
+    color: #4fc1ff !important;
+    background: rgba(79, 193, 255, 0.15);
+}
+
+.hl-segment-visit {
+    color: #b5cea8 !important;
+    background: rgba(181, 206, 168, 0.15);
+}
+
+.hl-segment-order {
+    color: #9cdcfe !important;
+    background: rgba(156, 220, 254, 0.15);
+}
+
+.hl-segment-pharmacy {
+    color: #4ec9b0 !important;
+    background: rgba(78, 201, 176, 0.15);
+}
+
+.hl-segment-allergy {
+    color: #f48771 !important;
+    background: rgba(244, 135, 113, 0.15);
+}
+
+.hl-segment-diagnosis {
+    color: #ce9178 !important;
+    background: rgba(206, 145, 120, 0.15);
+}
+
+.hl-segment-insurance {
+    color: #569cd6 !important;
+    background: rgba(86, 156, 214, 0.15);
+}
+
+.hl-segment-contact {
+    color: #c586c0 !important;
+    background: rgba(197, 134, 192, 0.15);
+}
+
+.hl-segment-note {
+    color: #6a9955 !important;
+    background: rgba(106, 153, 85, 0.15);
+}
+
+.hl-segment-other {
+    color: #808080 !important;
+    background: rgba(128, 128, 128, 0.15);
+}
+
+/* Separators with Different Colors */
+.hl-separator {
+    font-weight: 700;
+    padding: 0 0.125rem;
+}
+
+.hl-separator-field {
+    color: #d7ba7d !important;
+    font-size: 1.1em;
+}
+
+.hl-separator-component {
+    color: #569cd6 !important;
+    font-size: 1em;
+}
+
+.hl-separator-repetition {
+    color: #c586c0 !important;
+    font-size: 1em;
+}
+
+.hl-separator-subcomponent {
+    color: #4ec9b0 !important;
+    font-size: 0.9em;
+}
+
+/* Fields */
+.hl-field {
+    cursor: help;
+    transition: background 0.15s;
+}
+
+.hl-field:hover {
+    background: rgba(206, 145, 120, 0.2);
+    border-radius: 2px;
+}
+
+/* Values by Type */
+.hl-value {
+    cursor: help;
+}
+
+.hl-value-datetime {
+    color: #ce9178 !important;
+    font-weight: 600;
+}
+
+.hl-value-number {
+    color: #b5cea8 !important;
+    font-weight: 600;
+}
+
+.hl-value-id {
+    color: #9cdcfe !important;
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.hl-value-code {
+    color: #dcdcaa !important;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.hl-value-text {
+    color: #d4d4d4 !important;
+}
+
+/* Empty Values */
+.hl-empty {
+    color: #6a9955 !important;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* Escape Characters */
+.hl-escape {
+    color: #d16969 !important;
+    font-weight: 700;
+    background: rgba(209, 105, 105, 0.15);
+    padding: 0 0.2rem;
+    border-radius: 2px;
+}

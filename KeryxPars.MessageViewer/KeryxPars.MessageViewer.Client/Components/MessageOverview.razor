@@ -1,124 +1,283 @@
 @using KeryxPars.MessageViewer.Core.Models
 
 <div class="message-overview">
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon message-type">
-                <span class="bi bi-envelope"></span>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Message Type</div>
-                <div class="stat-value">@Result.Metadata.MessageType</div>
-                <div class="stat-subtext">@Result.Metadata.EventType</div>
-            </div>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon message-type">
+            <span class="bi bi-envelope"></span>
         </div>
-
-        <div class="stat-card">
-            <div class="stat-icon version">
-                <span class="bi bi-tag"></span>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">HL7 Version</div>
-                <div class="stat-value">@Result.Metadata.HL7Version</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon segments">
-                <span class="bi bi-list-nested"></span>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Segments</div>
-                <div class="stat-value">@Result.Metadata.SegmentCount</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon fields">
-                <span class="bi bi-table"></span>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Total Fields</div>
-                <div class="stat-value">@Result.Metadata.FieldCount</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon performance">
-                <span class="bi bi-speedometer2"></span>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Parse Time</div>
-                <div class="stat-value">@Result.ParseDuration.TotalMilliseconds.ToString("F2")ms</div>
-            </div>
+        <div class="stat-content">
+            <div class="stat-label">Message Type</div>
+            <div class="stat-value">@Result.Metadata.MessageType</div>
+            <div class="stat-subtext">@Result.Metadata.EventType</div>
         </div>
     </div>
+
+        <div class="stat-card">
+            <div class="stat-icon message-category">
+                <span class="bi bi-box-seam"></span>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Message Category</div>
+                <div class="stat-value">@Result.Metadata.MessageClassDescription</div>
+                <div class="stat-subtext">@Result.Metadata.DetectedMessageClass</div>
+            </div>
+        </div>
+
+    <div class="stat-card">
+        <div class="stat-icon version">
+            <span class="bi bi-tag"></span>
+        </div>
+        <div class="stat-content">
+            <div class="stat-label">HL7 Version</div>
+            <div class="stat-value">@Result.Metadata.HL7Version</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon segments">
+            <span class="bi bi-list-nested"></span>
+        </div>
+        <div class="stat-content">
+            <div class="stat-label">Segments</div>
+            <div class="stat-value">@Result.Metadata.SegmentCount</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon fields">
+            <span class="bi bi-table"></span>
+        </div>
+        <div class="stat-content">
+            <div class="stat-label">Total Fields</div>
+            <div class="stat-value">@Result.Metadata.FieldCount</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon performance">
+            <span class="bi bi-speedometer2"></span>
+        </div>
+        <div class="stat-content">
+            <div class="stat-label">Parse Time</div>
+            <div class="stat-value">@Result.ParseDuration.TotalMilliseconds.ToString("F2")ms</div>
+        </div>
+    </div>
+</div>
 
     @if (Result.Message?.Msh != null)
     {
         <div class="message-header-section">
-            <h4>Message Header (MSH)</h4>
-            <div class="header-details">
-                <div class="detail-row">
-                    <span class="detail-label">Sending Application:</span>
-                    <span class="detail-value">@Result.Message.Msh.SendingApplication.ToString()</span>
+            <h4>
+                <span class="bi bi-envelope-paper me-2"></span>Message Header (MSH)
+            </h4>
+            
+            <div class="header-subsection">
+                <div class="subsection-title">
+                    <span class="bi bi-arrow-right-circle"></span>
+                    Routing Information
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Sending Facility:</span>
-                    <span class="detail-value">@Result.Message.Msh.SendingFacility.ToString()</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Receiving Application:</span>
-                    <span class="detail-value">@Result.Message.Msh.ReceivingApplication.ToString()</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Receiving Facility:</span>
-                    <span class="detail-value">@Result.Message.Msh.ReceivingFacility.ToString()</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Message Control ID:</span>
-                    <span class="detail-value">@Result.Message.Msh.MessageControlID.ToString()</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Processing ID:</span>
-                    <span class="detail-value">@Result.Message.Msh.ProcessingID.ToString()</span>
-                </div>
-            </div>
-        </div>
-    }
-
-    @if (Result.Message?.Pid != null)
-    {
-        <div class="patient-section">
-            <h4>Patient Information (PID)</h4>
-            <div class="patient-details">
-                <div class="detail-row">
-                    <span class="detail-label">Patient Information:</span>
-                    <span class="detail-value">See Segments tab for detailed patient information</span>
+                <div class="header-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Sending Application:</span>
+                        <span class="detail-value highlight">@Result.Message.Msh.SendingApplication.ToString()</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Sending Facility:</span>
+                        <span class="detail-value highlight">@Result.Message.Msh.SendingFacility.ToString()</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Receiving Application:</span>
+                        <span class="detail-value">@Result.Message.Msh.ReceivingApplication.ToString()</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Receiving Facility:</span>
+                        <span class="detail-value">@Result.Message.Msh.ReceivingFacility.ToString()</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
 
-    @if (Result.Metadata.SegmentFrequency.Any())
-    {
-        <div class="segment-frequency-section">
-            <h4>Segment Distribution</h4>
-            <div class="frequency-chart">
-                @foreach (var segment in Result.Metadata.SegmentFrequency.OrderByDescending(s => s.Value))
-                {
-                    var percentage = (segment.Value * 100.0 / Result.Metadata.SegmentCount);
-                    <div class="frequency-bar">
-                        <div class="bar-label">@segment.Key</div>
-                        <div class="bar-container">
-                            <div class="bar-fill" style="width: @percentage%"></div>
-                            <div class="bar-value">@segment.Value</div>
+            <div class="header-subsection">
+                <div class="subsection-title">
+                    <span class="bi bi-gear"></span>
+                    Processing Details
+                </div>
+                <div class="header-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Message Control ID:</span>
+                        <span class="detail-value control-id">@Result.Message.Msh.MessageControlID.ToString()</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Processing ID:</span>
+                        <span class="detail-value">
+                            <span class="processing-badge processing-@Result.Message.Msh.ProcessingID.ToString().ToLower()">
+                                @Result.Message.Msh.ProcessingID.ToString()
+                            </span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Version ID:</span>
+                        <span class="detail-value">@Result.Message.Msh.VersionID.ToString()</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Message Date/Time:</span>
+                        <span class="detail-value">@FormatDateTime(Result.Message.Msh.DateTimeOfMessage.ToString())</span>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Result.Message.Msh.Security.ToString()))
+                    {
+                        <div class="detail-row">
+                            <span class="detail-label">Security:</span>
+                            <span class="detail-value">@Result.Message.Msh.Security.ToString()</span>
                         </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Result.Message.Msh.SequenceNumber.ToString()))
+                    {
+                        <div class="detail-row">
+                            <span class="detail-label">Sequence Number:</span>
+                            <span class="detail-value">@Result.Message.Msh.SequenceNumber.ToString()</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+
+    @if (Result.Message?.Evn != null)
+    {
+        <div class="event-section">
+            <h4>
+                <span class="bi bi-lightning me-2"></span>Event Information (EVN)
+            </h4>
+            <div class="event-details">
+                <div class="detail-row">
+                    <span class="detail-label">Event Type Code:</span>
+                    <span class="detail-value event-badge">@Result.Message.Evn.EventType.ToString()</span>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Result.Message.Evn.RecordedDateTime.ToString()))
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Recorded Date/Time:</span>
+                        <span class="detail-value">@FormatDateTime(Result.Message.Evn.RecordedDateTime.ToString())</span>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Result.Message.Evn.EventOccurred.ToString()))
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Event Occurred:</span>
+                        <span class="detail-value">@FormatDateTime(Result.Message.Evn.EventOccurred.ToString())</span>
                     </div>
                 }
             </div>
         </div>
     }
+
+
+    @if (Result.Metadata.SegmentFrequency.Any())
+    {
+        <div class="segment-frequency-section">
+            <h4>
+                <span class="bi bi-bar-chart me-2"></span>Segment Distribution
+                <span class="segment-types-badge">@Result.Metadata.SegmentFrequency.Count types</span>
+            </h4>
+            
+            <div class="frequency-stats">
+                <div class="stat-pill">
+                    <span class="stat-pill-label">Total Segments:</span>
+                    <span class="stat-pill-value">@Result.Metadata.SegmentCount</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-label">Unique Types:</span>
+                    <span class="stat-pill-value">@Result.Metadata.SegmentFrequency.Count</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-label">Most Common:</span>
+                    <span class="stat-pill-value">@Result.Metadata.SegmentFrequency.OrderByDescending(s => s.Value).First().Key (@Result.Metadata.SegmentFrequency.OrderByDescending(s => s.Value).First().Value)</span>
+                </div>
+            </div>
+
+            <div class="frequency-chart">
+                @foreach (var segment in Result.Metadata.SegmentFrequency.OrderByDescending(s => s.Value))
+                {
+                    var percentage = (segment.Value * 100.0 / Result.Metadata.SegmentCount);
+                    var barColor = GetSegmentColor(segment.Key);
+                    
+                    <div class="frequency-bar">
+                        <div class="bar-header">
+                            <span class="bar-label">
+                                <span class="segment-type-badge" style="background-color: @barColor">@segment.Key</span>
+                                <span class="segment-name">@GetSegmentName(segment.Key)</span>
+                            </span>
+                            <span class="bar-stats">
+                                <span class="bar-count">@segment.Value</span>
+                                <span class="bar-percentage">@percentage.ToString("F1")%</span>
+                            </span>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: @percentage%; background-color: @barColor"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="message-quality-section">
+            <h4>
+                <span class="bi bi-clipboard-check me-2"></span>Message Content Summary
+            </h4>
+            <div class="quality-grid">
+                <div class="quality-item @(HasRequiredSegments() ? "quality-pass" : "quality-fail")">
+                    <span class="quality-icon bi @(HasRequiredSegments() ? "bi-check-circle-fill" : "bi-x-circle-fill")"></span>
+                    <div class="quality-content">
+                        <div class="quality-label">Required Segments</div>
+                        <div class="quality-value">@(HasRequiredSegments() ? "Present" : "Missing")</div>
+                    </div>
+                </div>
+                
+                <div class="quality-item @(HasPatientInfo() ? "quality-pass" : "quality-warn")">
+                    <span class="quality-icon bi bi-person-fill"></span>
+                    <div class="quality-content">
+                        <div class="quality-label">Patient Information</div>
+                        <div class="quality-value">@(HasPatientInfo() ? "Complete" : "Missing")</div>
+                    </div>
+                </div>
+                
+                <div class="quality-item @(GetOrderCount() > 0 ? "quality-pass" : "quality-info")">
+                    <span class="quality-icon bi bi-prescription2"></span>
+                    <div class="quality-content">
+                        <div class="quality-label">Orders/Requests</div>
+                        <div class="quality-value">@GetOrderCount() @(GetOrderCount() == 1 ? "order" : "orders")</div>
+                    </div>
+                </div>
+
+                <div class="quality-item @(HasClinicalData() ? "quality-pass" : "quality-info")">
+                    <span class="quality-icon bi bi-heart-pulse-fill"></span>
+                    <div class="quality-content">
+                        <div class="quality-label">Clinical Data</div>
+                        <div class="quality-value">@GetClinicalDataSummary()</div>
+                    </div>
+                </div>
+
+                <div class="quality-item quality-info">
+                    <span class="quality-icon bi bi-file-text"></span>
+                    <div class="quality-content">
+                        <div class="quality-label">Message Size</div>
+                        <div class="quality-value">@Result.Metadata.SegmentCount segments, @Result.Metadata.FieldCount fields</div>
+                    </div>
+                </div>
+
+                <div class="quality-item @(string.IsNullOrWhiteSpace(Result.Message?.Msh?.MessageControlID.ToString()) ? "quality-warn" : "quality-pass")">
+                    <span class="quality-icon bi bi-hash"></span>
+                    <div class="quality-content">
+                        <div class="quality-label">Message Control ID</div>
+                        <div class="quality-value">@(string.IsNullOrWhiteSpace(Result.Message?.Msh?.MessageControlID.ToString()) ? "Not Set" : "Present")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+
 </div>
 
 @code {
@@ -138,5 +297,158 @@
         
         return obj.ToString() ?? string.Empty;
     }
+
+    private string FormatDateTime(string? dateTime)
+    {
+        if (string.IsNullOrWhiteSpace(dateTime))
+            return "Not specified";
+
+        // HL7 datetime format: YYYYMMDDHHMMSS
+        if (dateTime.Length >= 14)
+        {
+            try
+            {
+                var year = dateTime.Substring(0, 4);
+                var month = dateTime.Substring(4, 2);
+                var day = dateTime.Substring(6, 2);
+                var hour = dateTime.Substring(8, 2);
+                var minute = dateTime.Substring(10, 2);
+                var second = dateTime.Substring(12, 2);
+                return $"{month}/{day}/{year} {hour}:{minute}:{second}";
+            }
+            catch
+            {
+                return dateTime;
+            }
+        }
+        else if (dateTime.Length >= 8)
+        {
+            try
+            {
+                var year = dateTime.Substring(0, 4);
+                var month = dateTime.Substring(4, 2);
+                var day = dateTime.Substring(6, 2);
+                return $"{month}/{day}/{year}";
+            }
+            catch
+            {
+                return dateTime;
+            }
+        }
+
+        return dateTime;
+    }
+
+    private string GetSegmentName(string segmentId)
+    {
+        return segmentId switch
+        {
+            "MSH" => "Message Header",
+            "EVN" => "Event Type",
+            "PID" => "Patient Identification",
+            "PV1" => "Patient Visit",
+            "PV2" => "Patient Visit - Additional",
+            "ORC" => "Common Order",
+            "OBR" => "Observation Request",
+            "OBX" => "Observation Result",
+            "AL1" => "Allergy Information",
+            "DG1" => "Diagnosis",
+            "IN1" => "Insurance",
+            "NK1" => "Next of Kin",
+            "NTE" => "Notes and Comments",
+            "RXE" => "Pharmacy Encoded Order",
+            "RXO" => "Pharmacy Order",
+            "RXA" => "Pharmacy Administration",
+            "RXD" => "Pharmacy Dispense",
+            "RXR" => "Pharmacy Route",
+            "GT1" => "Guarantor",
+            "PR1" => "Procedures",
+            "FT1" => "Financial Transaction",
+            _ => segmentId
+        };
+    }
+
+    private string GetSegmentColor(string segmentId)
+    {
+        return segmentId switch
+        {
+            "MSH" => "#667eea",
+            "EVN" => "#764ba2",
+            "PID" => "#f093fb",
+            "PV1" => "#f5576c",
+            "PV2" => "#f5576c",
+            "ORC" => "#4facfe",
+            "OBR" => "#00f2fe",
+            "OBX" => "#43e97b",
+            "AL1" => "#ef4444",
+            "DG1" => "#8b5cf6",
+            "IN1" => "#0284c7",
+            "RXE" => "#10b981",
+            "RXO" => "#10b981",
+            "RXA" => "#10b981",
+            "RXD" => "#10b981",
+            "RXR" => "#10b981",
+            "NTE" => "#f59e0b",
+            "NK1" => "#ec4899",
+            "GT1" => "#0891b2",
+            "PR1" => "#7c3aed",
+            "FT1" => "#06b6d4",
+            _ => "#6b7280"
+        };
+    }
+
+
+    private bool HasRequiredSegments()
+    {
+        // MSH is always required
+        return Result.Metadata.SegmentFrequency.ContainsKey("MSH");
+    }
+
+    private bool HasPatientInfo()
+    {
+        return Result.Metadata.SegmentFrequency.ContainsKey("PID");
+    }
+
+    private int GetOrderCount()
+    {
+        if (Result.Message == null) return 0;
+        
+        // Check for ORC segments or Orders collection
+        var orcCount = Result.Metadata.SegmentFrequency.GetValueOrDefault("ORC", 0);
+        var orderCount = Result.Message.Orders?.Count ?? 0;
+        
+        return Math.Max(orcCount, orderCount);
+    }
+
+    private bool HasClinicalData()
+    {
+        // Check for clinical segments: diagnoses, allergies, observations
+        return Result.Metadata.SegmentFrequency.ContainsKey("DG1") ||
+               Result.Metadata.SegmentFrequency.ContainsKey("AL1") ||
+               Result.Metadata.SegmentFrequency.ContainsKey("OBX") ||
+               Result.Metadata.SegmentFrequency.ContainsKey("OBR");
+    }
+
+    private string GetClinicalDataSummary()
+    {
+        var items = new List<string>();
+        
+        if (Result.Metadata.SegmentFrequency.ContainsKey("DG1"))
+            items.Add($"{Result.Metadata.SegmentFrequency["DG1"]} diagnosis");
+        
+        if (Result.Metadata.SegmentFrequency.ContainsKey("AL1"))
+            items.Add($"{Result.Metadata.SegmentFrequency["AL1"]} allergy");
+        
+        if (Result.Metadata.SegmentFrequency.ContainsKey("OBX"))
+            items.Add($"{Result.Metadata.SegmentFrequency["OBX"]} result");
+
+        if (!items.Any())
+            return "None";
+
+        return string.Join(", ", items);
+    }
 }
+
+
+
 

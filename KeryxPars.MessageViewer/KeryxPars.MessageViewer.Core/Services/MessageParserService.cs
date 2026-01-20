@@ -17,52 +17,61 @@ public class MessageParserService : IMessageParserService
             
             try
             {
-                // Configure options to use comprehensive message type
-                var opts = options ?? SerializerOptions.Default;
-                if (opts.MessageType != typeof(HL7ComprehensiveMessage))
+                // Detect the appropriate message type based on content
+                var detectedType = MessageTypeDetector.DetectMessageType(rawMessage);
+                
+                // Configure options with detected message type
+                var opts = options ?? new SerializerOptions
+                {
+                    MessageType = detectedType,
+                    OrderGrouping = GetOrderGroupingForType(detectedType)
+                };
+
+                // If options were provided but don't specify a type, use detected type
+                if (options != null && options.MessageType == null)
                 {
                     opts = new SerializerOptions
                     {
-                        SegmentRegistry = opts.SegmentRegistry,
-                        IgnoreUnknownSegments = opts.IgnoreUnknownSegments,
-                        ErrorHandling = opts.ErrorHandling,
-                        ValidationStrategy = opts.ValidationStrategy,
-                        UseStringPooling = opts.UseStringPooling,
-                        InitialBufferSize = opts.InitialBufferSize,
-                        MessageType = typeof(HL7ComprehensiveMessage),
-                        OrderGrouping = opts.OrderGrouping
+                        SegmentRegistry = options.SegmentRegistry,
+                        IgnoreUnknownSegments = options.IgnoreUnknownSegments,
+                        ErrorHandling = options.ErrorHandling,
+                        ValidationStrategy = options.ValidationStrategy,
+                        UseStringPooling = options.UseStringPooling,
+                        InitialBufferSize = options.InitialBufferSize,
+                        MessageType = detectedType,
+                        OrderGrouping = options.OrderGrouping ?? GetOrderGroupingForType(detectedType)
                     };
                 }
 
-                // Parse as comprehensive message to capture all possible segments
+                // Parse using comprehensive message always (for viewer compatibility)
+                // But use the detected type's parser options for better grouping
                 var result = HL7Serializer.Deserialize<HL7ComprehensiveMessage>(rawMessage, opts);
+                
                 stopwatch.Stop();
 
-                if (result.IsSuccess)
+                if (result.IsSuccess && result.Value != null)
                 {
-                    var message = result.Value;
-                    var metadata = ExtractMetadata(message, rawMessage);
+                    var metadata = ExtractMetadata(result.Value, rawMessage, detectedType);
 
                     return new ParsedMessageResult
                     {
                         IsSuccess = true,
-                        Message = message,
+                        Message = result.Value,
                         Metadata = metadata,
                         ParseDuration = stopwatch.Elapsed
                     };
                 }
-                else
+                
+                // Handle error case
+                var errors = result.Error?.Select(e => e.Message).ToArray() ?? ["Parse failed"];
+                return new ParsedMessageResult
                 {
-                    var errors = result.Error != null 
-                        ? result.Error.Select(e => e.Message).ToArray()
-                        : ["Unknown error"];
-                    return new ParsedMessageResult
-                    {
-                        IsSuccess = false,
-                        Errors = errors,
-                        ParseDuration = stopwatch.Elapsed
-                    };
-                }
+                    IsSuccess = false,
+                    Errors = errors,
+                    ParseDuration = stopwatch.Elapsed
+                };
+
+
             }
             catch (Exception ex)
             {
@@ -77,7 +86,21 @@ public class MessageParserService : IMessageParserService
         });
     }
 
+    private static OrderGroupingConfiguration? GetOrderGroupingForType(Type messageType)
+    {
+        return messageType.Name switch
+        {
+            nameof(PharmacyMessage) => OrderGroupingConfiguration.Medication,
+            nameof(LabMessage) => OrderGroupingConfiguration.Lab,
+            nameof(DietaryMessage) => OrderGroupingConfiguration.Dietary,
+            _ => OrderGroupingConfiguration.None
+        };
+    }
+
     public Task<IEnumerable<MessageValidationError>> ValidateAsync(HL7DefaultMessage message)
+
+
+
     {
         return Task.Run(() =>
         {
@@ -140,7 +163,9 @@ public class MessageParserService : IMessageParserService
         });
     }
 
-    private ParseMetadata ExtractMetadata(HL7DefaultMessage message, string rawMessage)
+    private ParseMetadata ExtractMetadata(HL7DefaultMessage message, string rawMessage, Type detectedType)
+
+
     {
         var metadata = new ParseMetadata();
         
@@ -170,10 +195,15 @@ public class MessageParserService : IMessageParserService
             metadata.EventType = message.Evn.EventType.Value ?? "Unknown";
         }
 
+        // Add detected message class info
+        metadata.DetectedMessageClass = detectedType.Name;
+        metadata.MessageClassDescription = MessageTypeDetector.GetMessageTypeDescription(detectedType);
+
         // Count total fields (approximate)
         metadata.FieldCount = lines.Sum(line => line.Count(c => c == '|'));
 
         return metadata;
     }
 }
+
 

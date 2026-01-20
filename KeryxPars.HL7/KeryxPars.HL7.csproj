@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\KeryxPars.Core\KeryxPars.Core.csproj" />
+    <ProjectReference Include="..\KeryxPars.HL7.SourceGenerators\KeryxPars.HL7.SourceGenerators.csproj" 
+                      OutputItemType="Analyzer" 
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>
+
