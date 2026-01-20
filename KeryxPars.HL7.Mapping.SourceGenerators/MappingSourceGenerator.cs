@@ -157,6 +157,11 @@ public class MappingSourceGenerator : IIncrementalGenerator
         // Generate MapFromMessage method (for already-parsed messages)
         GenerateMapFromMessageMethod(sb, className, mappedProperties);
 
+        sb.AppendLine();
+
+        // Generate BuildHL7 method (reverse mapping)
+        GenerateBuildHL7Method(sb, className, mappedProperties, messageTypes);
+
         sb.AppendLine("}");
 
         return sb.ToString();
@@ -412,6 +417,16 @@ public class MappingSourceGenerator : IIncrementalGenerator
         var notationVar = $"_{prop.PropertyName}Notation";
 
         sb.AppendLine($"        // Map {prop.PropertyName} from {prop.FieldPath}");
+        
+        // Open conditional wrapper if condition exists
+        var hasCondition = !string.IsNullOrEmpty(prop.Condition);
+        if (hasCondition)
+        {
+            sb.AppendLine($"        // Conditional mapping: {prop.Condition}");
+            sb.AppendLine($"        if (KeryxPars.HL7.Mapping.Core.ConditionEvaluator.Evaluate({messageVarName}, \"{prop.Condition}\"))");
+            sb.AppendLine($"        {{");
+        }
+        
         sb.AppendLine($"        {{");
         sb.AppendLine($"            var value = HL7SpanParser.GetValue({messageVarName}, {notationVar});");
 
@@ -447,6 +462,13 @@ public class MappingSourceGenerator : IIncrementalGenerator
         }
 
         sb.AppendLine($"        }}");
+        
+        // Close conditional block if one was opened
+        if (hasCondition)
+        {
+            sb.AppendLine($"        }}");
+        }
+        
         sb.AppendLine();
     }
 
@@ -637,6 +659,9 @@ public class MappingSourceGenerator : IIncrementalGenerator
                 var format = GetNamedArgument<string>(fieldAttribute, "Format");
                 var defaultValue = GetNamedArgument<string>(fieldAttribute, "DefaultValue");
                 var required = GetNamedArgument<bool>(fieldAttribute, "Required");
+                var condition = GetNamedArgument<string>(fieldAttribute, "Condition") 
+                    ?? GetNamedArgument<string>(fieldAttribute, "When");
+                var skipIfEmpty = GetNamedArgument<bool>(fieldAttribute, "SkipIfEmpty");
 
                 // Get type information
                 var propertyType = property.Type;
@@ -659,7 +684,9 @@ public class MappingSourceGenerator : IIncrementalGenerator
                     IsNullable = isNullable,
                     IsEnum = isEnum,
                     UnderlyingType = GetUnderlyingType(propertyType),
-                    IsCollection = false
+                    IsCollection = false,
+                    Condition = condition,
+                    SkipIfEmpty = skipIfEmpty
                 });
             }
         }
@@ -721,5 +748,31 @@ public class MappingSourceGenerator : IIncrementalGenerator
         public bool IsComplex { get; init; }
         public string? BaseFieldPath { get; init; }
         public string? ComplexType { get; init; }
+        public string? Condition { get; init; }
+        public bool SkipIfEmpty { get; init; }
+    }
+
+    private void GenerateBuildHL7Method(
+        StringBuilder sb,
+        string className,
+        ImmutableArray<MappedProperty> properties,
+        System.Collections.Generic.List<string?> messageTypes)
+    {
+        sb.AppendLine("    /// <summary>");
+        sb.AppendLine($"    /// Builds an HL7 message from {className} (reverse mapping).");
+        sb.AppendLine("    /// </summary>");
+        sb.AppendLine($"    public static string BuildHL7({className} source)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        if (source == null) throw new System.ArgumentNullException(nameof(source));");
+        sb.AppendLine();
+        sb.AppendLine("        var sb = new System.Text.StringBuilder(2048);");
+        sb.AppendLine();
+        
+        // Build segments
+        sb.AppendLine("        // TODO: Build complete HL7 message with all required segments");
+        sb.AppendLine("        // For now, return a simple representation");
+        sb.AppendLine("        return sb.ToString();");
+        sb.AppendLine("    }");
     }
 }
+

@@ -19,6 +19,17 @@ public sealed class HL7SegmentsAttribute : Attribute
     public Type? Converter { get; set; }
 
     /// <summary>
+    /// Filter condition for segments. Only segments matching this condition are mapped.
+    /// Example: "OBX.2 == NM" (only numeric observations)
+    /// </summary>
+    public string? Where { get; set; }
+
+    /// <summary>
+    /// Maximum number of segments to map. Useful for limiting collection size.
+    /// </summary>
+    public int? MaxCount { get; set; }
+
+    /// <summary>
     /// Maps a collection property to repeating segments.
     /// </summary>
     /// <param name="segmentId">Segment identifier (e.g., "OBX")</param>

@@ -4,6 +4,28 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    
+    <!-- NuGet Package Information -->
+    <PackageId>KeryxPars.Core</PackageId>
+    <Version>0.2.0-beta2</Version>
+    <Authors>KeryxPars Contributors</Authors>
+    <Company>KeryxPars</Company>
+    <Description>Core utilities and abstractions for the KeryxPars HL7 ecosystem. Provides foundational types used across all KeryxPars libraries.</Description>
+    <PackageProjectUrl>https://github.com/theelevators/KeryxPars</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/theelevators/KeryxPars</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>hl7;healthcare;core;utilities</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+
 </Project>
+
