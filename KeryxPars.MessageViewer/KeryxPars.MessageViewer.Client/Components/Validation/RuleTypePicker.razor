@@ -1,0 +1,97 @@
+@using KeryxPars.MessageViewer.Core.Models
+
+<div class="rule-type-picker">
+    <div class="rule-cards">
+        <!-- Required Segment (only if no field selected) -->
+        @if (!IsFieldLevel)
+        {
+            <div class="rule-card @(SelectedType == RuleType.RequiredSegment ? "selected" : "")"
+                 @onclick="() => Select(RuleType.RequiredSegment)">
+                <div class="card-icon" style="color: var(--danger);">
+                    <span class="bi bi-shield-fill-exclamation"></span>
+                </div>
+                <h6>Required Segment</h6>
+                <p>Segment must be present</p>
+                <div class="card-badge popular">Most Common</div>
+            </div>
+        }
+
+        <!-- Required Field -->
+        @if (IsFieldLevel)
+        {
+            <div class="rule-card @(SelectedType == RuleType.Required ? "selected" : "")"
+                 @onclick="() => Select(RuleType.Required)">
+                <div class="card-icon" style="color: var(--danger);">
+                    <span class="bi bi-asterisk"></span>
+                </div>
+                <h6>Required</h6>
+                <p>Field must have a value</p>
+                <div class="card-badge popular">Most Common</div>
+            </div>
+        }
+
+        <!-- Max Length -->
+        @if (IsFieldLevel)
+        {
+            <div class="rule-card @(SelectedType == RuleType.MaxLength ? "selected" : "")"
+                 @onclick="() => Select(RuleType.MaxLength)">
+                <div class="card-icon" style="color: var(--warning);">
+                    <span class="bi bi-rulers"></span>
+                </div>
+                <h6>Max Length</h6>
+                <p>Limit field length</p>
+            </div>
+        }
+
+        <!-- Pattern/Format -->
+        @if (IsFieldLevel)
+        {
+            <div class="rule-card @(SelectedType == RuleType.Pattern ? "selected" : "")"
+                 @onclick="() => Select(RuleType.Pattern)">
+                <div class="card-icon" style="color: var(--info);">
+                    <span class="bi bi-braces-asterisk"></span>
+                </div>
+                <h6>Format/Pattern</h6>
+                <p>Match regex pattern</p>
+            </div>
+        }
+
+        <!-- Allowed Values -->
+        @if (IsFieldLevel)
+        {
+            <div class="rule-card @(SelectedType == RuleType.AllowedValues ? "selected" : "")"
+                 @onclick="() => Select(RuleType.AllowedValues)">
+                <div class="card-icon" style="color: var(--success);">
+                    <span class="bi bi-list-check"></span>
+                </div>
+                <h6>Allowed Values</h6>
+                <p>Must be one of specified values</p>
+            </div>
+        }
+
+        <!-- Numeric Range -->
+        @if (IsFieldLevel)
+        {
+            <div class="rule-card @(SelectedType == RuleType.NumericRange ? "selected" : "")"
+                 @onclick="() => Select(RuleType.NumericRange)">
+                <div class="card-icon" style="color: var(--primary);">
+                    <span class="bi bi-123"></span>
+                </div>
+                <h6>Numeric Range</h6>
+                <p>Min/Max numeric values</p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public RuleType SelectedType { get; set; }
+    [Parameter] public EventCallback<RuleType> SelectedTypeChanged { get; set; }
+    [Parameter] public bool IsFieldLevel { get; set; }
+    
+    private async Task Select(RuleType type)
+    {
+        SelectedType = type;
+        await SelectedTypeChanged.InvokeAsync(type);
+    }
+}

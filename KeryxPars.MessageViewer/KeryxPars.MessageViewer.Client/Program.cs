@@ -13,5 +13,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 builder.Services.AddScoped<IMessageParserService, MessageParserService>();
 builder.Services.AddScoped<IMessageRepository, InMemoryMessageRepository>();
+builder.Services.AddSingleton<ValidationProfileService>();
 
 await builder.Build().RunAsync();

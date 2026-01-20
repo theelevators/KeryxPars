@@ -1,0 +1,93 @@
+@using KeryxPars.HL7.Contracts
+@using ValidationSeverity = KeryxPars.HL7.Contracts.ValidationSeverity
+
+<div class="validation-tester-overlay" @onclick="Close">
+    <div class="validation-tester" @onclick:stopPropagation>
+        <div class="tester-header">
+            <h4>
+                <span class="bi bi-clipboard-check"></span>
+                Validation Test Results
+            </h4>
+            <button class="btn-close" @onclick="Close">
+                <span class="bi bi-x-lg"></span>
+            </button>
+        </div>
+
+        <div class="tester-body">
+            @if (Result.IsValid)
+            {
+                <div class="test-success">
+                    <div class="success-icon">
+                        <span class="bi bi-check-circle-fill"></span>
+                    </div>
+                    <h5>
+                        <span class="bi bi-check-lg"></span>
+                        All validations passed!
+                    </h5>
+                    <p>The message meets all validation requirements.</p>
+                </div>
+            }
+            else
+            {
+                <div class="test-summary">
+                    <div class="summary-stat critical">
+                        <span class="bi bi-x-circle-fill"></span>
+                        <strong>@Result.Errors.Count(e => e.Severity == ValidationSeverity.Critical)</strong>
+                        <small>Critical</small>
+                    </div>
+                    <div class="summary-stat error">
+                        <span class="bi bi-exclamation-circle-fill"></span>
+                        <strong>@Result.Errors.Count(e => e.Severity == ValidationSeverity.Error)</strong>
+                        <small>Errors</small>
+                    </div>
+                    <div class="summary-stat warning">
+                        <span class="bi bi-exclamation-triangle-fill"></span>
+                        <strong>@Result.Errors.Count(e => e.Severity == ValidationSeverity.Warning)</strong>
+                        <small>Warnings</small>
+                    </div>
+                    <div class="summary-stat info">
+                        <span class="bi bi-info-circle-fill"></span>
+                        <strong>@Result.Errors.Count(e => e.Severity == ValidationSeverity.Information)</strong>
+                        <small>Info</small>
+                    </div>
+                </div>
+
+                <div class="validation-errors">
+                    @foreach (var error in Result.Errors.OrderByDescending(e => e.Severity))
+                    {
+                        <div class="validation-error @error.Severity.ToString().ToLower()">
+                            <div class="error-header">
+                                <span class="severity-icon bi @GetSeverityIcon(error.Severity)"></span>
+                                <strong>@error.Field</strong>
+                                <span class="severity-badge">@error.Severity</span>
+                            </div>
+                            <div class="error-message">@error.Message</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="tester-footer">
+            <button class="btn btn-primary" @onclick="Close">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ValidationResult Result { get; set; } = default!;
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private async Task Close() => await OnClose.InvokeAsync();
+
+    private string GetSeverityIcon(ValidationSeverity severity) => severity switch
+    {
+        ValidationSeverity.Information => "bi-info-circle-fill",
+        ValidationSeverity.Warning => "bi-exclamation-triangle-fill",
+        ValidationSeverity.Error => "bi-exclamation-circle-fill",
+        ValidationSeverity.Critical => "bi-x-circle-fill",
+        _ => "bi-info-circle-fill"
+    };
+}
