@@ -50,7 +50,24 @@ public interface IHL7Message
     MSH? MshResponse { get; set; }
 
     /// <summary>
+    /// Adds a segment to the message. Implementation can be generated
+    /// by [GenerateSegmentHandlers] attribute or manually implemented.
+    /// Each message type determines how to handle different segment types.
+    /// </summary>
+    /// <param name="segment">The segment to add to the message</param>
+    void AddSegment(ISegment segment);
+
+    /// <summary>
+    /// Adds an order group to the message.
+    /// Only applicable to message types that support order grouping.
+    /// </summary>
+    /// <param name="orderGroup">The order group to add</param>
+    void AddOrderGroup(OrderGroup orderGroup);
+
+    /// <summary>
     /// Serializes the message to a JSON string for debugging/logging
     /// </summary>
     string Dump();
 }
+
+

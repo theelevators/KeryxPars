@@ -20,6 +20,43 @@ public abstract class HL7BaseMessage : IHL7Message
     public MSH? MshResponse { get; set; }
 
     /// <summary>
+    /// Base implementation of AddSegment. Handles universal segments (MSH, EVN, PID, ERR).
+    /// Derived classes should override and chain to base for unknown segments.
+    /// </summary>
+    public virtual void AddSegment(ISegment segment)
+    {
+        switch (segment)
+        {
+            case MSH msh:
+                Msh = msh;
+                return;
+            case EVN evn:
+                Evn = evn;
+                return;
+            case PID pid:
+                Pid = pid;
+                return;
+            case ERR err:
+                Errors.Add(err);
+                return;
+            default:
+                // Unknown segment - derived classes can override to handle
+                return;
+        }
+    }
+
+    /// <summary>
+    /// Adds an order group to the message.
+    /// Base implementation does nothing - override in derived classes that support orders.
+    /// </summary>
+    public virtual void AddOrderGroup(OrderGroup orderGroup)
+    {
+        // Base implementation - no-op
+        // Derived classes with Orders property should override
+    }
+
+
+    /// <summary>
     /// Virtual method to allow derived classes to customize JSON serialization
     /// </summary>
     public virtual string Dump()
@@ -31,3 +68,4 @@ public abstract class HL7BaseMessage : IHL7Message
         });
     }
 }
+
