@@ -1,6 +1,11 @@
 @using KeryxPars.MessageViewer.Core.Models
 @using KeryxPars.HL7.Contracts
 @using KeryxPars.MessageViewer.Client.Services
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+
 
 <div class="raw-view">
     @if (Result?.Message != null && !string.IsNullOrEmpty(RawMessage))
@@ -98,17 +103,59 @@
 </div>
 
 @code {
-    [Parameter]
-    public ParsedMessageResult? Result { get; set; }
+[Parameter]
+public ParsedMessageResult? Result { get; set; }
 
-    [Parameter]
-    public string? RawMessage { get; set; }
+[Parameter]
+public string? RawMessage { get; set; }
 
-    private bool showLineNumbers = true;
-    private bool showMetadata = true;
-    private FieldMetadata? hoveredField;
-    private int mouseX;
-    private int mouseY;
+private bool showLineNumbers = true;
+private bool showMetadata = true;
+private FieldMetadata? hoveredField;
+private int mouseX;
+private int mouseY;
+private int viewportWidth = 1920;
+private int viewportHeight = 1080;
+private IJSObjectReference? viewportModule;
+
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    if (firstRender)
+    {
+        try
+        {
+            viewportModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/viewport.js");
+            await UpdateViewportSize();
+        }
+        catch
+        {
+            // Fallback to default values if JS interop fails
+        }
+    }
+}
+
+private async Task UpdateViewportSize()
+{
+    if (viewportModule != null)
+    {
+        try
+        {
+            var viewport = await viewportModule.InvokeAsync<ViewportSize>("getViewportSize");
+            viewportWidth = viewport.Width;
+            viewportHeight = viewport.Height;
+        }
+        catch
+        {
+            // Keep default values
+        }
+    }
+}
+
+private class ViewportSize
+{
+    public int Width { get; set; }
+    public int Height { get; set; }
+}
 
     private class FieldMetadata
     {
@@ -154,6 +201,7 @@
             // Fields
             for (int i = 1; i < fields.Length; i++)
             {
+                // Capture loop variables to avoid closure issues
                 var field = fields[i];
                 var fieldIndex = i;
 
@@ -173,18 +221,21 @@
                     var components = field.Split('^');
                     for (int c = 0; c < components.Length; c++)
                     {
+                        // Capture loop variables to avoid closure issues
+                        var componentValue = components[c];
+                        var componentIndex = c + 1;
+                        
                         builder.OpenElement(12 + i * 20 + c * 5, "span");
                         builder.AddAttribute(13 + i * 20 + c * 5, "class", "hl-component");
                         
                         if (showMetadata)
                         {
-                            var componentIndex = c + 1;
                             builder.AddAttribute(14 + i * 20 + c * 5, "onmouseenter", EventCallback.Factory.Create<MouseEventArgs>(this,
-                                e => OnComponentHover(segmentId, fieldIndex, componentIndex, components[c], lineNum + 1, (int)e.ClientX, (int)e.ClientY)));
+                                e => OnComponentHover(segmentId, fieldIndex, componentIndex, componentValue, lineNum + 1, (int)e.ClientX, (int)e.ClientY)));
                             builder.AddAttribute(15 + i * 20 + c * 5, "onmouseleave", EventCallback.Factory.Create(this, () => hoveredField = null));
                         }
                         
-                        builder.AddContent(16 + i * 20 + c * 5, components[c]);
+                        builder.AddContent(16 + i * 20 + c * 5, componentValue);
                         builder.CloseElement();
 
                         if (c < components.Length - 1)
@@ -212,6 +263,7 @@
                     builder.CloseElement();
                 }
             }
+
         };
     }
 
@@ -263,8 +315,65 @@
 
     private string GetTooltipStyle()
     {
-        return $"left: {mouseX + 10}px; top: {mouseY + 10}px;";
+        // Tooltip dimensions (approximate)
+        const int tooltipWidth = 500;
+        const int tooltipHeight = 200;
+        const int offset = 10;
+        const int edgeMargin = 20;
+        
+        // Calculate initial position (bottom-right of cursor)
+        int left = mouseX + offset;
+        int top = mouseY + offset;
+        
+        // Check if tooltip would go off the right edge
+        if (left + tooltipWidth > viewportWidth - edgeMargin)
+        {
+            // Flip to left of cursor
+            left = mouseX - tooltipWidth - offset;
+            
+            // If still offscreen, clamp to viewport
+            if (left < edgeMargin)
+            {
+                left = Math.Max(edgeMargin, viewportWidth - tooltipWidth - edgeMargin);
+            }
+        }
+        
+        // Check if tooltip would go off the bottom edge
+        if (top + tooltipHeight > viewportHeight - edgeMargin)
+        {
+            // Flip to above cursor
+            top = mouseY - tooltipHeight - offset;
+            
+            // If still offscreen, clamp to viewport
+            if (top < edgeMargin)
+            {
+                top = edgeMargin;
+            }
+        }
+        
+        // Ensure minimum distance from edges
+        left = Math.Max(edgeMargin, Math.Min(left, viewportWidth - tooltipWidth - edgeMargin));
+        top = Math.Max(edgeMargin, Math.Min(top, viewportHeight - tooltipHeight - edgeMargin));
+        
+        return $"left: {left}px; top: {top}px;";
     }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (viewportModule != null)
+        {
+            try
+            {
+                await viewportModule.DisposeAsync();
+            }
+            catch
+            {
+                // Ignore disposal errors
+            }
+        }
+    }
+
+
 
     private void ToggleLineNumbers()
     {

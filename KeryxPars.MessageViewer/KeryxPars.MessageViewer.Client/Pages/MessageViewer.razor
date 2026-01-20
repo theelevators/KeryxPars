@@ -245,10 +245,16 @@
         parseResult = null;
         validationErrors = null;
         activeTab = "patient";
+        MessageId = null;
         
-        // Clear the query parameter
-        Navigation.NavigateTo("/viewer", false);
+        // Update URL to remove query parameters without reloading the page
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        if (!string.IsNullOrEmpty(uri.Query))
+        {
+            Navigation.NavigateTo("/viewer", replace: true);
+        }
     }
+
 
     private void LoadSampleMessage()
     {

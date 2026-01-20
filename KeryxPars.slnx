@@ -4,8 +4,8 @@
     <File Path="KeryxPars.HL7/Segments/TEST-MIGRATION-GUIDE.md" />
   </Folder>
   <Folder Name="/KeryxPars.MessageViewer/">
-    <Project Path="KeryxPars.MessageViewer/KeryxPars.MessageViewer.Client/KeryxPars.MessageViewer.Client.csproj" />
-    <Project Path="KeryxPars.MessageViewer/KeryxPars.MessageViewer.Core/KeryxPars.MessageViewer.Core.csproj" />
+    <Project Path="D:/Health/KeryxPars/KeryxPars.MessageViewer/KeryxPars.MessageViewer.Client/KeryxPars.MessageViewer.Client.csproj" />
+    <Project Path="D:/Health/KeryxPars/KeryxPars.MessageViewer/KeryxPars.MessageViewer.Core/KeryxPars.MessageViewer.Core.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
@@ -14,10 +14,11 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Tests/">
-    <Project Path="Tests/KeryxPars.HL7.Tests/KeryxPars.HL7.Tests.csproj" />
+    <Project Path="D:/Health/KeryxPars/Tests/KeryxPars.HL7.Tests/KeryxPars.HL7.Tests.csproj" />
   </Folder>
-  <Project Path="KeryxPars.Benchmarks/KeryxPars.Benchmarks.csproj" />
-  <Project Path="KeryxPars.Core/KeryxPars.Core.csproj" />
-  <Project Path="KeryxPars.HL7/KeryxPars.HL7.csproj" />
-  <Project Path="KeryxPars.Sandbox/KeryxPars.Sandbox.csproj" />
+  <Project Path="D:/Health/KeryxPars/KeryxPars.Benchmarks/KeryxPars.Benchmarks.csproj" />
+  <Project Path="D:/Health/KeryxPars/KeryxPars.Core/KeryxPars.Core.csproj" />
+  <Project Path="D:/Health/KeryxPars/KeryxPars.HL7.SourceGenerators/KeryxPars.HL7.SourceGenerators.csproj" />
+  <Project Path="D:/Health/KeryxPars/KeryxPars.HL7/KeryxPars.HL7.csproj" />
+  <Project Path="D:/Health/KeryxPars/KeryxPars.Sandbox/KeryxPars.Sandbox.csproj" />
 </Solution>
