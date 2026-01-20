@@ -174,40 +174,111 @@
         @if (Result.Message.Orders.Any())
         {
             <div class="orders-section">
-                <h4><span class="bi bi-prescription2 me-2"></span>Orders</h4>
+                <h4>
+                    <span class="bi bi-prescription2 me-2"></span>Orders
+                    <span class="order-count-badge">@Result.Message.Orders.Count</span>
+                </h4>
                 <div class="orders-list">
-                    @foreach (var order in Result.Message.Orders)
+                    @foreach (var order in Result.Message.Orders.Select((o, index) => new { Order = o, Index = index + 1 }))
                     {
                         <div class="order-item">
                             <div class="order-header">
-                                <span class="order-type-badge">@order.OrderType</span>
-                                @if (order.PrimarySegment != null)
+                                <span class="order-number">#@order.Index</span>
+                                <span class="order-type-badge">@order.Order.OrderType</span>
+                                @if (order.Order.PrimarySegment != null)
                                 {
-                                    var primaryFields = order.PrimarySegment.GetValues();
+                                    var primaryFields = order.Order.PrimarySegment.GetValues();
                                     var orderControl = GetFieldValue(primaryFields, 1);
                                     if (!string.IsNullOrWhiteSpace(orderControl))
                                     {
                                         <span class="order-control">@orderControl</span>
                                     }
-                                }
-                            </div>
-                            <div class="order-details">
-                                @foreach (var detail in order.DetailSegments)
-                                {
-                                    var detailFields = detail.Value.GetValues();
-                                    var nonEmptyFields = detailFields.Skip(1).Where(f => !string.IsNullOrWhiteSpace(f));
-                                    if (nonEmptyFields.Any())
+                                    
+                                    // Show Placer/Filler order numbers if available (ORC.2, ORC.3)
+                                    var placerOrder = GetFieldValue(primaryFields, 2);
+                                    var fillerOrder = GetFieldValue(primaryFields, 3);
+                                    if (!string.IsNullOrWhiteSpace(placerOrder) || !string.IsNullOrWhiteSpace(fillerOrder))
                                     {
-                                        <div class="order-detail-row">
-                                            <strong>@detail.Key:</strong> @string.Join(" | ", nonEmptyFields)
-                                        </div>
+                                        <span class="order-ids">
+                                            @if (!string.IsNullOrWhiteSpace(placerOrder))
+                                            {
+                                                <span class="order-id">Placer: @placerOrder</span>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(fillerOrder))
+                                            {
+                                                <span class="order-id">Filler: @fillerOrder</span>
+                                            }
+                                        </span>
                                     }
                                 }
                             </div>
+                            
+                            @* Detail Segments (RXE, OBR, etc.) *@
+                            @if (order.Order.DetailSegments.Any())
+                            {
+                                <div class="order-details">
+                                    @foreach (var detail in order.Order.DetailSegments)
+                                    {
+                                        var detailFields = detail.Value.GetValues();
+                                        <div class="order-detail-segment">
+                                            <div class="segment-header">
+                                                <span class="segment-badge">@detail.Key</span>
+                                                <span class="segment-name">@GetSegmentName(detail.Key)</span>
+                                            </div>
+                                            <div class="segment-fields">
+                                                @{
+                                                    var importantFields = GetImportantFields(detail.Key, detailFields);
+                                                    foreach (var field in importantFields)
+                                                    {
+                                                        <div class="field-item">
+                                                            <span class="field-label">@field.Label:</span>
+                                                            <span class="field-value">@field.Value</span>
+                                                        </div>
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            
+                            @* Repeatable Segments (OBX, NTE, etc.) *@
+                            @if (order.Order.RepeatableSegments.Any())
+                            {
+                                <div class="order-repeatables">
+                                    @foreach (var repeatableGroup in order.Order.RepeatableSegments)
+                                    {
+                                        <div class="repeatable-group">
+                                            <div class="repeatable-header">
+                                                <span class="segment-badge">@repeatableGroup.Key</span>
+                                                <span class="segment-count">@repeatableGroup.Value.Count item@(repeatableGroup.Value.Count != 1 ? "s" : "")</span>
+                                            </div>
+                                            @foreach (var segment in repeatableGroup.Value)
+                                            {
+                                                var fields = segment.GetValues();
+                                                var importantFields = GetImportantFields(repeatableGroup.Key, fields);
+                                                if (importantFields.Any())
+                                                {
+                                                    <div class="repeatable-item">
+                                                        @foreach (var field in importantFields)
+                                                        {
+                                                            <div class="field-item">
+                                                                <span class="field-label">@field.Label:</span>
+                                                                <span class="field-value">@field.Value</span>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
                         </div>
                     }
                 </div>
             </div>
+
         }
 
         @if (Result.Message.Insurance.Any(i => !IsEmpty(i)))
@@ -300,5 +371,107 @@
         }
         return true;
     }
+
+    private string GetSegmentName(string segmentId)
+    {
+        return segmentId switch
+        {
+            "OBR" => "Observation Request",
+            "OBX" => "Observation Result",
+            "RXE" => "Pharmacy Encoded Order",
+            "RXO" => "Pharmacy Order",
+            "RXA" => "Pharmacy Administration",
+            "RXD" => "Pharmacy Dispense",
+            "RXG" => "Pharmacy Give",
+            "NTE" => "Notes & Comments",
+            "TQ1" => "Timing/Quantity",
+            "ODS" => "Dietary Order",
+            "ODT" => "Diet Tray",
+            _ => segmentId
+        };
+    }
+
+    private record FieldDisplay(string Label, string Value);
+
+    private List<FieldDisplay> GetImportantFields(string segmentId, string[] fields)
+    {
+        var result = new List<FieldDisplay>();
+
+        switch (segmentId)
+        {
+            case "OBR": // Observation Request
+                AddIfNotEmpty(result, "Set ID", GetFieldValue(fields, 1));
+                AddIfNotEmpty(result, "Placer Order#", GetFieldValue(fields, 2));
+                AddIfNotEmpty(result, "Filler Order#", GetFieldValue(fields, 3));
+                AddIfNotEmpty(result, "Universal Service ID", GetFieldValue(fields, 4));
+                AddIfNotEmpty(result, "Requested Date/Time", GetFieldValue(fields, 7));
+                break;
+
+            case "OBX": // Observation Result
+                AddIfNotEmpty(result, "Set ID", GetFieldValue(fields, 1));
+                AddIfNotEmpty(result, "Value Type", GetFieldValue(fields, 2));
+                AddIfNotEmpty(result, "Observation ID", GetFieldValue(fields, 3));
+                AddIfNotEmpty(result, "Observation Value", GetFieldValue(fields, 5));
+                AddIfNotEmpty(result, "Units", GetFieldValue(fields, 6));
+                AddIfNotEmpty(result, "Reference Range", GetFieldValue(fields, 7));
+                AddIfNotEmpty(result, "Abnormal Flags", GetFieldValue(fields, 8));
+                break;
+
+            case "RXE": // Pharmacy Encoded Order
+                AddIfNotEmpty(result, "Give Code", GetFieldValue(fields, 2));
+                AddIfNotEmpty(result, "Give Amount Min", GetFieldValue(fields, 3));
+                AddIfNotEmpty(result, "Give Units", GetFieldValue(fields, 5));
+                AddIfNotEmpty(result, "Give Dosage Form", GetFieldValue(fields, 6));
+                break;
+
+            case "RXO": // Pharmacy Order
+                AddIfNotEmpty(result, "Requested Give Code", GetFieldValue(fields, 1));
+                AddIfNotEmpty(result, "Requested Give Amount", GetFieldValue(fields, 2));
+                AddIfNotEmpty(result, "Requested Give Units", GetFieldValue(fields, 4));
+                break;
+
+            case "RXA": // Pharmacy Administration
+                AddIfNotEmpty(result, "Give Sub-ID", GetFieldValue(fields, 1));
+                AddIfNotEmpty(result, "Admin Sub-ID", GetFieldValue(fields, 2));
+                AddIfNotEmpty(result, "Date/Time Start", GetFieldValue(fields, 3));
+                AddIfNotEmpty(result, "Administered Code", GetFieldValue(fields, 5));
+                AddIfNotEmpty(result, "Administered Amount", GetFieldValue(fields, 6));
+                break;
+
+            case "NTE": // Notes
+                AddIfNotEmpty(result, "Set ID", GetFieldValue(fields, 1));
+                AddIfNotEmpty(result, "Source", GetFieldValue(fields, 2));
+                AddIfNotEmpty(result, "Comment", GetFieldValue(fields, 3));
+                break;
+
+            case "ODS": // Dietary Order
+                AddIfNotEmpty(result, "Type", GetFieldValue(fields, 1));
+                AddIfNotEmpty(result, "Diet Code", GetFieldValue(fields, 2));
+                break;
+
+            default:
+                // For unknown segments, show first few non-empty fields
+                for (int i = 1; i < Math.Min(fields.Length, 6); i++)
+                {
+                    var value = GetFieldValue(fields, i);
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        result.Add(new FieldDisplay($"Field {i}", value));
+                    }
+                }
+                break;
+        }
+
+        return result;
+    }
+
+    private void AddIfNotEmpty(List<FieldDisplay> list, string label, string value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            list.Add(new FieldDisplay(label, value));
+        }
+    }
 }
+
 

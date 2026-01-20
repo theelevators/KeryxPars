@@ -159,6 +159,27 @@
     color: #6b7280;
 }
 
+.orders-section {
+    margin-bottom: 2rem;
+}
+
+.orders-section h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.order-count-badge {
+    background: #10b981;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+}
+
 .orders-list {
     display: flex;
     flex-direction: column;
@@ -167,36 +188,182 @@
 
 .order-item {
     padding: 1rem;
-    background: #f0fdf4;
-    border-radius: 6px;
-    border-left: 3px solid #10b981;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border-radius: 8px;
+    border-left: 4px solid #10b981;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .order-header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #d1fae5;
+}
+
+.order-number {
+    background: #047857;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
 }
 
 .order-type-badge {
     background: #10b981;
     color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 4px;
+    padding: 0.35rem 0.875rem;
+    border-radius: 6px;
     font-size: 0.875rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .order-control {
     color: #047857;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    background: #d1fae5;
+    border-radius: 4px;
+}
+
+.order-ids {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+.order-id {
+    font-size: 0.75rem;
+    color: #059669;
+    background: #d1fae5;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
 }
 
 .order-details {
     display: flex;
     flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.order-detail-segment {
+    background: white;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #d1fae5;
+}
+
+.segment-header {
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.segment-badge {
+    background: #6366f1;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: monospace;
+}
+
+.segment-name {
+    color: #4f46e5;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.segment-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.5rem;
+}
+
+.field-item {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    align-items: baseline;
+}
+
+.field-label {
+    color: #6b7280;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.field-value {
+    color: #1f2937;
+    font-weight: 400;
+    word-break: break-word;
+}
+
+.order-repeatables {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.repeatable-group {
+    background: #fefce8;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #fde68a;
+}
+
+.repeatable-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #fde68a;
+}
+
+.repeatable-header .segment-badge {
+    background: #f59e0b;
+}
+
+.segment-count {
+    color: #d97706;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.repeatable-item {
+    background: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid #fbbf24;
+}
+
+.repeatable-item:last-child {
+    margin-bottom: 0;
+}
+
+.repeatable-item .field-item {
+    margin-bottom: 0.25rem;
+}
+
+.repeatable-item .field-item:last-child {
+    margin-bottom: 0;
 }
 
 .order-detail-row {
@@ -207,6 +374,7 @@
 .order-detail-row strong {
     color: #047857;
 }
+
 
 .insurance-list {
     display: flex;
