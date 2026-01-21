@@ -5,8 +5,9 @@ namespace KeryxPars.HL7.Mapping;
 /// <summary>
 /// Maps a property to an HL7 field, component, or subcomponent.
 /// Supports multi-level notation: PID.5, PID.5.1, PID.5.1.1, PID.3[0], etc.
+/// Can be applied multiple times to a property for priority-based fallback (use Priority property).
 /// </summary>
-[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
 public sealed class HL7FieldAttribute : Attribute
 {
     /// <summary>
@@ -58,6 +59,27 @@ public sealed class HL7FieldAttribute : Attribute
     /// Useful for optional fields.
     /// </summary>
     public bool SkipIfEmpty { get; set; }
+
+    /// <summary>
+    /// When true, ONLY use conditional defaults - do NOT fall back to message value.
+    /// If no conditional default matches, the property is left at its default value.
+    /// Use this when you only want to map if specific conditions are met.
+    /// </summary>
+    public bool ConditionalOnly { get; set; }
+
+    /// <summary>
+    /// Fallback field path to use if the primary field is empty.
+    /// Enables field-level fallback: try primary field first, then fallback.
+    /// Example: "PID.14" to use work phone if home phone (PID.13) is empty.
+    /// </summary>
+    public string? FallbackField { get; set; }
+
+    /// <summary>
+    /// Priority for multiple field mappings (lower = higher priority).
+    /// When multiple [HL7Field] attributes are present, they are tried in priority order.
+    /// First non-empty field wins. Default priority is 0.
+    /// </summary>
+    public int Priority { get; set; } = 0;
 
     /// <summary>
     /// Maps a property to an HL7 field.

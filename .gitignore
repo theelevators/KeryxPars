@@ -362,4 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Docs/*.md
-/Examples/FEATURE_GUIDE.md
+**/*/*.md
+*.md
+*.ps1

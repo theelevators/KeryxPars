@@ -7,7 +7,7 @@
     
     <!-- NuGet Package Information -->
     <PackageId>KeryxPars.HL7</PackageId>
-    <Version>0.2.0-beta2</Version>
+    <Version>0.3.3-beta</Version>
     <Authors>KeryxPars Contributors</Authors>
     <Company>KeryxPars</Company>
     <Description>Ultra-fast HL7 v2.x message parser and serializer with zero-allocation span-based processing. Includes source-generated validation and fluent API. 50-100x faster than traditional parsers.</Description>
