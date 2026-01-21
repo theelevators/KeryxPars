@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -9,7 +9,7 @@
     
     <!-- NuGet Package Information -->
     <PackageId>KeryxPars.HL7.SourceGenerators</PackageId>
-    <Version>0.3.3-beta</Version>
+    <Version>0.5.2-beta</Version>
     <Authors>KeryxPars Contributors</Authors>
     <Company>KeryxPars</Company>
     <Description>Source generators for KeryxPars.HL7 providing compile-time validation code generation. Automatically validates HL7 messages at runtime with zero reflection overhead.</Description>

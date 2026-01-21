@@ -9,7 +9,7 @@
     
     <!-- NuGet Package Information -->
     <PackageId>KeryxPars.HL7.Mapping.SourceGenerators</PackageId>
-    <Version>0.3.3-beta</Version>
+    <Version>0.5.2-beta</Version>
     <Authors>KeryxPars Contributors</Authors>
     <Company>KeryxPars</Company>
     <Description>Source generators for KeryxPars.HL7.Mapping providing compile-time HL7-to-domain mapper generation. Creates optimized, zero-reflection mapping code at compile time. Supports DateTime, Enum, collections, and nested objects.</Description>

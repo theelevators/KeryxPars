@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -7,7 +7,7 @@
     
     <!-- NuGet Package Information -->
     <PackageId>KeryxPars.Core</PackageId>
-    <Version>0.3.3-beta</Version>
+    <Version>0.5.2-beta</Version>
     <Authors>KeryxPars Contributors</Authors>
     <Company>KeryxPars</Company>
     <Description>Core utilities and abstractions for the KeryxPars HL7 ecosystem. Provides foundational types used across all KeryxPars libraries.</Description>
