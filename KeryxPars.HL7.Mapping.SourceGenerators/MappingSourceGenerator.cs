@@ -44,6 +44,8 @@ public class MappingSourceGenerator : IIncrementalGenerator
         // Get attribute symbols
         var hl7MessageAttributeSymbol = compilation.GetTypeByMetadataName(
             "KeryxPars.HL7.Mapping.HL7MessageAttribute");
+        var hl7ComplexTypeAttributeSymbol = compilation.GetTypeByMetadataName(
+            "KeryxPars.HL7.Mapping.HL7ComplexTypeAttribute");
         var hl7FieldAttributeSymbol = compilation.GetTypeByMetadataName(
             "KeryxPars.HL7.Mapping.HL7FieldAttribute");
 
@@ -59,11 +61,15 @@ public class MappingSourceGenerator : IIncrementalGenerator
             if (classSymbol == null)
                 continue;
 
-            // Check if class has HL7MessageAttribute
+            // Check if class has HL7MessageAttribute (root message)
             var hl7MessageAttribute = classSymbol.GetAttributes()
                 .FirstOrDefault(ad => SymbolEqualityComparer.Default.Equals(ad.AttributeClass, hl7MessageAttributeSymbol));
 
-            // Check if class has any properties with HL7FieldAttribute (for collection items)
+            // Check if class has HL7ComplexTypeAttribute (complex type)
+            var hl7ComplexTypeAttribute = hl7ComplexTypeAttributeSymbol != null ? classSymbol.GetAttributes()
+                .FirstOrDefault(ad => SymbolEqualityComparer.Default.Equals(ad.AttributeClass, hl7ComplexTypeAttributeSymbol)) : null;
+
+            // Check if class has any properties with HL7FieldAttribute (for collection items or legacy support)
             var hasFieldAttributes = classSymbol.GetMembers()
                 .OfType<IPropertySymbol>()
                 .Any(p => p.GetAttributes()
@@ -77,8 +83,12 @@ public class MappingSourceGenerator : IIncrementalGenerator
                 .Any(p => p.GetAttributes()
                     .Any(ad => SymbolEqualityComparer.Default.Equals(ad.AttributeClass, hl7ComponentAttributeSymbol)));
 
-            // Generate mapper if it has HL7Message OR has HL7Field attributes OR has HL7Component attributes
-            if (hl7MessageAttribute != null || hasFieldAttributes || hasComponentAttributes)
+            // Generate mapper if:
+            // 1. Has HL7Message (root message class)
+            // 2. Has HL7ComplexType (complex type within a message)
+            // 3. Has HL7Field attributes (collection item or legacy support)
+            // 4. Has HL7Component attributes (legacy complex type support)
+            if (hl7MessageAttribute != null || hl7ComplexTypeAttribute != null || hasFieldAttributes || hasComponentAttributes)
             {
                 // Generate the mapper for this class
                 var sourceCode = GenerateMapperClass(classSymbol, hl7MessageAttribute, compilation);
@@ -102,10 +112,14 @@ public class MappingSourceGenerator : IIncrementalGenerator
         var className = classSymbol.Name;
 
         // Get message types from attribute (if present)
-        var messageTypes = hl7MessageAttribute?.ConstructorArguments[0].Values
-            .Select(v => v.Value?.ToString())
-            .Where(v => v != null)
-            .ToList() ?? new System.Collections.Generic.List<string?>();
+        var messageTypes = new System.Collections.Generic.List<string?>();
+        if (hl7MessageAttribute != null && hl7MessageAttribute.ConstructorArguments.Length > 0)
+        {
+            messageTypes = hl7MessageAttribute.ConstructorArguments[0].Values
+                .Select(v => v.Value?.ToString())
+                .Where(v => v != null)
+                .ToList();
+        }
 
         // Find all properties with mapping attributes
         var mappedProperties = GetMappedProperties(classSymbol, compilation);
@@ -179,6 +193,29 @@ public class MappingSourceGenerator : IIncrementalGenerator
                 var fieldName = $"_{prop.PropertyName}Notation";
                 sb.AppendLine($"    private static readonly FieldNotation {fieldName} = ");
                 sb.AppendLine($"        FieldNotation.Parse(\"{prop.FieldPath}\");");
+                
+                // Generate fallback notation if specified
+                if (!string.IsNullOrEmpty(prop.FallbackField))
+                {
+                    var fallbackFieldName = $"_Fallback{prop.PropertyName}Notation";
+                    sb.AppendLine($"    private static readonly FieldNotation {fallbackFieldName} = ");
+                    sb.AppendLine($"        FieldNotation.Parse(\"{prop.FallbackField}\");");
+                }
+                
+                // Generate priority fallback notations if specified
+                if (prop.PriorityFallbackFields != null && prop.PriorityFallbackFields.Count > 0)
+                {
+                    for (int i = 0; i < prop.PriorityFallbackFields.Count; i++)
+                    {
+                        var priorityField = prop.PriorityFallbackFields[i];
+                        if (!string.IsNullOrEmpty(priorityField))
+                        {
+                            var priorityFieldName = $"_Priority{i + 1}{prop.PropertyName}Notation";
+                            sb.AppendLine($"    private static readonly FieldNotation {priorityFieldName} = ");
+                            sb.AppendLine($"        FieldNotation.Parse(\"{priorityField}\");");
+                        }
+                    }
+                }
             }
         }
 
@@ -354,10 +391,10 @@ public class MappingSourceGenerator : IIncrementalGenerator
             .Select(p => new
             {
                 Property = p,
-                Attribute = p.GetAttributes()
+                ComponentAttribute = p.GetAttributes()
                     .FirstOrDefault(ad => SymbolEqualityComparer.Default.Equals(ad.AttributeClass, hl7ComponentAttributeSymbol))
             })
-            .Where(x => x.Attribute != null)
+            .Where(x => x.ComponentAttribute != null)
             .ToList();
 
         if (!componentProperties.Any())
@@ -373,21 +410,23 @@ public class MappingSourceGenerator : IIncrementalGenerator
         sb.AppendLine($"        var result = new {className}();");
         sb.AppendLine();
 
-        foreach (var componentProp in componentProperties)
+        foreach (var prop in componentProperties)
         {
-            var componentIndex = componentProp.Attribute!.ConstructorArguments[0].Value;
-            var propertyName = componentProp.Property.Name;
-            var propertyType = componentProp.Property.Type.ToDisplayString();
-
-            sb.AppendLine($"        // Map {propertyName} from component {componentIndex}");
-            sb.AppendLine($"        {{");
-            sb.AppendLine($"            var component = HL7SpanParser.GetComponent(field, {componentIndex});");
-            sb.AppendLine($"            if (!HL7SpanParser.IsNullOrWhiteSpace(component))");
-            sb.AppendLine($"            {{");
-            sb.AppendLine($"                result.{propertyName} = component.ToString();");
-            sb.AppendLine($"            }}");
-            sb.AppendLine($"        }}");
-            sb.AppendLine();
+            if (prop.ComponentAttribute != null && prop.ComponentAttribute.ConstructorArguments.Length > 0)
+            {
+                var componentIndex = prop.ComponentAttribute.ConstructorArguments[0].Value;
+                var propertyName = prop.Property.Name;
+                
+                sb.AppendLine($"        // Map {propertyName} from component {componentIndex}");
+                sb.AppendLine($"        {{");
+                sb.AppendLine($"            var component = HL7SpanParser.GetComponent(field, {componentIndex});");
+                sb.AppendLine($"            if (!HL7SpanParser.IsNullOrWhiteSpace(component))");
+                sb.AppendLine($"            {{");
+                sb.AppendLine($"                result.{propertyName} = component.ToString();");
+                sb.AppendLine($"            }}");
+                sb.AppendLine($"        }}");
+                sb.AppendLine();
+            }
         }
 
         sb.AppendLine("        return result;");
@@ -428,37 +467,130 @@ public class MappingSourceGenerator : IIncrementalGenerator
         }
         
         sb.AppendLine($"        {{");
-        sb.AppendLine($"            var value = HL7SpanParser.GetValue({messageVarName}, {notationVar});");
-
-        // Generate type conversion based on property type
-        var conversion = GenerateTypeConversion(prop);
-
-        sb.AppendLine($"            if (!HL7SpanParser.IsNullOrWhiteSpace(value))");
-        sb.AppendLine($"            {{");
         
-        // Wrap in try-catch for better error handling
-        sb.AppendLine($"                try");
-        sb.AppendLine($"                {{");
-        sb.AppendLine($"                    result.{prop.PropertyName} = {conversion};");
-        sb.AppendLine($"                }}");
-        sb.AppendLine($"                catch (System.Exception ex)");
-        sb.AppendLine($"                {{");
-        sb.AppendLine($"                    throw new KeryxPars.HL7.Mapping.HL7MappingException(");
-        sb.AppendLine($"                        $\"Error converting field {{value.ToString()}} to {prop.PropertyType}\",");
-        sb.AppendLine($"                        \"{prop.PropertyName}\",");
-        sb.AppendLine($"                        \"{prop.FieldPath}\",");
-        sb.AppendLine($"                        ex);");
-        sb.AppendLine($"                }}");
+        // Check conditional defaults FIRST - if condition matches, use default and skip message value
+        bool hasConditionalDefaults = prop.ConditionalDefaults != null && prop.ConditionalDefaults.Count > 0;
         
-        sb.AppendLine($"            }}");
-
-        // Handle default value if specified
-        if (prop.DefaultValue != null)
+        if (hasConditionalDefaults)
         {
-            sb.AppendLine($"            else");
+            sb.AppendLine($"            // Check conditional defaults first - override message value if condition matches");
+            
+            // Separate conditional and unconditional defaults
+            var conditionalOnes = prop.ConditionalDefaults.Where(cd => !string.IsNullOrEmpty(cd.Condition)).ToList();
+            var unconditionalOne = prop.ConditionalDefaults.FirstOrDefault(cd => string.IsNullOrEmpty(cd.Condition));
+            
+            bool isFirst = true;
+            
+            // Generate conditional defaults (with conditions)
+            foreach (var conditionalDefault in conditionalOnes)
+            {
+                var elsePrefix = isFirst ? "" : "else ";
+                isFirst = false;
+
+                sb.AppendLine($"            {elsePrefix}if (KeryxPars.HL7.Mapping.Core.ConditionEvaluator.Evaluate({messageVarName}, \"{conditionalDefault.Condition}\"))");
+                sb.AppendLine($"            {{");
+                
+                // Generate the appropriate assignment based on value type
+                var assignmentValue = GenerateConditionalDefaultAssignment(conditionalDefault, prop.PropertyType);
+                sb.AppendLine($"                result.{prop.PropertyName} = {assignmentValue};");
+                
+                sb.AppendLine($"            }}");
+            }
+            
+            // Generate unconditional default (else fallback) if present
+            if (unconditionalOne.Value != null)
+            {
+                var elsePrefix = conditionalOnes.Count > 0 ? "else " : "";
+                sb.AppendLine($"            {elsePrefix}");
+                sb.AppendLine($"            {{");
+                sb.AppendLine($"                // Unconditional default (else fallback)");
+                
+                var assignmentValue = GenerateConditionalDefaultAssignment(unconditionalOne, prop.PropertyType);
+                sb.AppendLine($"                result.{prop.PropertyName} = {assignmentValue};");
+                
+                sb.AppendLine($"            }}");
+            }
+            // If no unconditional default and not ConditionalOnly, fall back to message value
+            else if (!prop.ConditionalOnly)
+            {
+                sb.AppendLine($"            else");
+                sb.AppendLine($"            {{");
+            }
+        }
+        
+        // Only generate message mapping code if:
+        // 1. There are no conditional defaults, OR
+        // 2. There are conditional defaults but NO unconditional default AND ConditionalOnly is FALSE
+        bool hasUnconditionalDefault = hasConditionalDefaults && 
+            prop.ConditionalDefaults.Any(cd => string.IsNullOrEmpty(cd.Condition));
+        
+        bool shouldGenerateMessageMapping = !hasConditionalDefaults || 
+            (!hasUnconditionalDefault && !prop.ConditionalOnly);
+        
+        if (shouldGenerateMessageMapping)
+        {
+            sb.AppendLine($"            var value = HL7SpanParser.GetValue({messageVarName}, {notationVar});");
+
+            // If priority fallback fields are specified, try them in order
+            if (prop.PriorityFallbackFields != null && prop.PriorityFallbackFields.Count > 0)
+            {
+                for (int i = 0; i < prop.PriorityFallbackFields.Count; i++)
+                {
+                    var priorityNotationVar = $"_Priority{i + 1}{prop.PropertyName}Notation";
+                    sb.AppendLine($"            if (HL7SpanParser.IsNullOrWhiteSpace(value))");
+                    sb.AppendLine($"            {{");
+                    sb.AppendLine($"                value = HL7SpanParser.GetValue({messageVarName}, {priorityNotationVar});");
+                    sb.AppendLine($"            }}");
+                }
+            }
+            // Else if single fallback field is specified, try it if primary is empty
+            else if (!string.IsNullOrEmpty(prop.FallbackField))
+            {
+                var fallbackNotationVar = $"_Fallback{prop.PropertyName}Notation";
+                sb.AppendLine($"            if (HL7SpanParser.IsNullOrWhiteSpace(value))");
+                sb.AppendLine($"            {{");
+                sb.AppendLine($"                value = HL7SpanParser.GetValue({messageVarName}, {fallbackNotationVar});");
+                sb.AppendLine($"            }}");
+            }
+
+            // Generate type conversion based on property type
+            var conversion = GenerateTypeConversion(prop);
+
+            sb.AppendLine($"            if (!HL7SpanParser.IsNullOrWhiteSpace(value))");
             sb.AppendLine($"            {{");
-            sb.AppendLine($"                result.{prop.PropertyName} = {prop.DefaultValue};");
+            
+            
+            
+            // Wrap in try-catch for better error handling
+            sb.AppendLine($"                try");
+            sb.AppendLine($"                {{");
+            sb.AppendLine($"                    result.{prop.PropertyName} = {conversion};");
+            sb.AppendLine($"                }}");
+            sb.AppendLine($"                catch (System.Exception ex)");
+            sb.AppendLine($"                {{");
+            sb.AppendLine($"                    throw new KeryxPars.HL7.Mapping.HL7MappingException(");
+            sb.AppendLine($"                        $\"Error converting field {{value.ToString()}} to {prop.PropertyType}\",");
+            sb.AppendLine($"                        \"{prop.PropertyName}\",");
+            sb.AppendLine($"                        \"{prop.FieldPath}\",");
+            sb.AppendLine($"                        ex);");
+            sb.AppendLine($"                }}");
+            
             sb.AppendLine($"            }}");
+
+            // Handle regular default value only if no conditional defaults
+            if (!hasConditionalDefaults && prop.DefaultValue != null)
+            {
+                sb.AppendLine($"            else");
+                sb.AppendLine($"            {{");
+                sb.AppendLine($"                result.{prop.PropertyName} = {prop.DefaultValue};");
+                sb.AppendLine($"            }}");
+            }
+            
+            // Close the "else" block if we had conditional defaults, no unconditional default, and ConditionalOnly is false
+            if (hasConditionalDefaults && !prop.ConditionalOnly && !hasUnconditionalDefault)
+            {
+                sb.AppendLine($"            }}");
+            }
         }
 
         sb.AppendLine($"        }}");
@@ -479,7 +611,11 @@ public class MappingSourceGenerator : IIncrementalGenerator
         sb.AppendLine($"            var fieldValue = HL7SpanParser.GetValue({messageVarName}, \"{prop.BaseFieldPath}\");");
         sb.AppendLine($"            if (!HL7SpanParser.IsNullOrWhiteSpace(fieldValue))");
         sb.AppendLine($"            {{");
-        sb.AppendLine($"                result.{prop.PropertyName} = {prop.ComplexType}Mapper.MapFromField(fieldValue);");
+        
+        // Strip nullable suffix (?) from type name for mapper call
+        var mapperTypeName = prop.ComplexType?.TrimEnd('?') ?? prop.ComplexType;
+        
+        sb.AppendLine($"                result.{prop.PropertyName} = {mapperTypeName}Mapper.MapFromField(fieldValue);");
         sb.AppendLine($"            }}");
         sb.AppendLine($"        }}");
         sb.AppendLine();
@@ -497,6 +633,40 @@ public class MappingSourceGenerator : IIncrementalGenerator
         sb.AppendLine($"            }}");
         sb.AppendLine($"        }}");
         sb.AppendLine();
+    }
+
+    private string GenerateConditionalDefaultAssignment(ConditionalDefault conditionalDefault, string targetPropertyType)
+    {
+        if (conditionalDefault.ValueType.StartsWith("enum:"))
+        {
+            // Extract enum type name
+            var enumTypeName = conditionalDefault.ValueType.Substring(5); // Remove "enum:" prefix
+            return $"{enumTypeName}.{conditionalDefault.Value}";
+        }
+        else if (conditionalDefault.ValueType == "string")
+        {
+            return $"\"{conditionalDefault.Value}\"";
+        }
+        else if (conditionalDefault.ValueType == "double" && targetPropertyType.Contains("decimal"))
+        {
+            // Double value being assigned to decimal property - need to cast or add 'm' suffix
+            return $"(decimal){conditionalDefault.Value}";
+        }
+        else if (conditionalDefault.ValueType == "bool" || 
+                 conditionalDefault.ValueType == "int" || 
+                 conditionalDefault.ValueType == "long" ||
+                 conditionalDefault.ValueType == "decimal" ||
+                 conditionalDefault.ValueType == "double" ||
+                 conditionalDefault.ValueType == "float")
+        {
+            // Primitive types - use value directly (already formatted with suffix if needed)
+            return conditionalDefault.Value;
+        }
+        else
+        {
+            // Default to string
+            return $"\"{conditionalDefault.Value}\"";
+        }
     }
 
     private string GenerateTypeConversion(MappedProperty prop)
@@ -585,9 +755,10 @@ public class MappingSourceGenerator : IIncrementalGenerator
             if (member is not IPropertySymbol property)
                 continue;
 
-            // Check for HL7FieldAttribute
-            var fieldAttribute = property.GetAttributes()
-                .FirstOrDefault(ad => SymbolEqualityComparer.Default.Equals(ad.AttributeClass, hl7FieldAttributeSymbol));
+            // Check for HL7FieldAttribute (can have multiple for priority-based fallback)
+            var fieldAttributes = property.GetAttributes()
+                .Where(ad => SymbolEqualityComparer.Default.Equals(ad.AttributeClass, hl7FieldAttributeSymbol))
+                .ToList();
 
             // Check for HL7SegmentsAttribute (collection mapping)
             var segmentsAttribute = property.GetAttributes()
@@ -597,7 +768,7 @@ public class MappingSourceGenerator : IIncrementalGenerator
             var complexAttribute = property.GetAttributes()
                 .FirstOrDefault(ad => SymbolEqualityComparer.Default.Equals(ad.AttributeClass, hl7ComplexAttributeSymbol));
 
-            if (fieldAttribute == null && segmentsAttribute == null && complexAttribute == null)
+            if (fieldAttributes.Count == 0 && segmentsAttribute == null && complexAttribute == null)
                 continue;
 
             // Handle complex/nested object mapping
@@ -646,22 +817,156 @@ public class MappingSourceGenerator : IIncrementalGenerator
                 continue;
             }
 
-            // Handle regular field mapping
-            if (fieldAttribute != null)
+            // Handle regular field mapping (single or multiple attributes with priority)
+            if (fieldAttributes.Count > 0)
             {
+                // If multiple attributes, sort by priority (lower = higher priority)
+                var sortedAttributes = fieldAttributes
+                    .Select(attr => new
+                    {
+                        Attribute = attr,
+                        Priority = GetNamedArgument<int>(attr, "Priority")
+                    })
+                    .OrderBy(x => x.Priority)
+                    .ToList();
+
+                // Use the first (highest priority) attribute for the main property mapping
+                var primaryAttribute = sortedAttributes.First().Attribute;
+                
                 // Get field path from attribute
-                var fieldPath = fieldAttribute.ConstructorArguments[0].Value?.ToString();
+                var fieldPath = primaryAttribute.ConstructorArguments[0].Value?.ToString();
+
 
                 if (string.IsNullOrEmpty(fieldPath))
                     continue;
 
-                // Get optional properties
-                var format = GetNamedArgument<string>(fieldAttribute, "Format");
-                var defaultValue = GetNamedArgument<string>(fieldAttribute, "DefaultValue");
-                var required = GetNamedArgument<bool>(fieldAttribute, "Required");
-                var condition = GetNamedArgument<string>(fieldAttribute, "Condition") 
-                    ?? GetNamedArgument<string>(fieldAttribute, "When");
-                var skipIfEmpty = GetNamedArgument<bool>(fieldAttribute, "SkipIfEmpty");
+
+                // Get optional properties from primary attribute
+                var format = GetNamedArgument<string>(primaryAttribute, "Format");
+                var defaultValue = GetNamedArgument<string>(primaryAttribute, "DefaultValue");
+                var required = GetNamedArgument<bool>(primaryAttribute, "Required");
+                var condition = GetNamedArgument<string>(primaryAttribute, "Condition") 
+                    ?? GetNamedArgument<string>(primaryAttribute, "When");
+                var skipIfEmpty = GetNamedArgument<bool>(primaryAttribute, "SkipIfEmpty");
+                var conditionalOnly = GetNamedArgument<bool>(primaryAttribute, "ConditionalOnly");
+                var fallbackField = GetNamedArgument<string>(primaryAttribute, "FallbackField");
+                var priority = GetNamedArgument<int>(primaryAttribute, "Priority");
+                
+                // If multiple attributes (priority-based fallback), collect additional field paths
+                var priorityFallbackFields = sortedAttributes.Count > 1
+                    ? sortedAttributes.Skip(1).Select(x => x.Attribute.ConstructorArguments[0].Value?.ToString()).ToList()
+                    : null;
+
+                // Get conditional defaults
+                var conditionalDefaults = new System.Collections.Generic.List<ConditionalDefault>();
+                var conditionalDefaultAttrs = property.GetAttributes()
+                    .Where(a => a.AttributeClass?.Name == "HL7ConditionalDefaultAttribute")
+                    .ToList();
+
+
+                foreach (var cdAttr in conditionalDefaultAttrs)
+                {
+                    if (cdAttr.ConstructorArguments.Length > 0)
+                    {
+                        var argument = cdAttr.ConstructorArguments[0];
+                        var cdValue = argument.Value?.ToString();
+                        var cdCondition = GetNamedArgument<string>(cdAttr, "Condition");
+                        var cdPriority = GetNamedArgument<int>(cdAttr, "Priority");
+
+                        if (cdValue != null)
+                        {
+                            // Detect the type of the value
+                            string valueType;
+                            string formattedValue;
+
+                            switch (argument.Kind)
+                            {
+                                case TypedConstantKind.Primitive:
+                                    // Determine primitive type
+                                    if (argument.Type?.SpecialType == SpecialType.System_String)
+                                    {
+                                        valueType = "string";
+                                        formattedValue = cdValue;
+                                    }
+                                    else if (argument.Type?.SpecialType == SpecialType.System_Int32)
+                                    {
+                                        valueType = "int";
+                                        formattedValue = cdValue;
+                                    }
+                                    else if (argument.Type?.SpecialType == SpecialType.System_Int64)
+                                    {
+                                        valueType = "long";
+                                        formattedValue = cdValue + "L";
+                                    }
+                                    else if (argument.Type?.SpecialType == SpecialType.System_Boolean)
+                                    {
+                                        valueType = "bool";
+                                        formattedValue = cdValue.ToLowerInvariant();
+                                    }
+                                    else if (argument.Type?.SpecialType == SpecialType.System_Decimal)
+                                    {
+                                        valueType = "decimal";
+                                        formattedValue = cdValue + "m";
+                                    }
+                                    else if (argument.Type?.SpecialType == SpecialType.System_Double)
+                                    {
+                                        valueType = "double";
+                                        formattedValue = cdValue + "d";
+                                    }
+                                    else if (argument.Type?.SpecialType == SpecialType.System_Single)
+                                    {
+                                        valueType = "float";
+                                        formattedValue = cdValue + "f";
+                                    }
+                                    else
+                                    {
+                                        valueType = "string";
+                                        formattedValue = cdValue;
+                                    }
+                                    break;
+
+                                case TypedConstantKind.Enum:
+                                    // Enum value - get the member name, not the numeric value
+                                    valueType = $"enum:{argument.Type?.ToDisplayString()}";
+                                    
+                                    // For enums, we need to find the actual enum member name
+                                    // The Value gives us the numeric value, but we need the member name
+                                    if (argument.Type is INamedTypeSymbol enumType && argument.Value != null)
+                                    {
+                                        var enumValue = argument.Value;
+                                        // Find the enum member with this value
+                                        var enumMember = enumType.GetMembers()
+                                            .OfType<IFieldSymbol>()
+                                            .FirstOrDefault(f => f.IsConst && 
+                                                f.ConstantValue?.Equals(enumValue) == true);
+                                        
+                                        formattedValue = enumMember?.Name ?? enumValue.ToString();
+                                    }
+                                    else
+                                    {
+                                        formattedValue = cdValue;
+                                    }
+                                    break;
+
+                                default:
+                                    valueType = "string";
+                                    formattedValue = cdValue;
+                                    break;
+                            }
+
+                            conditionalDefaults.Add(new ConditionalDefault
+                            {
+                                Value = formattedValue,
+                                ValueType = valueType,
+                                Condition = cdCondition,
+                                Priority = cdPriority
+                            });
+                        }
+                    }
+                }
+
+                // Sort conditional defaults by priority
+                conditionalDefaults.Sort((a, b) => a.Priority.CompareTo(b.Priority));
 
                 // Get type information
                 var propertyType = property.Type;
@@ -686,7 +991,12 @@ public class MappingSourceGenerator : IIncrementalGenerator
                     UnderlyingType = GetUnderlyingType(propertyType),
                     IsCollection = false,
                     Condition = condition,
-                    SkipIfEmpty = skipIfEmpty
+                    SkipIfEmpty = skipIfEmpty,
+                    ConditionalDefaults = conditionalDefaults.Count > 0 ? conditionalDefaults : null,
+                    ConditionalOnly = conditionalOnly,
+                    FallbackField = fallbackField,
+                    Priority = priority,
+                    PriorityFallbackFields = priorityFallbackFields
                 });
             }
         }
@@ -750,6 +1060,22 @@ public class MappingSourceGenerator : IIncrementalGenerator
         public string? ComplexType { get; init; }
         public string? Condition { get; init; }
         public bool SkipIfEmpty { get; init; }
+        public System.Collections.Generic.List<ConditionalDefault>? ConditionalDefaults { get; init; }
+        public bool ConditionalOnly { get; init; }
+        public string? FallbackField { get; init; }
+        public int Priority { get; init; }
+        public System.Collections.Generic.List<string>? PriorityFallbackFields { get; init; }
+    }
+
+    /// <summary>
+    /// Represents a conditional default value with type information.
+    /// </summary>
+    private readonly struct ConditionalDefault
+    {
+        public string Value { get; init; }
+        public string ValueType { get; init; } // "string", "int", "bool", "decimal", "enum:FullTypeName"
+        public string? Condition { get; init; }
+        public int Priority { get; init; }
     }
 
     private void GenerateBuildHL7Method(
