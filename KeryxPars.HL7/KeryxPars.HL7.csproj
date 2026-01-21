@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -7,7 +7,7 @@
     
     <!-- NuGet Package Information -->
     <PackageId>KeryxPars.HL7</PackageId>
-    <Version>0.3.3-beta</Version>
+    <Version>0.5.2-beta</Version>
     <Authors>KeryxPars Contributors</Authors>
     <Company>KeryxPars</Company>
     <Description>Ultra-fast HL7 v2.x message parser and serializer with zero-allocation span-based processing. Includes source-generated validation and fluent API. 50-100x faster than traditional parsers.</Description>

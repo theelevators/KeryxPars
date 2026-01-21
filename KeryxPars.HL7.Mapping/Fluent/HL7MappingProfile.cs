@@ -39,7 +39,7 @@ public abstract class HL7MappingProfile<TDestination> where TDestination : class
     /// <summary>
     /// Specifies which HL7 message types this profile applies to.
     /// </summary>
-    protected void ForMessages(params string[] messageTypes)
+    public void ForMessages(params string[] messageTypes)
     {
         _messageTypes.AddRange(messageTypes);
     }
@@ -47,7 +47,7 @@ public abstract class HL7MappingProfile<TDestination> where TDestination : class
     /// <summary>
     /// Configures mapping for a simple property.
     /// </summary>
-    protected PropertyMappingBuilder<TDestination, TProperty> Map<TProperty>(
+    public PropertyMappingBuilder<TDestination, TProperty> Map<TProperty>(
         Expression<Func<TDestination, TProperty>> propertyExpression)
     {
         var mapping = new PropertyMapping<TDestination>
@@ -63,7 +63,7 @@ public abstract class HL7MappingProfile<TDestination> where TDestination : class
     /// <summary>
     /// Configures mapping for a complex/nested property.
     /// </summary>
-    protected ComplexMappingBuilder<TDestination, TProperty> MapComplex<TProperty>(
+    public ComplexMappingBuilder<TDestination, TProperty> MapComplex<TProperty>(
         Expression<Func<TDestination, TProperty>> propertyExpression)
         where TProperty : class, new()
     {
@@ -80,7 +80,7 @@ public abstract class HL7MappingProfile<TDestination> where TDestination : class
     /// <summary>
     /// Configures mapping for a collection property.
     /// </summary>
-    protected CollectionMappingBuilder<TDestination, TItem> MapCollection<TItem>(
+    public CollectionMappingBuilder<TDestination, TItem> MapCollection<TItem>(
         Expression<Func<TDestination, ICollection<TItem>>> propertyExpression)
         where TItem : class, new()
     {

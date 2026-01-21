@@ -159,7 +159,66 @@ public class ComplexTypeMappingTests
     }
 
     #endregion
+
+    #region Convenience Methods Tests (v0.5.1 - Result Pattern!)
+
+    [Fact]
+    public void Parse_ShouldReturnSuccessResult()
+    {
+        // Act - Using the new Parse() convenience method with Result!
+        var result = PatientDemographics.Parse(SamplePatientMessage);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value!.DateOfBirth.ShouldBe(new DateTime(1985, 6, 15));
+        result.Value.Gender.ShouldBe("M");
+        result.Value.PatientClass.ShouldBe("I");
+    }
+
+    [Fact]
+    public void From_ShouldReturnSuccessResult()
+    {
+        // Act - Using the new From() convenience method!
+        var result = PatientDemographics.From(SamplePatientMessage);
+
+        // Assert
+        result.IsSuccess.ShouldBeTrue();
+        result.Value!.DateOfBirth.ShouldBe(new DateTime(1985, 6, 15));
+        result.Value.Gender.ShouldBe("M");
+    }
+
+    [Fact]
+    public void Parse_WithPartialData_ShouldStillSucceed()
+    {
+        // Arrange - Complex types are forgiving with missing data
+        var partialMessage = "MSH|^~\\&|APP||";
+
+        // Act
+        var result = PatientDemographics.Parse(partialMessage);
+
+        // Assert - Parse succeeds even with minimal data (fields are optional)
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldNotBeNull();
+        result.Value!.DateOfBirth.ShouldBeNull(); // Missing field = null
+    }
+
+    [Fact]
+    public void Parse_WithNullInput_ShouldReturnError()
+    {
+        // Act
+        var result = PatientDemographics.Parse((string)null!);
+
+        // Assert - Returns error, doesn't throw!
+        result.IsSuccess.ShouldBeFalse();
+        result.Error.ShouldNotBeNull();
+        result.Error!.Message.ShouldContain("null");
+    }
+
+    #endregion
 }
+
+
 
 #region Test Models
 
@@ -179,7 +238,7 @@ public class ComplexTypeMappingTests
 /// </code>
 /// </example>
 [HL7ComplexType]
-public class PatientDemographics
+public partial class PatientDemographics
 {
     /// <summary>
     /// Patient's date of birth from PID.7.
