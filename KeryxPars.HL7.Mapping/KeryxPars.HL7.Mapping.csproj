@@ -2,19 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     
     <!-- NuGet Package Information -->
-    <PackageId>KeryxPars.HL7</PackageId>
+    <PackageId>KeryxPars.HL7.Mapping</PackageId>
     <Version>0.5.2-beta</Version>
     <Authors>KeryxPars Contributors</Authors>
     <Company>KeryxPars</Company>
-    <Description>Ultra-fast HL7 v2.x message parser and serializer with zero-allocation span-based processing. Includes source-generated validation and fluent API. 50-100x faster than traditional parsers.</Description>
+    <Description>Blazing-fast HL7-to-domain-model mapping with source generators and zero-reflection performance. Map HL7 messages to POCOs with attributes or fluent API. Industry-first subcomponent support. 45,000+ messages/second with full type conversion.</Description>
     <PackageProjectUrl>https://github.com/theelevators/KeryxPars</PackageProjectUrl>
     <RepositoryUrl>https://github.com/theelevators/KeryxPars</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>hl7;healthcare;parser;medical;fast;performance;healthcare-integration;hl7v2</PackageTags>
+    <PackageTags>hl7;mapping;source-generator;healthcare;medical;mapper;dto;domain-model;fast;performance</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -27,8 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\KeryxPars.Core\KeryxPars.Core.csproj" />
-    <ProjectReference Include="..\KeryxPars.HL7.SourceGenerators\KeryxPars.HL7.SourceGenerators.csproj" 
+    <ProjectReference Include="..\KeryxPars.HL7\KeryxPars.HL7.csproj" />
+    
+    <!-- Reference the source generator project -->
+    <ProjectReference Include="..\KeryxPars.HL7.Mapping.SourceGenerators\KeryxPars.HL7.Mapping.SourceGenerators.csproj" 
                       OutputItemType="Analyzer" 
                       ReferenceOutputAssembly="false" />
   </ItemGroup>

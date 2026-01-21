@@ -227,20 +227,20 @@ PV1|1|I|WARD^ROOM^BED||||ATTENDING^DOCTOR|||||||||||";
     {
         // Arrange
         var adtMessage = HL7Serializer.Deserialize(SampleMessage).Value!;
-        var labMessage = @"MSH|^~\&|LAB|LAB_FAC|RECEIVING_APP|RECEIVING_FAC|20230101120000||ORU^R01|MSG001|P|2.5||
-PID|1||123456||DOE^JOHN^A||19800101|M|||123 MAIN ST^^CITY^ST^12345|||||||
-OBR|1|ORDER123||TEST_CODE^TEST NAME|||20230101120000|||||||||";
-        var lab = HL7Serializer.Deserialize(labMessage).Value!;
+        var evnMessage = @"MSH|^~\&|LAB|LAB_FAC|RECEIVING_APP|RECEIVING_FAC|20230101120000||ADT^A01|MSG002|P|2.5||
+EVN|A01|20230101120000||
+PID|1||123456||DOE^JOHN^A||19800101|M|||123 MAIN ST^^CITY^ST^12345|||||||";
+        var lab = HL7Serializer.Deserialize(evnMessage).Value!;
 
         // Act
         var adtPid = SegmentAccessor.GetSegment(adtMessage, "PID");
         var labPid = SegmentAccessor.GetSegment(lab, "PID");
-        var labObr = SegmentAccessor.GetSegment(lab, "OBR");
+        var labEvn = SegmentAccessor.GetSegment(lab, "EVN");
 
         // Assert
         adtPid.ShouldNotBeNull();
         labPid.ShouldNotBeNull();
-        labObr.ShouldNotBeNull();
+        labEvn.ShouldNotBeNull();
         
         // Verify caching worked for both message types
         var stats = SegmentAccessor.GetCacheStats();

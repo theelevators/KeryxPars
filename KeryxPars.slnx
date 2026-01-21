@@ -18,6 +18,8 @@
   </Folder>
   <Project Path="KeryxPars.Benchmarks/KeryxPars.Benchmarks.csproj" />
   <Project Path="KeryxPars.Core/KeryxPars.Core.csproj" />
+  <Project Path="KeryxPars.HL7.Mapping.SourceGenerators/KeryxPars.HL7.Mapping.SourceGenerators.csproj" />
+  <Project Path="KeryxPars.HL7.Mapping/KeryxPars.HL7.Mapping.csproj" />
   <Project Path="KeryxPars.HL7.SourceGenerators/KeryxPars.HL7.SourceGenerators.csproj" />
   <Project Path="KeryxPars.HL7/KeryxPars.HL7.csproj" />
   <Project Path="KeryxPars.Sandbox/KeryxPars.Sandbox.csproj" />
