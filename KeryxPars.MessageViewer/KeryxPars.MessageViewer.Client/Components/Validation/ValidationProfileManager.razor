@@ -1,0 +1,320 @@
+@using KeryxPars.MessageViewer.Core.Models
+@using KeryxPars.MessageViewer.Core.Services
+@using KeryxPars.HL7.Definitions
+@using Microsoft.JSInterop
+
+<div class="validation-manager">
+@if (CurrentMessage == null)
+{
+    <div class="alert alert-info">
+        <span class="bi bi-info-circle"></span>
+        No message loaded. Parse a message first to use validation features.
+    </div>
+}
+    
+<div class="manager-header">
+        <h3>
+            <span class="bi bi-shield-check"></span>
+            Validation Profiles
+        </h3>
+        <div class="actions">
+            <button class="btn btn-primary" @onclick="ShowRuleBuilder">
+                <span class="bi bi-plus-circle"></span>
+                New Rule
+            </button>
+            <button class="btn btn-secondary" @onclick="ShowTemplates">
+                <span class="bi bi-grid"></span>
+                Templates
+            </button>
+            @if (ActiveProfile != null && ActiveProfile.Rules.Any())
+            {
+                <button class="btn btn-success" @onclick="TestRules">
+                    <span class="bi bi-play-circle"></span>
+                    Test Rules
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Active Profile Info -->
+    @if (ActiveProfile != null)
+    {
+        <div class="active-profile">
+            <div class="profile-info">
+                <input type="text" 
+                       class="profile-name-input" 
+                       @bind="ActiveProfile.Name" 
+                       @bind:event="oninput"
+                       @onblur="SaveProfile"
+                       placeholder="Profile name" />
+                <span class="rule-count">@ActiveProfile.Rules.Count(r => r.IsEnabled) rules active</span>
+            </div>
+            <div class="profile-actions">
+                <button @onclick="SaveProfile" title="Save">
+                    <span class="bi bi-floppy"></span>
+                </button>
+                <button @onclick="LoadProfile" title="Load">
+                    <span class="bi bi-folder-open"></span>
+                </button>
+                <button @onclick="ExportProfile" title="Export">
+                    <span class="bi bi-download"></span>
+                </button>
+                <button @onclick="ImportProfile" title="Import">
+                    <span class="bi bi-upload"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="validation-stats">
+            <div class="validation-stat-card">
+                <span class="bi bi-shield-fill-exclamation"></span>
+                <div>
+                    <strong>@RequiredSegmentsCount</strong>
+                    <small>Required Segments</small>
+                </div>
+            </div>
+            <div class="validation-stat-card">
+                <span class="bi bi-input-cursor-text"></span>
+                <div>
+                    <strong>@FieldRulesCount</strong>
+                    <small>Field Rules</small>
+                </div>
+            </div>
+            <div class="validation-stat-card critical">
+                <span class="bi bi-exclamation-circle-fill"></span>
+                <div>
+                    <strong>@CriticalRulesCount</strong>
+                    <small>Critical</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules List -->
+        <RulesList Rules="@ActiveProfile.Rules" 
+                   OnEdit="EditRule" 
+                   OnDelete="DeleteRule" 
+                   OnToggle="ToggleRule" />
+    }
+    else
+    {
+        <div class="empty-state">
+            <span class="bi bi-inbox"></span>
+            <h5>No profile active</h5>
+            <p>Create a new rule or load a template to get started</p>
+        </div>
+    }
+
+    <!-- Test Results Panel -->
+    @if (showTestResults && testResult != null)
+    {
+        <ValidationTester Result="@testResult" 
+                         OnClose="() => showTestResults = false" />
+    }
+</div>
+
+<!-- Modals -->
+@if (showRuleBuilder)
+{
+    <RuleBuilderModal OnSave="AddRule" 
+                     OnCancel="() => showRuleBuilder = false" 
+                     ExistingRule="@editingRule"
+                     CurrentMessage="@CurrentMessage" />
+}
+
+@if (showTemplates)
+{
+    <RuleTemplateSelector OnSelect="ApplyTemplate" 
+                         OnCancel="() => showTemplates = false" />
+}
+
+@code {
+[Parameter]
+public HL7ComprehensiveMessage? CurrentMessage { get; set; }
+
+[Inject]
+private ValidationProfileService ProfileService { get; set; } = default!;
+
+[Inject]
+private IJSRuntime JSRuntime { get; set; } = default!;
+
+    private ValidationProfile? ActiveProfile => ProfileService.ActiveProfile;
+    private bool showRuleBuilder = false;
+    private bool showTemplates = false;
+    private bool showTestResults = false;
+    private RuleDefinition? editingRule = null;
+    private HL7.Contracts.ValidationResult? testResult = null;
+
+    private int RequiredSegmentsCount => ActiveProfile?.Rules.Count(r => r.Type == RuleType.RequiredSegment && r.IsEnabled) ?? 0;
+    private int FieldRulesCount => ActiveProfile?.Rules.Count(r => r.Type != RuleType.RequiredSegment && r.IsEnabled) ?? 0;
+    private int CriticalRulesCount => ActiveProfile?.Rules.Count(r => r.Severity == HL7.Contracts.ValidationSeverity.Critical && r.IsEnabled) ?? 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Create default profile if none exists
+        if (ActiveProfile == null)
+        {
+            var profile = await ProfileService.CreateProfileAsync("My Validation Profile");
+            ProfileService.SetActiveProfile(profile);
+        }
+    }
+
+    private void ShowRuleBuilder()
+    {
+        editingRule = null;
+        showRuleBuilder = true;
+    }
+
+    private void EditRule(RuleDefinition rule)
+    {
+        editingRule = rule;
+        showRuleBuilder = true;
+    }
+
+    private async Task AddRule(RuleDefinition rule)
+    {
+        if (editingRule != null)
+        {
+            await ProfileService.UpdateRuleAsync(rule);
+        }
+        else
+        {
+            await ProfileService.AddRuleAsync(rule);
+        }
+        
+        showRuleBuilder = false;
+        editingRule = null;
+        StateHasChanged();
+    }
+
+    private async Task DeleteRule(RuleDefinition rule)
+    {
+        await ProfileService.RemoveRuleAsync(rule.Id);
+        StateHasChanged();
+    }
+
+    private async Task ToggleRule(RuleDefinition rule)
+    {
+        await ProfileService.ToggleRuleAsync(rule);
+        StateHasChanged();
+    }
+
+    private void ShowTemplates()
+    {
+        showTemplates = true;
+    }
+
+    private async Task ApplyTemplate(ValidationProfile template)
+    {
+        // Create a new profile based on the template
+        var newProfile = await ProfileService.CreateProfileAsync(template.Name, template.Description);
+        newProfile.Rules = template.Rules.Select(r => new RuleDefinition
+        {
+            SegmentId = r.SegmentId,
+            FieldIndex = r.FieldIndex,
+            Type = r.Type,
+            Config = new Dictionary<string, object>(r.Config),
+            CustomMessage = r.CustomMessage,
+            Severity = r.Severity,
+            IsEnabled = r.IsEnabled
+        }).ToList();
+        
+        ProfileService.SetActiveProfile(newProfile);
+        await ProfileService.UpdateProfileAsync(newProfile);
+        
+        showTemplates = false;
+        StateHasChanged();
+    }
+
+    private async Task SaveProfile()
+    {
+        if (ActiveProfile != null)
+        {
+            await ProfileService.UpdateProfileAsync(ActiveProfile);
+        }
+    }
+
+    private void LoadProfile()
+    {
+        // Open profile selector (future enhancement)
+        // For now, can use Import to load from file
+    }
+
+    private async Task ExportProfile()
+    {
+        if (ActiveProfile == null) return;
+
+        try
+        {
+            var json = ProfileService.ExportProfile(ActiveProfile);
+            var fileName = $"{ActiveProfile.Name.Replace(" ", "_")}.json";
+            var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+            
+            // Use JavaScript interop to download the file
+            var base64 = Convert.ToBase64String(bytes);
+            var dataUrl = $"data:application/json;base64,{base64}";
+            
+            await JSRuntime.InvokeVoidAsync("eval", 
+                $@"(function() {{
+                    const link = document.createElement('a');
+                    link.href = '{dataUrl}';
+                    link.download = '{fileName}';
+                    link.click();
+                }})()");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Export failed: {ex.Message}");
+        }
+    }
+
+    private async Task ImportProfile()
+    {
+        try
+        {
+            // Use file input element
+            var inputId = $"file-import-{Guid.NewGuid()}";
+            
+            await JSRuntime.InvokeVoidAsync("eval",
+                $@"(function() {{
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.json';
+                    input.id = '{inputId}';
+                    input.style.display = 'none';
+                    document.body.appendChild(input);
+                    
+                    input.onchange = async function(e) {{
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        
+                        const text = await file.text();
+                        const event = new CustomEvent('profileImported', {{ 
+                            detail: {{ json: text }} 
+                        }});
+                        window.dispatchEvent(event);
+                        document.body.removeChild(input);
+                    }};
+                    
+                    input.click();
+                }})()");
+            
+            // Note: The actual import will be handled by JS event listener
+            // This is a simple implementation - for production, use InputFile component
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Import failed: {ex.Message}");
+        }
+    }
+
+    private void TestRules()
+    {
+        if (ActiveProfile != null && CurrentMessage != null)
+        {
+            var validationRules = ActiveProfile.ToValidationRules();
+            testResult = validationRules.Validate(CurrentMessage);
+            showTestResults = true;
+        }
+    }
+}

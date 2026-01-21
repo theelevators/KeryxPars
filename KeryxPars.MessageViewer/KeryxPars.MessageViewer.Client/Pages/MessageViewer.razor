@@ -1,6 +1,8 @@
 @page "/viewer"
 @using KeryxPars.MessageViewer.Core.Interfaces
 @using KeryxPars.MessageViewer.Core.Models
+@using KeryxPars.HL7.Definitions
+@using KeryxPars.MessageViewer.Client.Components.Validation
 @inject IMessageParserService ParserService
 @inject IMessageRepository Repository
 @inject NavigationManager Navigation
@@ -146,7 +148,7 @@
                         }
                         else if (activeTab == "validation")
                         {
-                            <ValidationResults Errors="@validationErrors" />
+                            <ValidationProfileManager CurrentMessage="@(parseResult.Message as HL7ComprehensiveMessage)" />
                         }
                     </div>
 

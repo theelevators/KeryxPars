@@ -1,0 +1,272 @@
+@using KeryxPars.MessageViewer.Core.Models
+@using ValidationSeverity = KeryxPars.HL7.Contracts.ValidationSeverity
+
+<div class="rule-config-editor">
+    @switch (RuleType)
+    {
+        case RuleType.RequiredSegment:
+        case RuleType.Required:
+            <div class="config-info">
+                <span class="bi bi-info-circle"></span>
+                <p>This @(RuleType == RuleType.RequiredSegment ? "segment" : "field") will be marked as required. No additional configuration needed.</p>
+            </div>
+            break;
+            
+        case RuleType.MaxLength:
+            <div class="form-group">
+                <label>Maximum Length</label>
+                <input type="number" 
+                       class="form-control" 
+                       value="@GetConfigInt("maxLength", 250)" 
+                       @oninput="HandleMaxLengthInput"
+                       min="1" 
+                       placeholder="e.g., 250" />
+                <small class="form-text">Field value cannot exceed this length</small>
+            </div>
+            break;
+            
+        case RuleType.MinLength:
+            <div class="form-group">
+                <label>Minimum Length</label>
+                <input type="number" 
+                       class="form-control" 
+                       value="@GetConfigInt("minLength", 1)" 
+                       @oninput="HandleMinLengthInput"
+                       min="1" 
+                       placeholder="e.g., 5" />
+                <small class="form-text">Field value must be at least this length</small>
+            </div>
+            break;
+            
+        case RuleType.Pattern:
+            <div class="form-group">
+                <label>Regular Expression Pattern</label>
+                <input type="text" 
+                       class="form-control" 
+                       value="@GetConfigString("pattern")" 
+                       @oninput="HandlePatternInput"
+                       placeholder="e.g., ^[A-Z]{2}[0-9]{4}$" />
+                <small class="form-text">
+                    Examples: ^\d{{8}}$ (YYYYMMDD), ^\d{{14}}$ (YYYYMMDDHHmmss), ^(P|D|T)$ (Processing ID)
+                </small>
+            </div>
+            break;
+            
+        case RuleType.AllowedValues:
+            <div class="form-group">
+                <label>Allowed Values</label>
+                <input type="text" 
+                       class="form-control" 
+                       @bind="allowedValuesInput"
+                       @bind:event="oninput"
+                       placeholder="Enter values separated by commas" />
+                <small class="form-text">Separate multiple values with commas (e.g., NW, OK, CA, DC)</small>
+            </div>
+            break;
+
+        case RuleType.NumericRange:
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Minimum Value (optional)</label>
+                        <input type="number" 
+                               class="form-control" 
+                               value="@GetConfigDecimal("minValue")" 
+                               @oninput="HandleMinValueInput"
+                               step="0.01"
+                               placeholder="e.g., 0" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Maximum Value (optional)</label>
+                        <input type="number" 
+                               class="form-control" 
+                               value="@GetConfigDecimal("maxValue")" 
+                               @oninput="HandleMaxValueInput"
+                               step="0.01"
+                               placeholder="e.g., 1000" />
+                    </div>
+                </div>
+            </div>
+            break;
+    }
+    
+    <!-- Severity Selector (for all rules) -->
+    <div class="form-group mt-3">
+        <label>Severity</label>
+        <div class="severity-buttons">
+            <button type="button" 
+                    class="severity-btn info @(Severity == ValidationSeverity.Information ? "active" : "")"
+                    @onclick="HandleInfoSeverity">
+                <span class="bi bi-info-circle"></span> Info
+            </button>
+            <button type="button"
+                    class="severity-btn warning @(Severity == ValidationSeverity.Warning ? "active" : "")"
+                    @onclick="HandleWarningSeverity">
+                <span class="bi bi-exclamation-triangle"></span> Warning
+            </button>
+            <button type="button"
+                    class="severity-btn error @(Severity == ValidationSeverity.Error ? "active" : "")"
+                    @onclick="HandleErrorSeverity">
+                <span class="bi bi-exclamation-circle"></span> Error
+            </button>
+            <button type="button"
+                    class="severity-btn critical @(Severity == ValidationSeverity.Critical ? "active" : "")"
+                    @onclick="HandleCriticalSeverity">
+                <span class="bi bi-x-circle"></span> Critical
+            </button>
+        </div>
+    </div>
+    
+    <!-- Custom Error Message (optional) -->
+    <div class="form-group">
+        <label>Custom Error Message (Optional)</label>
+        <input type="text" 
+               class="form-control" 
+               @bind="CustomMessage"
+               @bind:event="oninput"
+               placeholder="e.g., Patient ID is required for billing" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public RuleType RuleType { get; set; }
+    [Parameter] public Dictionary<string, object> Config { get; set; } = new();
+    [Parameter] public EventCallback<Dictionary<string, object>> ConfigChanged { get; set; }
+    [Parameter] public ValidationSeverity Severity { get; set; } = ValidationSeverity.Error;
+    [Parameter] public EventCallback<ValidationSeverity> SeverityChanged { get; set; }
+    [Parameter] public string CustomMessage { get; set; } = "";
+    [Parameter] public EventCallback<string> CustomMessageChanged { get; set; }
+    [Parameter] public string? SegmentId { get; set; }
+    [Parameter] public int? FieldIndex { get; set; }
+    
+    private bool showPatternExamples = false;
+    private string allowedValuesInput = "";
+
+    protected override void OnParametersSet()
+    {
+        if (Config.TryGetValue("allowedValues", out var values) && values is string[] arr)
+        {
+            allowedValuesInput = string.Join(", ", arr);
+        }
+    }
+
+    private void UpdateConfig(string key, object? value)
+    {
+        if (value != null)
+        {
+            Config[key] = value;
+        }
+        else
+        {
+            Config.Remove(key);
+        }
+
+        if (key == "allowedValues" || (RuleType == RuleType.AllowedValues && !string.IsNullOrWhiteSpace(allowedValuesInput)))
+        {
+            var values = allowedValuesInput
+                .Split(',')
+                .Select(v => v.Trim())
+                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .ToArray();
+            
+            if (values.Length > 0)
+            {
+                Config["allowedValues"] = values;
+            }
+        }
+
+        ConfigChanged.InvokeAsync(Config);
+    }
+
+    private void HandleMaxLengthInput(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            UpdateConfig("maxLength", value);
+        }
+    }
+
+    private void HandleMinLengthInput(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            UpdateConfig("minLength", value);
+        }
+    }
+
+    private void HandlePatternInput(ChangeEventArgs e)
+    {
+        UpdateConfig("pattern", e.Value?.ToString() ?? "");
+    }
+
+    private void HandleMinValueInput(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var value))
+        {
+            UpdateConfig("minValue", value);
+        }
+        else
+        {
+            UpdateConfig("minValue", null);
+        }
+    }
+
+    private void HandleMaxValueInput(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var value))
+        {
+            UpdateConfig("maxValue", value);
+        }
+        else
+        {
+            UpdateConfig("maxValue", null);
+        }
+    }
+
+    private async Task UpdateSeverity(ValidationSeverity newSeverity)
+    {
+        Severity = newSeverity;
+        await SeverityChanged.InvokeAsync(newSeverity);
+    }
+
+    private Task HandleInfoSeverity() => UpdateSeverity(ValidationSeverity.Information);
+    private Task HandleWarningSeverity() => UpdateSeverity(ValidationSeverity.Warning);
+    private Task HandleErrorSeverity() => UpdateSeverity(ValidationSeverity.Error);
+    private Task HandleCriticalSeverity() => UpdateSeverity(ValidationSeverity.Critical);
+
+    private void TogglePatternExamples()
+    {
+        showPatternExamples = !showPatternExamples;
+    }
+
+    private int GetConfigInt(string key, int defaultValue = 0)
+    {
+        if (Config.TryGetValue(key, out var value))
+        {
+            if (value is int i) return i;
+            if (int.TryParse(value?.ToString(), out var parsed)) return parsed;
+        }
+        return defaultValue;
+    }
+
+    private decimal? GetConfigDecimal(string key)
+    {
+        if (Config.TryGetValue(key, out var value))
+        {
+            if (value is decimal d) return d;
+            if (decimal.TryParse(value?.ToString(), out var parsed)) return parsed;
+        }
+        return null;
+    }
+
+    private string GetConfigString(string key)
+    {
+        if (Config.TryGetValue(key, out var value))
+        {
+            return value?.ToString() ?? "";
+        }
+        return "";
+    }
+}

@@ -1,5 +1,6 @@
 ﻿using KeryxPars.HL7.Contracts;
 using KeryxPars.HL7.Definitions;
+using KeryxPars.HL7.Validation;
 
 namespace KeryxPars.HL7.Serialization.Configuration;
 
@@ -12,6 +13,11 @@ public sealed class SerializerOptions
     public bool IgnoreUnknownSegments { get; set; } = true;
     public ErrorHandlingStrategy ErrorHandling { get; set; } = ErrorHandlingStrategy.FailFast;
     public IValidationStrategy? ValidationStrategy { get; set; }
+    
+    /// <summary>
+    /// Simple validation rules (alternative to ValidationStrategy).
+    /// </summary>
+    public ValidationRules? Validation { get; set; }
 
     // Performance options
     public bool UseStringPooling { get; set; } = true;

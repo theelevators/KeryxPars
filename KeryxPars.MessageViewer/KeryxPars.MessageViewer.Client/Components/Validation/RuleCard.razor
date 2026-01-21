@@ -1,0 +1,144 @@
+@using KeryxPars.MessageViewer.Core.Models
+@using ValidationSeverity = KeryxPars.HL7.Contracts.ValidationSeverity
+
+<div class="rule-card @(Rule.IsEnabled ? "" : "disabled") @(IsPreview ? "preview" : "")">
+    <div class="rule-header">
+        <div class="rule-target">
+            <span class="segment-badge">@Rule.SegmentId</span>
+            @if (Rule.FieldIndex.HasValue)
+            {
+                <span class="field-badge">Field @Rule.FieldIndex</span>
+            }
+        </div>
+        
+        @if (!IsPreview)
+        {
+            <div class="rule-actions">
+                <button class="btn-icon" 
+                        @onclick="OnToggle"
+                        @onclick:stopPropagation
+                        title="@(Rule.IsEnabled ? "Disable" : "Enable")">
+                    <span class="bi bi-@(Rule.IsEnabled ? "toggle-on" : "toggle-off")"></span>
+                </button>
+                <button class="btn-icon" 
+                        @onclick="OnEdit"
+                        @onclick:stopPropagation
+                        title="Edit">
+                    <span class="bi bi-pencil"></span>
+                </button>
+                <button class="btn-icon danger" 
+                        @onclick="OnDelete"
+                        @onclick:stopPropagation
+                        title="Delete">
+                    <span class="bi bi-trash"></span>
+                </button>
+            </div>
+        }
+    </div>
+    
+    <div class="rule-body">
+        <div class="rule-type">
+            <span class="bi @GetTypeIcon()"></span>
+            <strong>@GetTypeName()</strong>
+        </div>
+        
+        <div class="rule-description">
+            @GetRuleDescription()
+        </div>
+        
+        <div class="rule-footer">
+            <span class="severity-badge @Rule.Severity.ToString().ToLower()">
+                <span class="bi @GetSeverityIcon()"></span>
+                @Rule.Severity
+            </span>
+            
+            @if (!string.IsNullOrEmpty(Rule.CustomMessage))
+            {
+                <span class="custom-message" title="@Rule.CustomMessage">
+                    <span class="bi bi-chat-quote"></span>
+                    Custom message
+                </span>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public RuleDefinition Rule { get; set; } = default!;
+    [Parameter] public EventCallback OnEdit { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+    [Parameter] public EventCallback OnToggle { get; set; }
+    [Parameter] public bool IsPreview { get; set; }
+
+    private string GetTypeIcon() => Rule.Type switch
+    {
+        RuleType.RequiredSegment => "bi-shield-fill-exclamation",
+        RuleType.Required => "bi-asterisk",
+        RuleType.MaxLength => "bi-rulers",
+        RuleType.MinLength => "bi-rulers",
+        RuleType.Pattern => "bi-braces-asterisk",  // Changed from bi-regex
+        RuleType.AllowedValues => "bi-list-check",
+        RuleType.NumericRange => "bi-123",  // Changed from bi-hash
+        RuleType.DateFormat => "bi-calendar-check",
+        _ => "bi-question-circle"
+    };
+
+    private string GetTypeName() => Rule.Type switch
+    {
+        RuleType.RequiredSegment => "Required Segment",
+        RuleType.Required => "Required Field",
+        RuleType.MaxLength => "Maximum Length",
+        RuleType.MinLength => "Minimum Length",
+        RuleType.Pattern => "Format Pattern",
+        RuleType.AllowedValues => "Allowed Values",
+        RuleType.NumericRange => "Numeric Range",
+        RuleType.DateFormat => "Date Format",
+        _ => Rule.Type.ToString()
+    };
+
+    private string GetRuleDescription()
+    {
+        if (!string.IsNullOrWhiteSpace(Rule.CustomMessage))
+            return Rule.CustomMessage;
+
+        return Rule.Type switch
+        {
+            RuleType.RequiredSegment => $"{Rule.SegmentId} segment must be present",
+            RuleType.Required => "Field is required",
+            RuleType.MaxLength when Rule.Config.TryGetValue("maxLength", out var max) => 
+                $"Maximum length: {max}",
+            RuleType.MinLength when Rule.Config.TryGetValue("minLength", out var min) => 
+                $"Minimum length: {min}",
+            RuleType.Pattern when Rule.Config.TryGetValue("pattern", out var pattern) => 
+                $"Must match pattern: {pattern}",
+            RuleType.AllowedValues when Rule.Config.TryGetValue("allowedValues", out var values) => 
+                $"Allowed: {string.Join(", ", (string[])values)}",
+            RuleType.NumericRange => GetNumericRangeDescription(),
+            _ => Rule.Type.ToString()
+        };
+    }
+
+    private string GetNumericRangeDescription()
+    {
+        var hasMin = Rule.Config.TryGetValue("minValue", out var min);
+        var hasMax = Rule.Config.TryGetValue("maxValue", out var max);
+
+        if (hasMin && hasMax)
+            return $"Value between {min} and {max}";
+        if (hasMin)
+            return $"Value ? {min}";
+        if (hasMax)
+            return $"Value ? {max}";
+        
+        return "Numeric validation";
+    }
+
+    private string GetSeverityIcon() => Rule.Severity switch
+    {
+        ValidationSeverity.Information => "bi-info-circle-fill",
+        ValidationSeverity.Warning => "bi-exclamation-triangle-fill",
+        ValidationSeverity.Error => "bi-exclamation-circle-fill",
+        ValidationSeverity.Critical => "bi-x-circle-fill",
+        _ => "bi-info-circle-fill"
+    };
+}
